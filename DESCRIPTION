@@ -1,0 +1,15 @@
+Package: DMRcate
+Title: Illumina 450K methylation array spatial analysis methods
+Version: 0.99.6
+Date: 2014-05-03
+Author: Tim Peters
+Maintainer: Tim Peters <Tim.Peters@csiro.au>
+Description: De novo identification and extraction of differentially methylated regions (DMRs) in the human genome using Illumina Infinium HumanMethylation450 BeadChip array data. Provides functionality for filtering probes possibly confounded by SNPs and cross-hybridisation. Includes bedGraph and plotting functions.
+Depends: R (>= 3.0.2), ks, limma, minfi, DMRcatedata
+biocViews: DifferentialMethylation, IlluminaChip, Preprocessing,
+        SNP
+Suggests: knitr, RUnit, BiocGenerics,
+        IlluminaHumanMethylation450kanno.ilmn12.hg19
+Imports: methods, graphics
+License: GPL-3
+VignetteBuilder: knitr

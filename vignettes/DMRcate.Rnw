@@ -1,0 +1,118 @@
+\documentclass{article}
+\usepackage{url}
+\usepackage{breakurl}
+%\VignetteIndexEntry{The DMRcate package user's guide}
+%\VignetteEngine{knitr::knitr}
+\begin{document}
+\title{The \texttt{DMRcate} package user's guide}
+
+\author{Peters TJ, Buckley MJ, Pidsley R, Clark SJ, Molloy PL}
+\maketitle
+
+\renewcommand{\abstractname}{Summary}
+\begin{abstract}
+\texttt{DMRcate} extracts the most differentially methylated regions (DMRs), variably methylated regions (VMRs) and hypermethylated regions (HMRs) from Illumina\textregistered Infinium HumanMethylation450 BeadChip (hereby referred to as the 450k array) samples via kernel density modelling. We provide clean, transparent code and highly interpretable and exportable results.
+\end{abstract}
+
+\texttt{DMRcate} requires R version 3.0.2 or higher.
+
+<<bioconductor, message=FALSE, warning=FALSE, eval=FALSE>>=
+source("http://bioconductor.org/biocLite.R")
+biocLite("DMRcate")
+@
+
+Load \texttt{DMRcate} into the workspace:
+
+<<libr, message=FALSE, warning=FALSE>>=
+library(DMRcate)
+@
+
+We now can load in the test data set of beta values. We assume at this point that normalisation and filtering out bad-quality probes via their detection \textit{p}-values have already been done. Many packages are available for these purposes, including \texttt{minfi}, \texttt{wateRmelon} and \texttt{methylumi}. M-values (logit-transform of beta) are preferable to beta values for analysis because of increased sensitivity, but we will retain the beta matrix for visualisation purposes later on.
+
+The TCGA (Cancer Genome Atlas - colorectal cancer) data in \texttt{myBetas} only comes from chromosome 20, but DMRcate will have no problem taking in the approximately half million probes as input for this pipeline either.
+
+<<loaddata>>=
+data(dmrcatedata)
+myMs <- logit2(myBetas)
+@
+
+Some of the methylation measurements on the array may be confounded by proximity to SNPs, and cross-hybridisation to other areas of the genome\cite{Chen}. In particular, probes that are 0, 1, or 2 nucleotides from the methylcytosine of interest show a markedly different distribution to those farther away, in healthy tissue (Figure 1). 
+
+\begin{figure}[htbp!]
+  \caption{Beta distribution of 450K probes from publically available data from blood samples of healthy individuals \cite{Heyn} by their proximity to a SNP. ``All SNP probes'' refers to the 153 113 probes listed by Illumina\textregistered\ whose values may potentially be confounded by a SNP.
+}
+  \centering
+    \includegraphics[width=\textwidth]{heynSNP.pdf}
+\end{figure}
+
+It is with this in mind that we filter out probes 2 nucleotides or closer to a SNP that have a minor allele frequency greater than 0.05, and the approximately 30,000 \cite{Chen} cross-reactive probes, so as to reduce confounding. Here we use Illumina\textregistered's database of approximately 150,000 potentially SNP-confounded probes, and an internally-loaded dataset of the probes from \cite{Chen}, to filter these probes out. About 600 are removed from our M-matrix of approximately 10,000:
+
+<<filter>>=
+nrow(illuminaSNPs)
+nrow(myMs)
+myMs.noSNPs <- rmSNPandCH(myMs, dist=2, mafcut=0.05)
+nrow(myMs.noSNPs)
+@
+
+Next we want to annotate our matrix of M-values with relevant information. The default is the \texttt{ilmn12.hg19} annotation, but this can be substituted for any argument compatible with the interface provided by the \texttt{minfi} package. We also use the backbone of the \texttt{limma} pipeline for differential array analysis to get fold changes and, optionally, filter probes by their fdr-corrected textit{p}-value.
+Here we have 38 patients with 2 tissue samples each taken from them. We want to compare within patients across tissue samples, so we set up our variables for a standard limma pipeline, and set \texttt{coef=39} in \texttt{annotate} since this corresponds to the phenotype comparison in \texttt{design}. We also only want to retain probes that are signficant in this comparison, post-fdr-correction.
+
+<<annotate>>=
+patient <- factor(sub("-.*", "", colnames(myMs)))
+type <- factor(sub(".*-", "", colnames(myMs)))
+design <- model.matrix(~patient + type) 
+myannotation <- annotate(myMs.noSNPs, analysis.type="differential", design=design, coef=39, diff.metric="FC", paired=TRUE, pcutoff=0.01)
+@
+
+We can see that, after using an adjusted \textit{p}-value threshold of 0.01, we are left with about $5000$ CpG sites to fit on chromosome 20:
+<<length>>=
+length(myannotation$ID)
+@
+
+Now we can find our most differentially methylated regions with \texttt{dmrcate}.
+Mathematically, we formulate the underlying density $f$ from the vector $X$ of hg19 coordinates of each CpG used as input like this:
+
+\begin{equation}
+ \hat{f}_{nH}(x) = n^{-1}\displaystyle\sum\limits_{i=1}^n w(X_{i})K_{H}(x-X_{i})
+\end{equation}
+
+\noindent where $K(x)$ is the kernel function, $H$ the bandwidth (needs to be specified, either in nucleotides or in probes when \texttt{consec=TRUE}) and $w$ the weight vector containing the absolute fold change values for each probe.
+
+For each chromosome, two of these density estimates are computed: one weighted with \texttt{myannotation\$weights} and one with a vector of all 1s, for a null comparison. The two estimates are compared, and a significance test\cite{Duong} is calculated at all hg19 coordinates that an input probe maps to (underlying function is \texttt{kde.local.test}). After fdr-correction, regions are then agglomerated from groups of significant probes where the distance to the next consecutive probe is less than \texttt{bw} nucleotides.
+
+
+<<dmrcate>>=
+dmrcoutput <- dmrcate(myannotation, bw=1000)
+@
+
+Now we can plot our most significant differentially methylated region. It is associated with the GATA5 locus.
+
+<<plotting>>=
+dmrcoutput$results[1,]
+DMR.plot(dmrcoutput=dmrcoutput, dmr=1, betas=myBetas, phen.col=c(rep("orange", 38), rep("blue", 38)), pch=16, toscale=TRUE)
+@
+
+<<sessionInfo>>=
+sessionInfo()
+@
+
+\begin{thebibliography}{9}
+
+\bibitem{Chen}
+  Chen YA, Lemire M, Choufani S, Butcher DT, Grafodatskaya D, Zanke BW, Gallinger S, Hudson TJ, Weksberg R. 
+  Discovery of cross-reactive probes and polymorphic CpGs in the Illumina Infinium HumanMethylation450 microarray. 
+  \emph{Epigenetics}. 2013 Jan 11;8(2).
+  
+\bibitem{Duong}
+  Duong T. 
+  Local significant differences from nonparametric two-sample tests.
+  \emph{ Journal of Nonparametric Statistics}. 2013 \textbf{25}(3), 635-645.
+  
+\bibitem{Heyn}
+  Heyn H, Li N, Ferreira HJ, Moran S, Pisano DG, Gomez A, Esteller M. 
+  Distinct DNA methylomes of newborns and centenarians.
+  \emph{Proceedings of the National Academy of Sciences}. 2012 \textbf{109}(26), 10522-7.
+
+\end{thebibliography}
+
+\end{document}
