@@ -8,7 +8,7 @@ Illumina 450K methylation array spatial analysis
 \description{
   \emph{De novo} identification and extraction of differentially
   methylated regions (DMR) in the human genome using 450k array
-  data. DMRcate extracts and annotates differentially methylated regions
+  data. \code{DMRcate} extracts and annotates differentially methylated regions
   (DMRs) using an array-bias corrected density estimate. Functions are
   provided for filtering probes possibly confounded by SNPs and
   cross-hybridisation. Includes bedGraph and plotting functions.

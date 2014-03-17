@@ -59,7 +59,7 @@ annotate(object,
     \code{analysis.type="differential"}.
   }
   \item{pcutoff}{
-    If specified, the BH-adjusted p-value threshold at which probes are
+    If specified, the BH-adjusted \emph{p}-value threshold at which probes are
     filtered for passing to \code{dmrcate}. Must be a numeric argument 0
     <= \code{pcutoff} <= 1. Default is \code{NULL} i.e. no
     filtering. User should be confident that enough probes will survive
@@ -101,12 +101,12 @@ annotate(object,
   An object of class "annot", for passing to \code{dmrcate}, containing
   the vectors:
   \itemize{
-    \item{ID}{Illumina probe ID}
-    \item{weights}{Fold change between phenotypes for each probe}
-    \item{CHR}{Chromosome which the probe maps to}
-    \item{pos}{hg19 position (on \code{CHR}) that the probe maps to}
-    \item{gene}{Matching UCSC_RefGene_Name}
-    \item{group}{Matching UCSC_RefGene_Group}
+    \item \code{ID}: Illumina probe ID
+    \item \code{weights}: Fold change between phenotypes for each probe
+    \item \code{CHR}: Chromosome which the probe maps to
+    \item \code{pos}: hg19 position (on \code{CHR}) that the probe maps to
+    \item \code{gene}: Matching UCSC_RefGene_Name
+    \item \code{group}: Matching UCSC_RefGene_Group
   }
 }
 \references{
