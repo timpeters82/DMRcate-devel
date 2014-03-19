@@ -28,7 +28,7 @@ dmrcate(object, bw = 1000, p.adjust.method = "BH", pcutoff = 0.05,
     \code{"BH"} (Benjamini-Hochberg).
   }
   \item{pcutoff}{
-    P-value cutoff to determine DMRs.
+    \emph{p}-value cutoff to determine DMRs.
   }
   \item{consec}{
     Use \code{DMRcate} in consecutive probe mode. Treats CpG sites as equally spaced.
@@ -57,7 +57,7 @@ dmrcate(object, bw = 1000, p.adjust.method = "BH", pcutoff = 0.05,
 
 }
 \value{
-  A list containing 2 data frames (\code{input} and \code{results}) and a numeric value (\code{cutoff}). \code{input} contains the contents of the \code{annot} object, plus calculated p-values:
+  A list containing 2 data frames (\code{input} and \code{results}) and a numeric value (\code{cutoff}). \code{input} contains the contents of the \code{annot} object, plus calculated \emph{p}-values:
   \itemize{
     \item \code{ID}: As per annotation object input
     \item \code{weights}: As per annotation object input
@@ -65,8 +65,8 @@ dmrcate(object, bw = 1000, p.adjust.method = "BH", pcutoff = 0.05,
     \item \code{pos}: As per annotation object input
     \item \code{gene}: As per annotation object input
     \item \code{group}: As per annotation object input
-    \item \code{raw}: Raw p-values from the significance test
-    \item \code{fdr}: Adjusted p-values from the significance test
+    \item \code{raw}: Raw \emph{p}-values from the significance test
+    \item \code{fdr}: Adjusted \emph{p}-values from the significance test
   }
   \code{results} contains an annotated data.frame of significant
   regions, ranked by \code{minpval}:
@@ -82,12 +82,12 @@ dmrcate(object, bw = 1000, p.adjust.method = "BH", pcutoff = 0.05,
       regions may report \code{no.probes=1}, which may seem
       counter-intuitive, but this is only because the adjacent probes are either
       just below the significance threshold, or it is a highly DM probe in a sparse region. Unless \code{pcutoff} is highly conservative, it is unlikely that these regions will report at the head of the sorted list.
-    \item \code{minpval}: Minimum adjusted p-value from the probes constituting the
+    \item \code{minpval}: Minimum adjusted \emph{p}-value from the probes constituting the
       significant region.
-    \item \code{meanpval}: Mean adjusted p-value from the probes constituting the
+    \item \code{meanpval}: Mean adjusted \emph{p}-value from the probes constituting the
       significant region.
   }
-  \code{cutoff} is the signficance \emph{p-value} cutoff provided in the call to \code{dmrcate}.
+  \code{cutoff} is the signficance \emph{p}-value cutoff provided in the call to \code{dmrcate}.
 }
 
 \references{
