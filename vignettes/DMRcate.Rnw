@@ -54,7 +54,7 @@ myMs.noSNPs <- rmSNPandCH(myMs, dist=2, mafcut=0.05)
 nrow(myMs.noSNPs)
 @
 
-Next we want to annotate our matrix of M-values with relevant information. The default is the \texttt{ilmn12.hg19} annotation, but this can be substituted for any argument compatible with the interface provided by the \texttt{minfi} package. We also use the backbone of the \texttt{limma} pipeline for differential array analysis to get fold changes and, optionally, filter probes by their fdr-corrected textit{p}-value.
+Next we want to annotate our matrix of M-values with relevant information. The default is the \texttt{ilmn12.hg19} annotation, but this can be substituted for any argument compatible with the interface provided by the \texttt{minfi} package. We also use the backbone of the \texttt{limma} pipeline for differential array analysis to get fold changes and, optionally, filter probes by their fdr-corrected \textit{p}-value.
 Here we have 38 patients with 2 tissue samples each taken from them. We want to compare within patients across tissue samples, so we set up our variables for a standard limma pipeline, and set \texttt{coef=39} in \texttt{annotate} since this corresponds to the phenotype comparison in \texttt{design}. We also only want to retain probes that are signficant in this comparison, post-fdr-correction.
 
 <<annotate>>=
