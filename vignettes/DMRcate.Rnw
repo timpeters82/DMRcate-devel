@@ -27,7 +27,7 @@ Load \texttt{DMRcate} into the workspace:
 library(DMRcate)
 @
 
-We now can load in the test data set of beta values. We assume at this point that normalisation and filtering out bad-quality probes via their detection \textit{p}-values have already been done. Many packages are available for these purposes, including \texttt{minfi}, \texttt{wateRmelon} and \texttt{methylumi}. M-values (logit-transform of beta) are preferable to beta values for analysis because of increased sensitivity, but we will retain the beta matrix for visualisation purposes later on.
+We now can load in the test data set of beta values. We assume at this point that normalisation and filtering out bad-quality probes via their detection \textit{p}-values have already been done. Many packages are available for these purposes, including \texttt{minfi}, \texttt{wateRmelon} and \texttt{methylumi}. M-values (logit-transform of beta) are preferable to beta values for significance testing via \texttt{limma} because of increased sensitivity, but we will retain the beta matrix for visualisation purposes later on.
 
 The TCGA (Cancer Genome Atlas - colorectal cancer) data in \texttt{myBetas} only comes from chromosome 20, but DMRcate will have no problem taking in the approximately half million probes as input for this pipeline either.
 

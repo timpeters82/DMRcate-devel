@@ -4,7 +4,7 @@
   450k probe annotation
 }
 \description{
-  Annotates a matrix of M-values (logit transform of beta) with weights
+  Annotates a matrix of \emph{M}-values (logit transform of beta) with weights
   (depending on \code{analysis.type}) and other relevant information
   including gene association.
 }
