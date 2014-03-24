@@ -14,7 +14,7 @@
 \texttt{DMRcate} extracts the most differentially methylated regions (DMRs), variably methylated regions (VMRs) and hypermethylated regions (HMRs) from Illumina\textregistered Infinium HumanMethylation450 BeadChip (hereby referred to as the 450k array) samples via kernel density modelling. We provide clean, transparent code and highly interpretable and exportable results.
 \end{abstract}
 
-\texttt{DMRcate} requires R version 3.0.2 or higher.
+\texttt{DMRcate} will require the development version of R until the next Bioconductor release in April 2014.
 
 <<bioconductor, message=FALSE, warning=FALSE, eval=FALSE>>=
 source("http://bioconductor.org/biocLite.R")
