@@ -10,7 +10,7 @@ DMR identification
 }
 \usage{
 dmrcate(object, bw = 1000, p.adjust.method = "BH", pcutoff = 0.05,
-    consec=FALSE, consecbw=10)
+    consec=FALSE, consecbw=10, betacutoff=NULL)
 }
 \arguments{
   \item{object}{
@@ -37,6 +37,9 @@ dmrcate(object, bw = 1000, p.adjust.method = "BH", pcutoff = 0.05,
     Bandwidth in \emph{probes} (rather than nucleotides) to use when
     \code{consec=TRUE}. When specified the variable \code{bw} simply
     becomes the minumum distance separating DMRs.
+  }
+  \item{betacutoff}{
+    Optional filter; removes any region from the results that does not have at least one         CpG site with a beta fold change exceeding this value.
   }
 }
 \details{
@@ -65,6 +68,7 @@ dmrcate(object, bw = 1000, p.adjust.method = "BH", pcutoff = 0.05,
     \item \code{pos}: As per annotation object input
     \item \code{gene}: As per annotation object input
     \item \code{group}: As per annotation object input
+    \item \code{betafc}: As per annotation object input
     \item \code{raw}: Raw \emph{p}-values from the significance test
     \item \code{fdr}: Adjusted \emph{p}-values from the significance test
   }
@@ -86,6 +90,7 @@ dmrcate(object, bw = 1000, p.adjust.method = "BH", pcutoff = 0.05,
       significant region.
     \item \code{meanpval}: Mean adjusted \emph{p}-value from the probes constituting the
       significant region.
+    \item \code{maxbetafc}: Maximum absolute beta fold change within the region
   }
   \code{cutoff} is the signficance \emph{p}-value cutoff provided in the call to \code{dmrcate}.
 }

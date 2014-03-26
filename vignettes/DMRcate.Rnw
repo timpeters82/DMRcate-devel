@@ -1,6 +1,8 @@
 \documentclass{article}
 \usepackage{url}
 \usepackage{breakurl}
+\usepackage{amsmath}
+\usepackage{amssymb}
 %\VignetteIndexEntry{The DMRcate package user's guide}
 %\VignetteEngine{knitr::knitr}
 \begin{document}
@@ -73,7 +75,7 @@ Now we can find our most differentially methylated regions with \texttt{dmrcate}
 Mathematically, we formulate the underlying density $f$ from the vector $X$ of hg19 coordinates of each CpG used as input like this:
 
 \begin{equation}
- \hat{f}_{nH}(x) = n^{-1}\displaystyle\sum\limits_{i=1}^n w(X_{i})K_{H}(x-X_{i})
+ \hat{f}_{\boldsymbol{w},\boldsymbol{X},H}(x) = n^{-1}\displaystyle\sum\limits_{i=1}^n \boldsymbol{w}(X_{i})K_{H}(x-X_{i})
 \end{equation}
 
 \noindent where $K(x)$ is the kernel function, $H$ the bandwidth (needs to be specified, either in nucleotides or in probes when \texttt{consec=TRUE}) and $w$ the weight vector containing the absolute fold change values for each probe.

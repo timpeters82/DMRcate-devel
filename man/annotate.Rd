@@ -107,6 +107,7 @@ annotate(object,
     \item \code{pos}: hg19 position (on \code{CHR}) that the probe maps to
     \item \code{gene}: Matching UCSC_RefGene_Name
     \item \code{group}: Matching UCSC_RefGene_Group
+    \item \code{betafc}: The beta fold change according to the given design
   }
 }
 \references{
