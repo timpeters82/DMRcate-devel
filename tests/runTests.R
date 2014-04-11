@@ -1,0 +1,5 @@
+BiocGenerics:::testPackage("DMRcate")
+
+
+
+  
