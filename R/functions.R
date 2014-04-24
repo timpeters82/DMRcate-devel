@@ -85,7 +85,8 @@ annotate <- function(object,
     RSanno <- getAnnotation(RSobject)
     annotated <- data.frame(ID=rownames(object),
                             weights=apply(object, 1, var), CHR=RSanno$chr, pos=RSanno$pos,
-                            gene=RSanno$UCSC_RefGene_Name, group=RSanno$UCSC_RefGene_Group)
+                            gene=RSanno$UCSC_RefGene_Name, group=RSanno$UCSC_RefGene_Group,
+                            betafc=rep(0, nrow(object)))
     if (quantcut > 0) {
       annotated <- annotated[annotated$weights >
                                quantile(annotated$weights, quantcut),]
@@ -96,7 +97,8 @@ annotate <- function(object,
     RSanno <- getAnnotation(RSobject)
     annotated <- data.frame(ID=rownames(object),
                             weights=apply(object, 1, mean), CHR=RSanno$chr, pos=RSanno$pos,
-                            gene=RSanno$UCSC_RefGene_Name, group=RSanno$UCSC_RefGene_Group)
+                            gene=RSanno$UCSC_RefGene_Name, group=RSanno$UCSC_RefGene_Group,
+                            betafc=rep(0, nrow(object)))
     annotated <- annotated[annotated$weights > logit2(cut),]
   })
   annotated <- annotated[order(annotated$CHR, annotated$pos),]
