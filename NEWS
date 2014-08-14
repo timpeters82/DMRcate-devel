@@ -1,0 +1,11 @@
+CHANGES IN DMRcate VERSION 1.1.5
+
+BUG FIXES
+•	annotate() renamed to cpg.annotate to avoid clashes with same-named function in ggplot2
+
+NEW FEATURES
+•	Kernel estimator has been rewritten from scratch without the need for ks:::kde. Now only takes moderated t-values as cpg weights, as required by the chi-square transformation. 
+•	Now allows for multi-level factor experiments, as allowed by limma. Contrasts should be specified with a contrast matrix, otherwise the design matrix MUST have an intercept. (Thanks to Tim Triche Jr. and David Martino for their advice).
+•	A GRanges object can be produced from the results.
+•	XY probes can also be filtered out using rmSNPandCH().
+•	DMR.plot() allows group median lines to be plotted to better visualise distances between groups (Thanks to Susan van Dijk and Magnus Tobiasson for their advice).
