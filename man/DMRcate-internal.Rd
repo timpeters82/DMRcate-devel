@@ -3,7 +3,11 @@
 Internal DMRcate objects and functions
 }
 \alias{annot}
-\alias{loctest}
+\alias{dmrcate.output}
+\alias{extractCoords}
+\alias{KernelSums}
+\alias{KernelTest}
+\alias{SparseDeltas}
 \description{
 Internal DMRcate objects and functions
 }

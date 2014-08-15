@@ -16,7 +16,7 @@ makeBedgraphs(dmrcoutput, betas,
 }
 \arguments{
   \item{dmrcoutput}{
-    Output from \code{dmrcate}.
+     An object of class \code{dmrcate.output}.
   }
   \item{betas}{
     Matrix of beta values to be converted to bedGraph rows, with unique
@@ -48,9 +48,9 @@ myMs.noSNPs <- rmSNPandCH(myMs, dist=2, mafcut=0.05)
 patient <- factor(sub("-.*", "", colnames(myMs)))
 type <- factor(sub(".*-", "", colnames(myMs)))
 design <- model.matrix(~patient + type) 
-myannotation <- annotate(myMs.noSNPs, analysis.type="differential",
-    design=design, coef=39, diff.metric="FC", paired=TRUE, pcutoff=0.01)
-dmrcoutput <- dmrcate(myannotation, bw=1000)
+myannotation <- cpg.annotate(myMs.noSNPs, analysis.type="differential",
+    design=design, coef=39)
+dmrcoutput <- dmrcate(myannotation, lambda=1000)
 makeBedgraphs(dmrcoutput=dmrcoutput, betas=myBetas, samps=c(1,39))
 }
 }

@@ -13,7 +13,7 @@
 
 \renewcommand{\abstractname}{Summary}
 \begin{abstract}
-\texttt{DMRcate} extracts the most differentially methylated regions (DMRs), variably methylated regions (VMRs) and hypermethylated regions (HMRs) from Illumina\textregistered Infinium HumanMethylation450 BeadChip (hereby referred to as the 450k array) samples via kernel density modelling. We provide clean, transparent code and highly interpretable and exportable results.
+\texttt{DMRcate} extracts the most differentially methylated regions (DMRs) and variably methylated regions (VMRs) from Illumina\textregistered Infinium HumanMethylation450 BeadChip (hereinafter referred to as the 450k array) samples via kernel smoothing. We provide clean, transparent code and highly interpretable and exportable results.
 \end{abstract}
 
 <<bioconductor, message=FALSE, warning=FALSE, eval=FALSE>>=
@@ -54,42 +54,33 @@ myMs.noSNPs <- rmSNPandCH(myMs, dist=2, mafcut=0.05)
 nrow(myMs.noSNPs)
 @
 
-Next we want to annotate our matrix of M-values with relevant information. The default is the \texttt{ilmn12.hg19} annotation, but this can be substituted for any argument compatible with the interface provided by the \texttt{minfi} package. We also use the backbone of the \texttt{limma} pipeline for differential array analysis to get fold changes and, optionally, filter probes by their fdr-corrected \textit{p}-value.
-Here we have 38 patients with 2 tissue samples each taken from them. We want to compare within patients across tissue samples, so we set up our variables for a standard limma pipeline, and set \texttt{coef=39} in \texttt{annotate} since this corresponds to the phenotype comparison in \texttt{design}. We also only want to retain probes that are signficant in this comparison, post-fdr-correction.
+Next we want to annotate our matrix of M-values with relevant information. The default is the \texttt{ilmn12.hg19} annotation, but this can be substituted for any argument compatible with the interface provided by the \texttt{minfi} package. We also use the backbone of the \texttt{limma} pipeline for differential array analysis to get \textit{t}-statistics changes and, optionally, filter probes by their fdr-corrected \textit{p}-value.
+Here we have 38 patients with 2 tissue samples each taken from them. We want to compare within patients across tissue samples, so we set up our variables for a standard limma pipeline, and set \texttt{coef=39} in \texttt{cpg.annotate} since this corresponds to the phenotype comparison in \texttt{design}. 
 
 <<annotate>>=
 patient <- factor(sub("-.*", "", colnames(myMs)))
 type <- factor(sub(".*-", "", colnames(myMs)))
 design <- model.matrix(~patient + type) 
-myannotation <- annotate(myMs.noSNPs, analysis.type="differential", design=design, coef=39, diff.metric="FC", paired=TRUE, pcutoff=0.01)
-@
-
-We can see that, after using an adjusted \textit{p}-value threshold of 0.01, we are left with about $5000$ CpG sites to fit on chromosome 20:
-<<length>>=
-length(myannotation$ID)
+myannotation <- cpg.annotate(myMs.noSNPs, analysis.type="differential",
+    design=design, coef=39)
 @
 
 Now we can find our most differentially methylated regions with \texttt{dmrcate}.
-Mathematically, we formulate the underlying density $f$ from the vector $X$ of hg19 coordinates of each CpG used as input like this:
 
-\begin{equation}
- \hat{f}_{\boldsymbol{w},\boldsymbol{X},H}(x) = n^{-1}\displaystyle\sum\limits_{i=1}^n \boldsymbol{w}(X_{i})K_{H}(x-X_{i})
-\end{equation}
-
-\noindent where $K(x)$ is the kernel function, $H$ the bandwidth (needs to be specified, either in nucleotides or in probes when \texttt{consec=TRUE}) and $w$ the weight vector containing the absolute fold change values for each probe.
-
-For each chromosome, two of these density estimates are computed: one weighted with \texttt{myannotation\$weights} and one with a vector of all 1s, for a null comparison. The two estimates are compared, and a significance test\cite{Duong} is calculated at all hg19 coordinates that an input probe maps to (underlying function is \texttt{kde.local.test}). After fdr-correction, regions are then agglomerated from groups of significant probes where the distance to the next consecutive probe is less than \texttt{bw} nucleotides.
+For each chromosome, two smoothed estimates are computed: one weighted with \texttt{myannotation\$weights} and one not, for a null comparison. The two estimates are compared via a Satterthwaite approximation\cite{Satterthwaite}, and a significance test is calculated at all hg19 coordinates that an input probe maps to. After fdr-correction, regions are then agglomerated from groups of significant probes where the distance to the next consecutive probe is less than \texttt{lambda} nucleotides.
 
 
 <<dmrcate>>=
-dmrcoutput <- dmrcate(myannotation, bw=1000)
+dmrcoutput <- dmrcate(myannotation, lambda=1000)
 @
 
-Now we can plot our most significant differentially methylated region. It is associated with the GATA5 locus.
+Now we can plot a significant DMR. We'll choose one associated with the GATA5 locus.
 
 <<plotting>>=
-dmrcoutput$results[1,]
-DMR.plot(dmrcoutput=dmrcoutput, dmr=1, betas=myBetas, phen.col=c(rep("orange", 38), rep("blue", 38)), pch=16, toscale=TRUE)
+head(dmrcoutput$results)
+DMR.plot(dmrcoutput=dmrcoutput, dmr=2, betas=myBetas, 
+         phen.col=c(rep("orange", 38), rep("blue", 38)), 
+         pch=16, toscale=TRUE, plotmedians=TRUE)
 @
 
 <<sessionInfo>>=
@@ -103,15 +94,16 @@ sessionInfo()
   Discovery of cross-reactive probes and polymorphic CpGs in the Illumina Infinium HumanMethylation450 microarray. 
   \emph{Epigenetics}. 2013 Jan 11;8(2).
   
-\bibitem{Duong}
-  Duong T. 
-  Local significant differences from nonparametric two-sample tests.
-  \emph{ Journal of Nonparametric Statistics}. 2013 \textbf{25}(3), 635-645.
   
 \bibitem{Heyn}
   Heyn H, Li N, Ferreira HJ, Moran S, Pisano DG, Gomez A, Esteller M. 
   Distinct DNA methylomes of newborns and centenarians.
   \emph{Proceedings of the National Academy of Sciences}. 2012 \textbf{109}(26), 10522-7.
+  
+\bibitem{Satterthwaite}
+  Satterthwaite, F. E. (1946), 
+  An Approximate Distribution of Estimates of Variance Components., 
+  \emph{Biometrics Bulletin}. 1946 \textbf{2}: 110-114
 
 \end{thebibliography}
 

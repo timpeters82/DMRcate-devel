@@ -4,10 +4,10 @@
   Filter probes
 }
 \description{
-  Filters a matrix of M-values (or beta values) by distance.
+  Filters a matrix of M-values (or beta values) by distance to SNP. Also (optionally) removes cross-hybridising probes and sex-chromosome probes.
 }
 \usage{
-rmSNPandCH(object, dist = 2, mafcut = 0.05, and = TRUE, rmcrosshyb = TRUE)
+rmSNPandCH(object, dist = 2, mafcut = 0.05, and = TRUE, rmcrosshyb = TRUE, rmXY=FALSE)
 }
 \arguments{
   \item{object}{
@@ -36,6 +36,9 @@ rmSNPandCH(object, dist = 2, mafcut = 0.05, and = TRUE, rmcrosshyb = TRUE)
     potential confounding if the sample group is a mix of males and
     females. There are 30,969 probes in total in this list. Default is
     \code{TRUE}.
+  }
+  \item{rmXY}{
+    If \code{TRUE}, filters out probe hybridising to sex chromosomes. Or-operator applies when combined with other 2 filters. 
   }
 }
 \details{

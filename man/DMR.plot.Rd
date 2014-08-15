@@ -8,14 +8,14 @@
   Plots an individual DMR as found by \code{dmrcate}.
 }
 \usage{
-DMR.plot(dmrcoutput, dmr, betas, phen.col, 
-    annotation=c(array="IlluminaHumanMethylation450k",
-        annotation="ilmn12.hg19"),
-    samps=NULL, toscale=FALSE, ...)
+DMR.plot(dmrcoutput, dmr, betas, phen.col,
+         annotation=c(array="IlluminaHumanMethylation450k",
+                      annotation="ilmn12.hg19"),
+         samps=NULL, toscale=FALSE, plotmedians=FALSE, ...)
 }
 \arguments{
   \item{dmrcoutput}{
-    Output from \code{dmrcate}.
+    An object of class \code{dmrcate.output}.
   }
   \item{dmr}{
     Row index of \code{dmrcoutput$results}. Indicates which DMR to be
@@ -44,6 +44,9 @@ DMR.plot(dmrcoutput, dmr, betas, phen.col,
     \code{TRUE} denotes CpGs plotted to scale along the x-axis according
     to their genomic coordinates, \code{FALSE} denotes evenly spaced
     plotting. Default is \code{FALSE}.
+  }
+  \item{plotmedians}{
+    Logical denoting whether group medians will be plotted. Groups are derived from \code{phen.col}.
   }
   \item{\dots}{
     Extra arguments passed to \code{plot}
@@ -77,12 +80,11 @@ myMs.noSNPs <- rmSNPandCH(myMs, dist=2, mafcut=0.05)
 patient <- factor(sub("-.*", "", colnames(myMs)))
 type <- factor(sub(".*-", "", colnames(myMs)))
 design <- model.matrix(~patient + type) 
-myannotation <- annotate(myMs.noSNPs, analysis.type="differential",
-    design=design, coef=39, diff.metric="FC", paired=TRUE, pcutoff=0.01)
-dmrcoutput <- dmrcate(myannotation, bw=1000)
+myannotation <- cpg.annotate(myMs.noSNPs, analysis.type="differential",
+    design=design, coef=39)
+dmrcoutput <- dmrcate(myannotation, lambda=1000)
 phen.col <- c(rep("orange", 38), rep("blue", 38))
 DMR.plot(dmrcoutput=dmrcoutput, dmr=1, betas=myBetas, phen.col=phen.col,
-    pch=16, toscale=TRUE)
+    pch=16, toscale=TRUE, plotmedians=TRUE)
 }
 }
-

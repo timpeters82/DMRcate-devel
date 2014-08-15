@@ -1,6 +1,5 @@
 exportPattern("^[[:alpha:]]+")
 import(methods)
-import(ks)
 import(limma)
 import(minfi)
 import(DMRcatedata)
@@ -10,6 +9,7 @@ exportMethods(
 	rmSNPandCH, 
 	dmrcate, 
 	makeBedgraphs, 
-	DMR.plot
+	DMR.plot,
+	extractRanges
 	) 
 
