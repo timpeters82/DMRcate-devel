@@ -11,14 +11,14 @@ Illumina 450K methylation array spatial analysis
   data. \code{DMRcate} extracts and annotates differentially methylated regions
   (DMRs) using an array-bias corrected smoothed estimate. Functions are
   provided for filtering probes possibly confounded by SNPs and
-  cross-hybridisation. Includes bedGraph and plotting functions.
+  cross-hybridisation. Includes bedGraph generation, GRanges generation and plotting functions.
 }
 \author{
 Tim J. Peters <Tim.Peters@csiro.au>
 }
 \references{
-Peters T.J., Buckley M.J., Statham, A., Pidsley R., Clark S.J., Molloy P.L. \emph{De
-Novo} identification of differentially methylated regions in the human
+Peters T.J., Buckley M.J., Statham, A., Pidsley R., Samaras K., Lord R.V., Clark S.J., Molloy P.L. \emph{De
+novo} identification of differentially methylated regions in the human
 genome. To submit
 }
 
