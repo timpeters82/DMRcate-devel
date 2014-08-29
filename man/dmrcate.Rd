@@ -6,12 +6,12 @@ DMR identification
 \description{
   The main function of this package. Computes a kernel estimate
   against a null comparison to identify significantly differentially (or
-  variable, or hyper-) methylated regions in hg19.
+  variable) methylated regions in hg19.
 }
 \usage{
 dmrcate(object, 
         lambda = 1000,
-        C=1,
+        C=2,
         p.adjust.method = "BH", 
         pcutoff = 0.05, 
         consec = FALSE, 
@@ -31,7 +31,7 @@ dmrcate(object,
   }
   \item{C}{
     Scaling factor for bandwidth. Gaussian kernel is calculated where 
-    \code{lambda}/\code{C} = sigma. Empirical testing shows that when lambda=1000, optimal prediction of sequencing-derived DMRs is obtained when 1 <= \code{C} <= 2. Cannot be < 0.2.
+    \code{lambda}/\code{C} = sigma. Empirical testing shows that when \code{lambda=1000}, near-optimal prediction of sequencing-derived DMRs is obtained when \code{C} is approximately 2, i.e. 1 standard deviation of Gaussian kernel = 500 base pairs. Cannot be < 0.2.
   }
   \item{p.adjust.method}{
     Method for \emph{p}-value adjustment from the significance test. Default is
@@ -54,7 +54,7 @@ dmrcate(object,
 }
 \details{
 
-  The values of \code{lambda} and \code{C} should be chosen with care. We recommend that 1 kilobase represent 1 standard deviation of support (\code{lambda=1000} and \code{C=1}). If \code{lambda} is too small or \code{C} too large then the kernel estimator will not have enough support to significantly differentiate the weighted estimate from the null distribution. If \code{lambda} is too large then \code{dmrcate} will report very long DMRs spanning multiple gene loci, and the large amount of support will likely give Type I errors.
+  The values of \code{lambda} and \code{C} should be chosen with care. We recommend that half a kilobase represent 1 standard deviation of support (\code{lambda=1000} and \code{C=2}). If \code{lambda} is too small or \code{C} too large then the kernel estimator will not have enough support to significantly differentiate the weighted estimate from the null distribution. If \code{lambda} is too large then \code{dmrcate} will report very long DMRs spanning multiple gene loci, and the large amount of support will likely give Type I errors.
 
   Many gene loci have lengths reaching into the hundreds of thousands of base pairs, so it is quite possible that multiple signficant regions will have identical values in \code{results$gene_assoc}. This is fine; these regions are distinct in that they are at the very least \code{lambda} nucleotides apart, and is preferable to attempting collapse
   into a super-DMR by increasing \code{lambda}.

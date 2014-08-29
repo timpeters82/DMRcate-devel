@@ -1,7 +1,7 @@
 dmrcate <-
   function(object, 
            lambda = 1000,
-           C=1,
+           C=2,
            p.adjust.method = "BH", 
            pcutoff = 0.05, 
            consec = FALSE, 

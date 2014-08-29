@@ -67,10 +67,7 @@ cpg.annotate(object, annotation=c(array="IlluminaHumanMethylation450k",
   }
 }
 \references{
-  Smyth, G. K. (2004). Linear models and empirical Bayes methods for
-  assessing differential expression in microarray
-  experiments. \emph{Statistical Applications in Genetics and Molecular
-  Biology} \bold{3}, No. 1, Article 3.
+Smyth, G. K. (2005). Limma: linear models for microarray data. In: \emph{Bioinformatics and Computational Biology Solutions using R and Bioconductor}, R. Gentleman, V. Carey, S. Dudoit, R. Irizarry, W. Huber (eds.), Springer, New York, pages 397-420
 }
 \author{
   Tim J. Peters <Tim.Peters@csiro.au>
