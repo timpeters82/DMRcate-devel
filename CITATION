@@ -1,0 +1,19 @@
+citEntry(entry="article",
+	author = c(person(c("Timothy","J"),"Peters"),
+	           person(c("Michael", "J"),"Buckley"),
+	           person(c("Aaron", "L"),"Statham"),
+	           person("Ruth","Pidsley"),
+	           person("Katherine,"Samaras"),
+	           person(c("Reginald","V"),"Lord"),
+	           person(c("Susan","J"),"Clark"),
+		   person(c("Peter","L"),"Molloy")),
+	title = "De novo identification of differentially methylated regions in the human genome",
+	doi = "10.1186/1756-8935-8-6",
+	journal = "Epigenetics & Chromatin",
+	year = 2015,
+	volume = 8,
+	url = "http://www.epigeneticsandchromatin.com/content/8/1/6"
+)
+	
+
+	
