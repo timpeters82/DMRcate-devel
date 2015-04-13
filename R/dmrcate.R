@@ -3,7 +3,7 @@ dmrcate <-
            lambda = 1000,
            C=2,
            p.adjust.method = "BH", 
-           pcutoff = 0.05, 
+           pcutoff = "limma", 
            consec = FALSE, 
            conseclambda = 10, 
            betacutoff = NULL
@@ -13,7 +13,7 @@ dmrcate <-
     ## Checks
     stopifnot(is(object, "annot"))
     stopifnot(lambda >= 1)
-    stopifnot(0 <= pcutoff & pcutoff <= 1)
+    stopifnot(pcutoff=="limma" | (0 <= pcutoff & pcutoff <= 1))
     stopifnot(C >= 0.2)
     if (consec & is.null(conseclambda)) 
     {
@@ -28,7 +28,8 @@ dmrcate <-
                  pos = object$pos, 
                  gene = object$gene, 
                  group = object$group, 
-                 betafc = object$betafc
+                 betafc = object$betafc,
+                 indfdr = object$indfdr
       )    
     
     ## Loop over chromosomes
@@ -58,11 +59,15 @@ dmrcate <-
     
     ## FDR correction
     object$fdr <- p.adjust(object$raw, method = p.adjust.method)
+    if (pcutoff=="limma"){
+      nsig <- sum(object$indfdr < 0.05)
+      pcutoff <- sort(object$fdr)[nsig]
+    }
     sigprobes <- object[object$fdr <= pcutoff, , drop = FALSE]
     
     if (nrow(sigprobes) == 0) 
     {
-      txt <- "No signficant regions found. Try increasing the value of\n    'pcutoff' in dmrcate() and/or cpg.annotate()."
+      txt <- "No significant regions found. Try increasing the value of\n 'pcutoff' in dmrcate()."
       stop(paste(strwrap(txt, exdent = 2), collapse = "\n"))
     }
     message("Demarcating regions...")

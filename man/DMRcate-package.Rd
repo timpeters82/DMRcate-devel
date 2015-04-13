@@ -17,9 +17,7 @@ Illumina 450K methylation array spatial analysis
 Tim J. Peters <Tim.Peters@csiro.au>
 }
 \references{
-Peters T.J., Buckley M.J., Statham, A., Pidsley R., Samaras K., Lord R.V., Clark S.J., Molloy P.L. \emph{De
-novo} identification of differentially methylated regions in the human
-genome. To submit
+Peters T.J., Buckley M.J., Statham, A., Pidsley R., Samaras K., Lord R.V., Clark S.J. and  Molloy P.L. \emph{De novo} identification of differentially methylated regions in the human genome. \emph{Epigenetics & Chromatin} 2015, \bold{8}:6,  doi:10.1186/1756-8935-8-6
 }
 
 \examples{

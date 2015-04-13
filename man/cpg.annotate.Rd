@@ -64,11 +64,15 @@ cpg.annotate(object, annotation=c(array="IlluminaHumanMethylation450k",
     \item \code{gene}: Matching UCSC_RefGene_Name
     \item \code{group}: Matching UCSC_RefGene_Group
     \item \code{betafc}: The beta fold change according to the given design
+    \item \code{indfdr}: The post-kernel fitting \code{limma} fdr value 
   }
 }
 \references{
-Smyth, G. K. (2005). Limma: linear models for microarray data. In: \emph{Bioinformatics and Computational Biology Solutions using R and Bioconductor}, R. Gentleman, V. Carey, S. Dudoit, R. Irizarry, W. Huber (eds.), Springer, New York, pages 397-420
+Smyth, G. K. (2005). Limma: linear models for microarray data. In: \emph{Bioinformatics and Computational Biology Solutions using R and Bioconductor}, R. Gentleman, V. Carey, S. Dudoit, R. Irizarry, W. Huber (eds.), Springer, New York, pages 397-420.
+
+Peters T.J., Buckley M.J., Statham, A., Pidsley R., Samaras K., Lord R.V., Clark S.J. and  Molloy P.L. \emph{De novo} identification of differentially methylated regions in the human genome. \emph{Epigenetics & Chromatin} 2015, \bold{8}:6,  doi:10.1186/1756-8935-8-6.
 }
+
 \author{
   Tim J. Peters <Tim.Peters@csiro.au>
 }
