@@ -13,7 +13,7 @@ dmrcate(object,
         lambda = 1000,
         C=2,
         p.adjust.method = "BH", 
-        pcutoff = 0.05, 
+        pcutoff = "limma", 
         consec = FALSE, 
         conseclambda = 10, 
         betacutoff = NULL
@@ -38,7 +38,7 @@ dmrcate(object,
     \code{"BH"} (Benjamini-Hochberg).
   }
   \item{pcutoff}{
-    \emph{p}-value cutoff to determine DMRs.
+    \emph{p}-value cutoff to determine DMRs. Default is automatically determined by the number of significant probes returned by \code{limma} for that contrast, but can be set manually with a numeric value.
   }
   \item{consec}{
     Use \code{DMRcate} in consecutive probe mode. Treats CpG sites as equally spaced.
@@ -54,7 +54,7 @@ dmrcate(object,
 }
 \details{
 
-  The values of \code{lambda} and \code{C} should be chosen with care. We recommend that half a kilobase represent 1 standard deviation of support (\code{lambda=1000} and \code{C=2}). If \code{lambda} is too small or \code{C} too large then the kernel estimator will not have enough support to significantly differentiate the weighted estimate from the null distribution. If \code{lambda} is too large then \code{dmrcate} will report very long DMRs spanning multiple gene loci, and the large amount of support will likely give Type I errors.
+  The values of \code{lambda} and \code{C} should be chosen with care. We recommend that half a kilobase represent 1 standard deviation of support (\code{lambda=1000} and \code{C=2}). If \code{lambda} is too small or \code{C} too large then the kernel estimator will not have enough support to significantly differentiate the weighted estimate from the null distribution. If \code{lambda} is too large then \code{dmrcate} will report very long DMRs spanning multiple gene loci, and the large amount of support will likely give Type I errors. If you are concerned about Type I errors we recommend using the default value of \code{pcutoff}, although this will return no DMRs if no DM probes are returned by \code{limma} either.
 
   Many gene loci have lengths reaching into the hundreds of thousands of base pairs, so it is quite possible that multiple signficant regions will have identical values in \code{results$gene_assoc}. This is fine; these regions are distinct in that they are at the very least \code{lambda} nucleotides apart, and is preferable to attempting collapse
   into a super-DMR by increasing \code{lambda}.
@@ -97,6 +97,9 @@ dmrcate(object,
 }
 
 \references{
+
+Peters T.J., Buckley M.J., Statham, A., Pidsley R., Samaras K., Lord R.V., Clark S.J. and  Molloy P.L. \emph{De novo} identification of differentially methylated regions in the human genome. \emph{Epigenetics & Chromatin} 2015, \bold{8}:6,  doi:10.1186/1756-8935-8-6
+
 Wand, M.P. & Jones, M.C. (1995) \emph{Kernel Smoothing}. Chapman & Hall.
 
 Duong T. (2013) Local significant differences from nonparametric
