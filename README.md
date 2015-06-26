@@ -4,7 +4,7 @@ Installation instructions:
 
 ```R
 source("http://bioconductor.org/biocLite.R")
-biocLite(c("ks", "limma", "minfi", "DMRcatedata", "impute", "qvalue", "rtracklayer", "matrixStats"))
+biocLite(c("ks", "limma", "minfi", "DMRcatedata", "impute", "qvalue", "rtracklayer", "matrixStats","devtools"))
 install_github("ttriche/DMRcate-devel")
 ```
 
