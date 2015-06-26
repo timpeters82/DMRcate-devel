@@ -3,8 +3,9 @@
 Installation instructions:
 
 ```R
+install.packages(c("devtools","git2r"))
 source("http://bioconductor.org/biocLite.R")
-biocLite(c("ks", "limma", "minfi", "DMRcatedata", "impute", "qvalue", "rtracklayer", "matrixStats","devtools"))
+biocLite(c("ks", "limma", "minfi", "DMRcatedata", "impute", "qvalue", "rtracklayer", "matrixStats"))
 install_github("ttriche/DMRcate-devel")
 ```
 
