@@ -1,17 +1,19 @@
 Package: DMRcate
 Title: Illumina 450K methylation array spatial analysis methods
-Version: 1.5.60
-Date: 2015-06-26
+Version: 1.5.61
+Date: 2015-13-07
 Author: Tim Peters
-Maintainer: Tim Peters <Tim.Peters@csiro.au>
+Maintainer: Tim Peters <t.peters@garvan.org.au>
 Authors@R: c(person("Tim", "Peters", role = c("cre", "aut"),
                     email = "Tim.Peters@csiro.au"),
 	     person("Mike", "Buckley", role = "aut"),
-             person("Tim", "Triche, Jr.", role = "aut"))
-Description: De novo identification and extraction of differentially methylated regions (DMRs) in the human genome using Illumina Infinium HumanMethylation450 BeadChip array data. Provides functionality for filtering probes possibly confounded by SNPs and cross-hybridisation. Includes bedGraph generation, significance tracks as BigWig files, GRanges generation and plotting functions. Allows collapsing of SummarizedExperiment-derived datasets over DMRs or VMRs for predictions.
-Depends: R (>= 3.1.0), ks, limma, minfi, DMRcatedata, impute, qvalue, rtracklayer
-Imports: methods, graphics, limma, minfi, rtracklayer, matrixStats
+             person("Tim", "Triche, Jr.", role = "ctb"))
+Description: De novo identification and extraction of differentially methylated regions (DMRs) in the human genome using Illumina Infinium HumanMethylation450 BeadChip array data. Provides functionality for filtering probes possibly confounded by SNPs and cross-hybridisation. Includes bedGraph generation, GRanges generation and plotting functions.
+Depends: R (>= 3.2.1), limma, minfi, DMRcatedata
+Imports: GenomicRanges
 biocViews: DifferentialMethylation, GeneExpression, Microarray, MethylationArray, Genetics, DifferentialExpression, GenomeAnnotation, DNAMethylation, OneChannel, TwoChannel, MultipleComparison, QualityControl, TimeCourse
-Suggests: knitr, RUnit, BiocGenerics, IlluminaHumanMethylation450kanno.ilmn12.hg19, coMET 
+Suggests: knitr, RUnit, BiocGenerics, IlluminaHumanMethylation450kanno.ilmn12.hg19
+Imports: methods, graphics
 License: file LICENSE
 VignetteBuilder: knitr
+
