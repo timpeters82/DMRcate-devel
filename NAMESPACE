@@ -2,11 +2,14 @@ exportPattern("^[[:alpha:]]+")
 import(methods)
 import(limma)
 import(minfi)
-import(Matrix)
-import(impute)
 import(DMRcatedata)
-import(rtracklayer)
-import(GenomicRanges)
-importFrom(graphics, plot)
-importFrom(matrixStats, rowSds, rowMedians, rowMads, rowMins, rowMaxs, colMedians, colMads, colMaxs, colMins)
-S3method(print, dmrcate.output)
+importFrom("graphics",plot)
+exportMethods(
+	cpg.annotate, 
+	rmSNPandCH, 
+	dmrcate, 
+	makeBedgraphs, 
+	DMR.plot,
+	extractRanges
+	) 
+
