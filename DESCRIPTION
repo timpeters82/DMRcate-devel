@@ -1,6 +1,6 @@
 Package: DMRcate
 Title: Illumina 450K methylation array spatial analysis methods
-Version: 1.5.61
+Version: 1.6.0
 Date: 2015-13-07
 Author: Tim Peters
 Maintainer: Tim Peters <t.peters@garvan.org.au>
