@@ -3,18 +3,18 @@
 \alias{DMRcate}
 \docType{package}
 \title{
-Illumina 450K methylation array spatial analysis
+DMR calling from bisulphite sequencing and Illumina array data
 }
 \description{
   \emph{De novo} identification and extraction of differentially
-  methylated regions (DMR) in the human genome using 450k array
+  methylated regions (DMRs) in the human genome using array and sequencing
   data. \code{DMRcate} extracts and annotates differentially methylated regions
   (DMRs) using an array-bias corrected smoothed estimate. Functions are
   provided for filtering probes possibly confounded by SNPs and
-  cross-hybridisation. Includes bedGraph generation, GRanges generation and plotting functions.
+  cross-hybridisation. Includes GRanges generation and plotting functions.
 }
 \author{
-Tim J. Peters <Tim.Peters@csiro.au>
+Tim J. Peters <t.peters@garvan.org.au>
 }
 \references{
 Peters T.J., Buckley M.J., Statham, A., Pidsley R., Samaras K., Lord R.V., Clark S.J. and  Molloy P.L. \emph{De novo} identification of differentially methylated regions in the human genome. \emph{Epigenetics & Chromatin} 2015, \bold{8}:6,  doi:10.1186/1756-8935-8-6
@@ -27,11 +27,12 @@ myMs.noSNPs <- rmSNPandCH(myMs, dist=2, mafcut=0.05)
 patient <- factor(sub("-.*", "", colnames(myMs)))
 type <- factor(sub(".*-", "", colnames(myMs)))
 design <- model.matrix(~patient + type) 
-myannotation <- cpg.annotate(myMs.noSNPs, analysis.type="differential",
+myannotation <- cpg.annotate("array", myMs.noSNPs, analysis.type="differential",
     design=design, coef=39)
-dmrcoutput <- dmrcate(myannotation, lambda=1000)
-makeBedgraphs(dmrcoutput=dmrcoutput, betas=myBetas, samps=c(1,39))
-phen.col <- c(rep("orange", 38), rep("blue", 38))
-DMR.plot(dmrcoutput=dmrcoutput, dmr=1, betas=myBetas, phen.col=phen.col,
-    pch=16, toscale=TRUE, plotmedians=TRUE)
+dmrcoutput <- dmrcate(myannotation, lambda=1000, C=2)
+results.ranges <- extractRanges(dmrcoutput, genome = "hg19")
+groups <- c(Tumour="magenta", Normal="forestgreen")
+cols <- groups[as.character(type)]
+samps <- c(1:6, 38+(1:6))
+DMR.plot(ranges=results.ranges, dmr=1, CpGs=myBetas, phen.col=cols, genome="hg19", samps=samps)
 }

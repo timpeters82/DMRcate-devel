@@ -63,7 +63,7 @@ rmSNPandCH(object, dist = 2, mafcut = 0.05, and = TRUE, rmcrosshyb = TRUE, rmXY=
 
 }
 \author{
-  Tim J. Peters <Tim.Peters@csiro.au>
+  Tim J. Peters <t.peters@garvan.org.au>
 }
 \examples{
 \dontrun{

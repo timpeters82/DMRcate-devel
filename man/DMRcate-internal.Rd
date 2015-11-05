@@ -5,6 +5,7 @@ Internal DMRcate objects and functions
 \alias{annot}
 \alias{dmrcate.output}
 \alias{extractCoords}
+\alias{fitParallel}
 \alias{KernelSums}
 \alias{KernelTest}
 \alias{SparseDeltas}
