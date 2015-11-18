@@ -1,19 +1,19 @@
 Package: DMRcate
-Title: Illumina 450K methylation array spatial analysis methods
-Version: 1.7.0
-Date: 2015-13-07
+Title: Methylation array and sequencing spatial analysis methods
+Version: 1.7.1
+Date: 2015-05-11
 Author: Tim Peters
 Maintainer: Tim Peters <t.peters@garvan.org.au>
 Authors@R: c(person("Tim", "Peters", role = c("cre", "aut"),
-                    email = "Tim.Peters@csiro.au"),
+                    email = "t.peters@garvan.org.au"),
 	     person("Mike", "Buckley", role = "aut"),
+             person("Aaron", "Statham", role = "ctb"),
              person("Tim", "Triche, Jr.", role = "ctb"))
-Description: De novo identification and extraction of differentially methylated regions (DMRs) in the human genome using Illumina Infinium HumanMethylation450 BeadChip array data. Provides functionality for filtering probes possibly confounded by SNPs and cross-hybridisation. Includes bedGraph generation, GRanges generation and plotting functions.
-Depends: R (>= 3.2.1), limma, minfi, DMRcatedata
-Imports: GenomicRanges
+Description: De novo identification and extraction of differentially methylated regions (DMRs) from the human genome using Whole Genome Bisulphite Sequencing (WGBS) and Illumina Infinium Array data. Provides functionality for filtering probes possibly confounded by SNPs and cross-hybridisation. Includes GRanges generation and plotting functions.
+Depends: R (>= 3.2.2), minfi, DSS, DMRcatedata
+Imports: limma, GenomicRanges, parallel, methods, graphics, plyr, Gviz, IRanges
 biocViews: DifferentialMethylation, GeneExpression, Microarray, MethylationArray, Genetics, DifferentialExpression, GenomeAnnotation, DNAMethylation, OneChannel, TwoChannel, MultipleComparison, QualityControl, TimeCourse
 Suggests: knitr, RUnit, BiocGenerics, IlluminaHumanMethylation450kanno.ilmn12.hg19
-Imports: methods, graphics
 License: file LICENSE
 VignetteBuilder: knitr
 

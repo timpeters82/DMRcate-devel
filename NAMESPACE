@@ -1,14 +1,19 @@
 exportPattern("^[[:alpha:]]+")
 import(methods)
 import(limma)
-import(minfi)
 import(DMRcatedata)
+import(Gviz)
+import(GenomicRanges)
+import(parallel)
+import(minfi)
+import(DSS)
+import(IRanges)
+importFrom("plyr",rbind.fill)
 importFrom("graphics",plot)
 exportMethods(
 	cpg.annotate, 
 	rmSNPandCH, 
 	dmrcate, 
-	makeBedgraphs, 
 	DMR.plot,
 	extractRanges
 	) 
