@@ -41,7 +41,7 @@ DMR.plot <- function(ranges, dmr, CpGs, phen.col,
   phen.col <- phen.col[samps]
   
  
-  dt.group <- lapply(names(groups), function(i)
+  dt.group <- lapply(unique(names(phen.col)), function(i)
         DataTrack(methRatios[,names(phen.col) %in% i], name=i, background.title=phen.col[i],
                   type="heatmap", showSampleNames=TRUE, ylim=c(0, 1), genome=genome,
                   gradient=c("blue", "white", "red")))
