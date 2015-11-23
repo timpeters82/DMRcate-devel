@@ -102,7 +102,7 @@ The \texttt{CpGs} GRanges object contains simulated data for 3 Treatment vs. 3 C
 CpGs
 @
 
-Note the structure of the metadata columns for this object: samples come in column pairs, with the number of methylated reads followed by the total coverage for that CpG site. Naturally, \langle sample \rangle.cov must always be $\geq$ \langle sample \rangle.C. This structure must be in place in order for downstream tasks such as \texttt{DMR.plot()} to be run.
+Note the structure of the metadata columns for this object: samples come in column pairs, with the number of methylated reads followed by the total coverage for that CpG site. Naturally, $\langle$sample$\rangle$.cov must always be $\geq \langle$sample$\rangle$.C. This structure must be in place in order for downstream tasks such as \texttt{DMR.plot()} to be run.
 Using this structure, we can now extract the methylation and coverage counts, and prepare a \texttt{bsseq} object as we would for \texttt{DSS}, and call differentially methylated CpG sites.
 
 <<prepareDSS, warning=FALSE>>=
