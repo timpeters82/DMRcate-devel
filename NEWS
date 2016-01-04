@@ -17,6 +17,6 @@ CHANGES IN DMRcate VERSION 1.4.1
 
 CHANGES IN DMRcate VERSION 1.7.2
 
-- Major changes. WGBS pipeline is now implemented with DSS as a regression step instead of limma.  Currently restricted to 2-group comparisons for WGBS, but multifactor and continuous response will be available in future versions. 450K pipeline is the same, but with slight cosmetic changes in anticipation of the transition to the EPIC array.
+- Major changes. WGBS pipeline is now implemented with DSS as a regression step instead of limma. 450K pipeline is the same, but with slight cosmetic changes in anticipation of the transition to the EPIC array.
 - DMR.plot() has been completely rewritten, now with Gviz and inbuilt transcript annotation for hg19, hg38 and mm10.
 - DMRs are now ranked by the Stouffer transformations of the limma- and DSS- derived FDRs of their constituent CpG sites.
