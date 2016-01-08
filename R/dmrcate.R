@@ -1,5 +1,4 @@
-
-function (object, lambda = 1000, C = NULL, p.adjust.method = "BH", 
+dmrcate <- function (object, lambda = 1000, C = NULL, p.adjust.method = "BH", 
           pcutoff = "fdr", consec = FALSE, conseclambda = 10, betacutoff = NULL, 
           min.cpgs = 2, mc.cores = 1) 
 {
@@ -47,29 +46,35 @@ chr <- as.character(object$CHR)
 pos <- object$pos
 stopifnot(sum(object$sig) >= 2)
 bychr <- function(i) {
-  this.chr <- object[object$CHR %in% i, ]
-  n <- nrow(this.chr)
-  s <- seq(n - 1)
-  w <- which(this.chr$sig)
-  step.pos <- rep(NA, length(w) - 1)
-  step.pos <- (pos[w][-1] - pos[w][-length(w)] > lag)
-  step.pos <- c(TRUE, step.pos)
-  step.dmr <- rep(NA, n)
-  step.dmr[w] <- step.pos
-  transitions <- paste(step.dmr[-length(step.dmr)], step.dmr[-1])
-  gaps <- grep("NA FALSE", transitions)
-  if(length(gaps) > 0) {
-    for (j in 1:length(gaps)) {
-      idx <- gaps[j]
-      while (is.na(step.dmr[idx])) {
-      step.dmr[idx] <- FALSE
-      idx <- idx - 1
+    #print(i)
+    this.chr <- object[object$CHR %in% i, ]
+    n <- nrow(this.chr)
+    s <- seq(n - 1)
+    w <- which(this.chr$sig)
+    if(length(w) > 0){
+      step.pos <- rep(NA, length(w) - 1)
+      step.pos <- (pos[w][-1] - pos[w][-length(w)] > lag)
+      step.pos <- c(TRUE, step.pos)
+      step.dmr <- rep(NA, n)
+      step.dmr[w] <- step.pos
+      transitions <- paste(step.dmr[-length(step.dmr)], step.dmr[-1])
+      gaps <- grep("NA FALSE", transitions)
+      if(length(gaps) > 0) {
+        for (j in 1:length(gaps)) {
+          idx <- gaps[j]
+          while (is.na(step.dmr[idx])) {
+            step.dmr[idx] <- FALSE
+            idx <- idx - 1
+          }
+        }
       }
+      this.chr$step.dmr <- step.dmr
+      return(this.chr)
+    } else {
+      this.chr$step.dmr <- NA
+      return(this.chr)
     }
   }
-  this.chr$step.dmr <- step.dmr
-  this.chr
-}
 object <- lapply(unique(object$CHR), bychr)
 object <- rbind.fill(object)
 sigprobes <- object[!is.na(object$step.dmr), ]
@@ -123,4 +128,3 @@ output$cutoff <- pcutoff
 class(output) <- "dmrcate.output"
 output
 }
-
