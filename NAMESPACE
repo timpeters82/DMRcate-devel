@@ -10,11 +10,11 @@ import(DSS)
 import(IRanges)
 importFrom("plyr",rbind.fill)
 importFrom("graphics",plot)
+export(dmrcate)
 exportMethods(
 	cpg.annotate, 
 	rmSNPandCH, 
-	dmrcate, 
 	DMR.plot,
 	extractRanges
-	) 
+	)
 
