@@ -16,5 +16,5 @@ exportMethods(
 	rmSNPandCH, 
 	DMR.plot,
 	extractRanges
-	) 
+	)
 
