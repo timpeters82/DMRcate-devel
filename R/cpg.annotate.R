@@ -58,7 +58,7 @@ cpg.annotate <- function (datatype = c("array", "sequencing"), object,
                colnames(object)))
       stop("Error: object does not contain all required columns, was it created by DSS::DMLtest()? Must contain colNames 'stat', 'chr', 'pos', 'diff' and 'fdr'.")
     annotated <- data.frame(ID = rownames(object), stat = object$stat, CHR = object$chr, pos = object$pos, 
-                            betafc = object$diff, indfdr = object$fdr)
+                            betafc = object$diff, indfdr = p.adjust(2*pnorm(-abs(object$stat)), method="BH"))
     annotated <- annotated[order(annotated$CHR, annotated$pos),]
     class(annotated) <- "annot"
   } else {
