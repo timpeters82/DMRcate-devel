@@ -1,6 +1,7 @@
 extractRanges <-function(dmrcoutput, genome=c("hg19", "hg38", "mm10")) 
 {
   stopifnot(is(dmrcoutput, "dmrcate.output"))
+  data(dmrcatedata)
   coords <- extractCoords(dmrcoutput$results$coord)
   coords <- cbind(coords, dmrcoutput$results[, c("no.cpgs", "minfdr", "Stouffer", "maxbetafc", "meanbetafc")])
   coords$chromStart <- as.integer(as.character(coords$chromStart))

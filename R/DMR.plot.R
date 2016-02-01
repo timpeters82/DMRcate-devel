@@ -5,6 +5,7 @@ DMR.plot <- function(ranges, dmr, CpGs, phen.col,
 {
   stopifnot(class(CpGs) %in% c("matrix", "GRanges"))
   stopifnot(dmr %in% 1:length(ranges))
+  data(dmrcatedata)
   if(is.null(samps)){samps=1:length(phen.col)}
   group <- unique(names(phen.col))
   if(is.matrix(CpGs)){
@@ -13,7 +14,7 @@ DMR.plot <- function(ranges, dmr, CpGs, phen.col,
     RSanno <- RSanno[order(RSanno$chr, RSanno$pos),]
     CpGs <- CpGs[rownames(RSanno),]
     colnames(CpGs) <- paste(colnames(CpGs), ".C", sep='')
-    cov <- matrix(1, nrow(CpGs), ncol(CpGs), dimnames = list(rownames(CpGs), sub(".C", ".cov", colnames(CpGs))))
+    cov <- matrix(1, nrow(CpGs), ncol(CpGs), dimnames = list(rownames(CpGs), sub(".C$", ".cov", colnames(CpGs))))
     cpgs.ranges <- GRanges(RSanno$chr, IRanges(RSanno$pos, RSanno$pos))
     dummy <- matrix(0, nrow=nrow(CpGs), ncol=2*ncol(CpGs))
     dummy[,seq(1, 2*ncol(CpGs), 2)] <- CpGs
