@@ -38,7 +38,7 @@ DMR.plot <- function(ranges, dmr, CpGs, phen.col,
                 as.data.frame(values(cpgs.ranges)[,grep("cov$", colnames(values(cpgs.ranges)))])
   methRatios <- GRanges(cpgs.ranges, mcols=methRatios)
   mcols(methRatios) <- mcols(methRatios)[samps]
-  names(mcols(methRatios)) <- gsub("mcols.", "", gsub("*.C", "", names(mcols(methRatios))))
+  names(mcols(methRatios)) <- gsub("mcols.", "", gsub("*.C$", "", names(mcols(methRatios))))
   phen.col <- phen.col[samps]
   
  
