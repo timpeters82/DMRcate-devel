@@ -25,7 +25,7 @@ cpg.annotate(datatype = c("array", "sequencing"), object,
   }
   \item{object}{
     Either:
-    - A matrix of emph{M}-values, with unique Illumina probe IDs as 
+    - A matrix of \emph{M}-values, with unique Illumina probe IDs as 
     rownames and unique sample IDs as column names or,
     - Output from \code{DSS:::DMLtest()}.
   }
