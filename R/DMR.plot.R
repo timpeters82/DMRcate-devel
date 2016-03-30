@@ -3,6 +3,8 @@ DMR.plot <- function(ranges, dmr, CpGs, phen.col,
                                                                       annotation="ilmn12.hg19"), 
          samps=NULL, ...)
 {
+  env <- new.env(parent=emptyenv())
+  data(dmrcatedata, envir=env)
   stopifnot(class(CpGs) %in% c("matrix", "GRanges"))
   stopifnot(dmr %in% 1:length(ranges))
   data(dmrcatedata)
@@ -51,9 +53,9 @@ DMR.plot <- function(ranges, dmr, CpGs, phen.col,
                                              aggregateGroups=TRUE, col=phen.col[sort(group)], ylim=c(0, 1), name="Group means")))
      
   switch(genome, 
-         hg19={tx=tx.hg19},
-         hg38={tx=tx.hg38},
-         mm10={tx=tx.mm10}
+         hg19={tx=env$tx.hg19},
+         hg38={tx=env$tx.hg38},
+         mm10={tx=env$tx.mm10}
   )
   extras <- list(AnnotationTrack(dmrs.inplot, name="DMRs", showFeatureId=TRUE, col=NULL, fill="purple", id=dmrs.inplot$ID, 
                                  fontcolor="black"))
