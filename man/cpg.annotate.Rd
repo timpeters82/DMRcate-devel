@@ -6,7 +6,7 @@
 \description{
   Either:
   - Annotate a matrix of \emph{M}-values (logit transform of beta)
-  representing 450K data with weights (depending on \code{analysis.type}) 
+  representing 450K or EPIC data with probe weights (depending on \code{analysis.type}) 
   and chromosomal position, or
   - Standardise this information from \code{DSS:::DMLtest()} to the
     same data format.
@@ -14,10 +14,8 @@
 }
 \usage{
 
-cpg.annotate(datatype = c("array", "sequencing"), object, 
-            annotation = c(array = "IlluminaHumanMethylation450k", annotation = "ilmn12.hg19"), 
-            analysis.type = c("differential", "variability"), design, contrasts = FALSE, 
-            cont.matrix = NULL, fdr = 0.05, coef, ...) 
+cpg.annotate(datatype = c("array", "sequencing"), object, annotation=c(array = "IlluminaHumanMethylation450k", annotation = "ilmn12.hg19"), 
+             analysis.type = c("differential", "variability"), design, contrasts = FALSE, cont.matrix = NULL, fdr = 0.05, coef, ...) 
 }
 \arguments{
   \item{datatype}{
@@ -33,8 +31,14 @@ cpg.annotate(datatype = c("array", "sequencing"), object,
     A vector describing the type of annotation to affix to
     \code{object}. Identical context to \code{minfi},
     i.e. \code{annotation <- annotation(minfiobject)} where
-    \code{minfiobject} is a \code{[Genomic](Methyl|Ratio)Set)}. Default
-    (ilmn12.hg) is recommended. Only applicable when \code{datatype="array"}.
+    \code{minfiobject} is a \code{[Genomic](Methyl|Ratio)Set)}. 
+    Argument for 450K arrays: 
+    \code{c(array = "IlluminaHumanMethylation450k", annotation = "ilmn12.hg19")}.
+    Argument for EPIC arrays: 
+    \code{c(array = "IlluminaHumanMethylationEPIC", annotation = "ilm10b2.hg19")}.
+    An error will be thrown if you attempt one on an \code{object}
+    with rownames on the other, due to non-overlapping probes 
+    on both platforms. Only applicable when \code{datatype="array"}.
   }
   \item{analysis.type}{
     \code{"differential"} for \code{dmrcate()} to return DMRs and

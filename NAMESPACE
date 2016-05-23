@@ -10,6 +10,9 @@ import(DSS)
 import(IRanges)
 importFrom("plyr",rbind.fill)
 importFrom("graphics",plot)
+importFrom("S4Vectors",subjectHits)
+importFrom("stats", "approx", "p.adjust", "pchisq", "pnorm", "qnorm")
+importFrom("utils", "data")
 export(dmrcate)
 exportMethods(
 	cpg.annotate, 

@@ -1,7 +1,7 @@
-DMR.plot <- function(ranges, dmr, CpGs, phen.col,
-         genome=c("hg19", "hg38", "mm10"), array.annotation=c(array="IlluminaHumanMethylation450k",
-                                                                      annotation="ilmn12.hg19"), 
-         samps=NULL, ...)
+DMR.plot <- function(ranges, dmr, CpGs, phen.col, genome = c("hg19", "hg38", "mm10"), 
+         array.annotation = c(array = "IlluminaHumanMethylation450k", annotation = "ilmn12.hg19"),
+                            samps = NULL, ...)
+
 {
   env <- new.env(parent=emptyenv())
   data(dmrcatedata, envir=env)
