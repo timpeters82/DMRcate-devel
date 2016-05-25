@@ -45,16 +45,15 @@ cpg.annotate <- function(datatype = c("array", "sequencing"), object, annotation
       stat <- tt$t
       annotated <- data.frame(ID = rownames(object), stat = stat, 
                               CHR = RSanno$chr, pos = RSanno$pos, betafc = tt$betafc, 
-                              indfdr = tt$adj.P.Val)
+                              indfdr = tt$adj.P.Val, is.sig=tt$adj.P.Val < fdr)
     }, variability = {
       RSobject <- RatioSet(object, annotation = annotation)
       RSanno <- getAnnotation(RSobject)
       wholevar <- var(object)
       weights <- apply(object, 1, var)
       weights <- weights/mean(weights)
-      annotated <- data.frame(ID = rownames(object), stat = weights, 
-                              CHR = RSanno$chr, pos = RSanno$pos, betafc = rep(0, 
-                                                                               nrow(object)), indfdr = rep(0, nrow(object)))
+      annotated <- data.frame(ID = rownames(object), stat = weights, CHR = RSanno$chr, pos = RSanno$pos, 
+                              betafc = rep(0, nrow(object)), indfdr = rep(0, nrow(object)), is.sig=weights > quantile(weights, 0.95))
     })
     annotated <- annotated[order(annotated$CHR, annotated$pos), 
                            ]
@@ -67,7 +66,7 @@ cpg.annotate <- function(datatype = c("array", "sequencing"), object, annotation
       stop("Error: object does not contain all required columns, was it created by DSS::DMLtest()? Must contain colNames 'stat', 'chr', 'pos', 'diff' and 'fdr'.")
     annotated <- data.frame(ID = rownames(object), stat = object$stat, 
                             CHR = object$chr, pos = object$pos, betafc = object$diff, 
-                            indfdr = object$fdr)
+                            indfdr = object$fdr, is.sig=object$fdr < fdr)
     annotated <- annotated[order(annotated$CHR, annotated$pos), 
                            ]
     class(annotated) <- "annot"

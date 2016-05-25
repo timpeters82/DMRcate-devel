@@ -14,17 +14,27 @@
 }
 \usage{
 
-cpg.annotate(datatype = c("array", "sequencing"), object, annotation=c(array = "IlluminaHumanMethylation450k", annotation = "ilmn12.hg19"), 
-             analysis.type = c("differential", "variability"), design, contrasts = FALSE, cont.matrix = NULL, fdr = 0.05, coef, ...) 
+cpg.annotate(datatype = c("array", "sequencing"), 
+             object, 
+             annotation=c(array = "IlluminaHumanMethylation450k", annotation = "ilmn12.hg19"), 
+             analysis.type = c("differential", "variability"), 
+             design, 
+             contrasts = FALSE, 
+             cont.matrix = NULL, 
+             fdr = 0.05, 
+             coef, 
+             ...) 
 }
 \arguments{
   \item{datatype}{
     Character string representing the type of data being analysed.
   }
   \item{object}{
-    Either:
+    Either: 
+    
     - A matrix of \emph{M}-values, with unique Illumina probe IDs as 
-    rownames and unique sample IDs as column names or,
+    rownames and unique sample IDs as column names or, 
+    
     - Output from \code{DSS:::DMLtest()}.
   }
   \item{annotation}{
@@ -32,10 +42,15 @@ cpg.annotate(datatype = c("array", "sequencing"), object, annotation=c(array = "
     \code{object}. Identical context to \code{minfi},
     i.e. \code{annotation <- annotation(minfiobject)} where
     \code{minfiobject} is a \code{[Genomic](Methyl|Ratio)Set)}. 
+    
     Argument for 450K arrays: 
+    
     \code{c(array = "IlluminaHumanMethylation450k", annotation = "ilmn12.hg19")}.
-    Argument for EPIC arrays: 
+    
+    Argument for EPIC arrays:
+    
     \code{c(array = "IlluminaHumanMethylationEPIC", annotation = "ilm10b2.hg19")}.
+    
     An error will be thrown if you attempt one on an \code{object}
     with rownames on the other, due to non-overlapping probes 
     on both platforms. Only applicable when \code{datatype="array"}.
@@ -72,7 +87,7 @@ cpg.annotate(datatype = c("array", "sequencing"), object, annotation=c(array = "
   }
   \item{\dots}{
     Extra arguments passed to the \code{limma} function lmFit(). \cr
-    Applies only when \code{analysis.type="differential"} and when \code{datatype="array"}..
+    Applies only when \code{analysis.type="differential"} and when \code{datatype="array"}.
   }
 }
 \value{
@@ -85,6 +100,7 @@ cpg.annotate(datatype = c("array", "sequencing"), object, annotation=c(array = "
     \item \code{pos}: Genomic coordinate (on \code{CHR}) that the CpG maps to
     \item \code{betafc}: The beta fold change according to the given design
     \item \code{indfdr}: Individually-derived FDRs for each CpG 
+    \item \code{is.sig}: Logical denoting either significance from \code{fdr} (\code{analysis.type="differential"}) or top ventile of variable probes (\code{analysis.type="variability"})
   }
 }
 \references{

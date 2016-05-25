@@ -21,6 +21,6 @@ CHANGES IN DMRcate VERSION 1.7.2
 - DMR.plot() has been completely rewritten, now with Gviz and inbuilt transcript annotation for hg19, hg38 and mm10.
 - DMRs are now ranked by the Stouffer transformations of the limma- and DSS- derived FDRs of their constituent CpG sites.
 
-CHANGES IN DMRcate VERSION 1.8.4
+CHANGES IN DMRcate VERSION 1.8.5
 
 - DMRs can now be called from Illumina's EPIC array. Workflow is identical to that of 450K, just with a different annotation argument to cpg.annotate() and DMR.plot().

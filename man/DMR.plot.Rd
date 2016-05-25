@@ -43,10 +43,16 @@ DMR.plot(ranges, dmr, CpGs, phen.col, genome = c("hg19", "hg38", "mm10"),
     A vector describing the type of annotation from which plots are
     derived. Identical context to \code{minfi}, i.e. \code{annotation <-
     annotation(minfiobject)} where \code{minfiobject} is a
-    \code{[Genomic](Methyl|Ratio)Set)}. Argument for 450K arrays: 
+    \code{[Genomic](Methyl|Ratio)Set)}. 
+    
+    Argument for 450K arrays:
+    
     \code{c(array = "IlluminaHumanMethylation450k", annotation = "ilmn12.hg19")}.
-    Argument for EPIC arrays: 
+    
+    Argument for EPIC arrays:
+    
     \code{c(array = "IlluminaHumanMethylationEPIC", annotation = "ilm10b2.hg19")}.
+    
     An error will be thrown if you attempt one on \code{CpGs}
     with rownames on the other, due to non-overlapping probes 
     on both platforms. Only applicable when \code{datatype="array"}.

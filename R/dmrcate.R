@@ -12,13 +12,13 @@ if (consec & is.null(conseclambda)) {
 }
 object <- data.frame(ID = object$ID, weights = abs(object$stat), 
                      CHR = as.character(object$CHR), pos = object$pos, betafc = object$betafc, 
-                     indfdr = object$indfdr)
+                     indfdr = object$indfdr, is.sig=object$is.sig)
 
 object <- object[order(object$CHR, object$pos),]
 
 # Automatic bandwidth specification
 if (is.null(C) & !consec) {
-  if (nrow(object) < 485513) {
+  if (nrow(object) < 900000) {
     C = 2
   }
   else {
@@ -44,7 +44,7 @@ fitted <- mclapply(chr.unique, fitParallel, object = object,
 object <- rbind.fill(fitted)
 object$fdr <- p.adjust(object$raw, method = p.adjust.method)
 if (pcutoff == "fdr") {
-  nsig <- sum(object$indfdr < 0.05)
+  nsig <- sum(object$is.sig)
   pcutoff <- sort(object$fdr)[nsig]
 }
 object$sig <- object$fdr <= pcutoff
