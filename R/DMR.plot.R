@@ -59,10 +59,10 @@ DMR.plot <- function(ranges, dmr, CpGs, phen.col, genome = c("hg19", "hg38", "mm
   )
   extras <- list(AnnotationTrack(dmrs.inplot, name="DMRs", showFeatureId=TRUE, col=NULL, fill="purple", id=dmrs.inplot$ID, 
                                  fontcolor="black"))
-  extras <- endoapply(extras, function(x) {
-    chromosome(x) <- as.character(seqnames(methRatios[dmr]))
-    x
-  })
+  #extras <- endoapply(extras, function(x) {
+  #  chromosome(x) <- as.character(seqnames(methRatios[dmr]))
+  #  x
+  #})
   values(cpgs.ranges) <- NULL
     basetracks <- list(IdeogramTrack(genome = "hg19", chromosome = as.character(seqnames(ranges.inplot))),
                        GenomeAxisTrack(),
