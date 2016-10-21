@@ -122,8 +122,8 @@ myMs.noSNPs <- rmSNPandCH(myMs, dist=2, mafcut=0.05)
 patient <- factor(sub("-.*", "", colnames(myMs)))
 type <- factor(sub(".*-", "", colnames(myMs)))
 design <- model.matrix(~patient + type) 
-myannotation <- cpg.annotate(myMs.noSNPs, analysis.type="differential",
-    design=design, coef=39)
+myannotation <- cpg.annotate("array", myMs.noSNPs, what="M", arraytype = "450K",
+                             analysis.type="differential", design=design, coef=39)
 dmrcoutput <- dmrcate(myannotation, lambda=1000)
 }
 }

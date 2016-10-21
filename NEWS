@@ -1,3 +1,24 @@
+CHANGES IN DMRcate VERSION 1.8.7
+
+- Data filtering for EPIC arrays now incorporates probe information (via DMRcatedata_1.8.3) from Pidsley and Zotenko et al. (2016) Genome Biology 17(1), 208.
+- Two new modules are now available in cpg.annotate() in addition to "differential" and "variability": "ANOVA" and "diffVar". "ANOVA" will find whole-experiment DMRs from the entire set of contrasts in the design matrix; "diffVar" finds differentially variable regions (DVMRs) using functionality from the missMethyl package.
+- Class GenomicRatioSet (minfi) can now be passed to cpg.annotate().
+
+CHANGES IN DMRcate VERSION 1.8.5
+
+- DMRs can now be called from Illumina's EPIC array. Workflow is identical to that of 450K, just with a different annotation argument to cpg.annotate() and DMR.plot().
+
+CHANGES IN DMRcate VERSION 1.7.2
+
+- Major changes. WGBS pipeline is now implemented with DSS as a regression step instead of limma. 450K pipeline is the same, but with slight cosmetic changes in anticipation of the transition to the EPIC array.
+- DMR.plot() has been completely rewritten, now with Gviz and inbuilt transcript annotation for hg19, hg38 and mm10.
+- DMRs are now ranked by the Stouffer transformations of the limma- and DSS- derived FDRs of their constituent CpG sites.
+
+CHANGES IN DMRcate VERSION 1.4.1 
+
+- Extra control for Type I error through DMR constituents made commensurate with # of differential limma probes
+- CITATIONs added
+
 CHANGES IN DMRcate VERSION 1.0.2
 
 BUG FIXES
@@ -10,17 +31,7 @@ NEW FEATURES
 •	XY probes can also be filtered out using rmSNPandCH().
 •	DMR.plot() allows group median lines to be plotted to better visualise distances between groups (Thanks to Susan van Dijk and Magnus Tobiasson for their advice).
 
-CHANGES IN DMRcate VERSION 1.4.1 
 
-- Extra control for Type I error through DMR constituents made commensurate with # of differential limma probes
-- CITATIONs added
 
-CHANGES IN DMRcate VERSION 1.7.2
 
-- Major changes. WGBS pipeline is now implemented with DSS as a regression step instead of limma. 450K pipeline is the same, but with slight cosmetic changes in anticipation of the transition to the EPIC array.
-- DMR.plot() has been completely rewritten, now with Gviz and inbuilt transcript annotation for hg19, hg38 and mm10.
-- DMRs are now ranked by the Stouffer transformations of the limma- and DSS- derived FDRs of their constituent CpG sites.
 
-CHANGES IN DMRcate VERSION 1.8.5
-
-- DMRs can now be called from Illumina's EPIC array. Workflow is identical to that of 450K, just with a different annotation argument to cpg.annotate() and DMR.plot().

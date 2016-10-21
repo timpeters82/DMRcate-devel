@@ -10,13 +10,14 @@
   and proximal coding regions.
 }
 \usage{
-DMR.plot(ranges, dmr, CpGs, phen.col, genome = c("hg19", "hg38", "mm10"), 
-         array.annotation = c(array = "IlluminaHumanMethylation450k", annotation = "ilmn12.hg19"),
+DMR.plot(ranges, dmr, CpGs, what=c("Beta", "M"), 
+         arraytype=c("EPIC", "450K"), phen.col, 
+         genome = c("hg19", "hg38", "mm10"), 
          samps = NULL, ...)
 }
 \arguments{
   \item{ranges}{
-    A GRanges object (ostensibly created by \code{extractRanges()} 
+    A GRanges object (ostensibly created by \code{extractRanges()}) 
     describing DMR coordinates.
   }
   \item{dmr}{
@@ -25,11 +26,23 @@ DMR.plot(ranges, dmr, CpGs, phen.col, genome = c("hg19", "hg38", "mm10"),
   }
   \item{CpGs}{
     Either:
+    
     - A matrix of beta values for plotting, with unique Illumina probe IDs
     as rownames.
+    
+    - A GenomicRatioSet, annotated with the appropriate array and data types
+    
     - A GRanges object describing individual CpGs to be plotted, containing
       methylated reads and total coverage for each sample. Please see the 
       worked example in the vignette for the correct structure of this object.
+  }
+  \item{what}{
+    Does \code{CpGs} (if a matrix) contain Beta or M-values? Not needed
+    if object is a GenomicRatioSet or GRanges object.
+  }
+  \item{arraytype}{
+    Is \code{CpGs} (if a matrix) sourced from EPIC or 450K data? Not needed
+    if object is a GenomicRatioSet or GRanges object.
   }
   \item{phen.col}{
     Vector of colors denoting phenotypes of \emph{all} samples described in
@@ -39,25 +52,6 @@ DMR.plot(ranges, dmr, CpGs, phen.col, genome = c("hg19", "hg38", "mm10"),
     Reference genome for annotating DMRs. Can be one of \code{"hg19"},
     \code{"hg38"} or \code{"mm10"}
   }
-  \item{array.annotation}{
-    A vector describing the type of annotation from which plots are
-    derived. Identical context to \code{minfi}, i.e. \code{annotation <-
-    annotation(minfiobject)} where \code{minfiobject} is a
-    \code{[Genomic](Methyl|Ratio)Set)}. 
-    
-    Argument for 450K arrays:
-    
-    \code{c(array = "IlluminaHumanMethylation450k", annotation = "ilmn12.hg19")}.
-    
-    Argument for EPIC arrays:
-    
-    \code{c(array = "IlluminaHumanMethylationEPIC", annotation = "ilm10b2.hg19")}.
-    
-    An error will be thrown if you attempt one on \code{CpGs}
-    with rownames on the other, due to non-overlapping probes 
-    on both platforms. Only applicable when \code{datatype="array"}.
-  }
-  
   \item{samps}{
     Vector of samples to be plotted, corresponding to indices of \code{phen.col}. 
     Default is all samples plotted.
@@ -80,13 +74,14 @@ myMs.noSNPs <- rmSNPandCH(myMs, dist=2, mafcut=0.05)
 patient <- factor(sub("-.*", "", colnames(myMs)))
 type <- factor(sub(".*-", "", colnames(myMs)))
 design <- model.matrix(~patient + type) 
-myannotation <- cpg.annotate("array", myMs.noSNPs, analysis.type="differential",
-    design=design, coef=39)
+myannotation <- cpg.annotate("array", myMs.noSNPs, what="M", arraytype = "450K",
+                             analysis.type="differential", design=design, coef=39)
 dmrcoutput <- dmrcate(myannotation, lambda=1000, C=2)
 results.ranges <- extractRanges(dmrcoutput, genome = "hg19")
 groups <- c(Tumour="magenta", Normal="forestgreen")
 cols <- groups[as.character(type)]
 samps <- c(1:6, 38+(1:6))
-DMR.plot(ranges=results.ranges, dmr=1, CpGs=myBetas, phen.col=cols, genome="hg19", samps=samps)
+DMR.plot(ranges=results.ranges, dmr=1, CpGs=myBetas, what="Beta", arraytype = "450K", 
+         phen.col=cols, genome="hg19", samps=samps)
 }
 }

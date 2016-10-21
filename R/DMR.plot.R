@@ -1,18 +1,20 @@
-DMR.plot <- function(ranges, dmr, CpGs, phen.col, genome = c("hg19", "hg38", "mm10"), 
-         array.annotation = c(array = "IlluminaHumanMethylation450k", annotation = "ilmn12.hg19"),
-                            samps = NULL, ...)
+DMR.plot <- function(ranges, dmr, CpGs, what=c("Beta", "M"), arraytype=c("EPIC", "450K"), phen.col, genome = c("hg19", "hg38", "mm10"), samps = NULL, ...)
 
 {
   env <- new.env(parent=emptyenv())
   data(dmrcatedata, envir=env)
-  stopifnot(class(CpGs) %in% c("matrix", "GRanges"))
+  stopifnot(class(CpGs) %in% c("matrix", "GRanges", "GenomicRatioSet"))
   stopifnot(dmr %in% 1:length(ranges))
   data(dmrcatedata)
   if(is.null(samps)){samps=1:length(phen.col)}
   group <- unique(names(phen.col))
-  if(is.matrix(CpGs)){
-    RSobject <- RatioSet(CpGs, annotation=array.annotation)
-    RSanno <- getAnnotation(RSobject)
+  if(class(CpGs) %in% c("matrix", "GenomicRatioSet")){
+    if(class(CpGs) == "matrix"){
+      if(arraytype=="450K"){grset <- makeGenomicRatioSetFromMatrix(CpGs, array = "IlluminaHumanMethylation450k", annotation = "ilmn12.hg19", mergeManifest = TRUE, what = what)}
+      if(arraytype=="EPIC"){grset <- makeGenomicRatioSetFromMatrix(CpGs, array = "IlluminaHumanMethylationEPIC", annotation = "ilm10b2.hg19", mergeManifest = TRUE, what = what)}
+    }
+    CpGs <- getBeta(grset)
+    RSanno <- getAnnotation(grset)
     RSanno <- RSanno[order(RSanno$chr, RSanno$pos),]
     CpGs <- CpGs[rownames(RSanno),]
     colnames(CpGs) <- paste(colnames(CpGs), ".C", sep='')

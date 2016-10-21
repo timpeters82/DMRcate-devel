@@ -22,24 +22,24 @@ testpipeline <- function(){
     
   #Test annotate()
   ##################################################################################
-  checkException(cpg.annotate(datatype="array", object=list(), analysis.type="differential", design=design, 
+  checkException(cpg.annotate(datatype="array", object=list(), what="M", arraytype = "450K", analysis.type="differential", design=design, 
                           coef=39))
-  checkException(cpg.annotate(datatype="array", myMs.noSNPs, annotation=c(array="IlluminaHumanMethylation450k", annotation="ilmn12.hg20"), analysis.type="differential", design=design, 
+  checkException(cpg.annotate(datatype="array", myMs.noSNPs, what="M", arraytype = "550K", analysis.type="differential", design=design, 
                           coef=39))
-  checkException(cpg.annotate(datatype="array", myMs.noSNPs, analysis.type="deferential", design=design, 
+  checkException(cpg.annotate(datatype="array", myMs.noSNPs, what="M", arraytype = "450K", analysis.type="deferential", design=design, 
                           coef=39))
-  checkException(cpg.annotate(datatype="array", myMs.noSNPs, analysis.type="differential", design=design,
+  checkException(cpg.annotate(datatype="array", myMs.noSNPs, what="M", arraytype = "450K", analysis.type="differential", design=design,
                           coef=40))
-  checkException(cpg.annotate(datatype="array", myMs.noSNPs, analysis.type="differential", design=nointerceptdesign,
+  checkException(cpg.annotate(datatype="array", myMs.noSNPs, what="M", arraytype = "450K", analysis.type="differential", design=nointerceptdesign,
                           coef=39))
     
-  checkEquals(nrow(myMs.noSNPs), length(cpg.annotate(datatype="array", object=myMs.noSNPs, analysis.type="differential", design=design, 
+  checkEquals(nrow(myMs.noSNPs), length(cpg.annotate(datatype="array", object=myMs.noSNPs, what="M", arraytype = "450K", analysis.type="differential", design=design, 
                                                  coef=39)$ID))
-  checkEquals(class(cpg.annotate(datatype="array", myMs.noSNPs, analysis.type="differential", design=design, 
+  checkEquals(class(cpg.annotate(datatype="array", myMs.noSNPs, what="M", arraytype = "450K", analysis.type="differential", design=design, 
                              coef=39)), "annot")
   ###################################################################################
   
-  myannotation <- cpg.annotate("array", myMs.noSNPs, analysis.type="differential", design=design, 
+  myannotation <- cpg.annotate("array", myMs.noSNPs, what="M", arraytype = "450K", analysis.type="differential", design=design, 
                            coef=39, pcutoff=0.01)
   
   #Test dmrcate()
@@ -63,12 +63,12 @@ testpipeline <- function(){
   
   #Test DMR.plot
   ###############################################################################
-  checkException(DMR.plot(dmrcoutput=dmrcoutputwrong, dmr=1, CpGs=myBetas, phen.col=cols, genome="hg19"))
-  checkException(DMR.plot(dmrcoutput=dmrcoutput, dmr=1.5, CpGs=myBetas, phen.col=cols, genome="hg19"))
-  checkException(DMR.plot(dmrcoutput=dmrcoutput, dmr=1, CpGs=factor(c(1, 2)), phen.col=cols, genome="hg19"))
-  checkException(DMR.plot(dmrcoutput=dmrcoutput, dmr=1, CpGs=myBetas, phen.col=cols, genome="hg19", samps=c(1, 79)))
-  checkException(DMR.plot(dmrcoutput=dmrcoutput, dmr=1, CpGs=myBetas, phen.col=cols, annotation=c(array="IlluminaHumanMethylation450k", annotation="ilmn12.hg20")))
+  checkException(DMR.plot(dmrcoutput=dmrcoutputwrong, dmr=1, CpGs=myBetas, what="M", arraytype = "450K", phen.col=cols, genome="hg19"))
+  checkException(DMR.plot(dmrcoutput=dmrcoutput, dmr=1.5, CpGs=myBetas, what="M", arraytype = "450K", phen.col=cols, genome="hg19"))
+  checkException(DMR.plot(dmrcoutput=dmrcoutput, dmr=1, CpGs=factor(c(1, 2)), what="M", arraytype = "450K", phen.col=cols, genome="hg19"))
+  checkException(DMR.plot(dmrcoutput=dmrcoutput, dmr=1, CpGs=myBetas, what="M", arraytype = "450K", phen.col=cols, genome="hg19", samps=c(1, 79)))
+  checkException(DMR.plot(dmrcoutput=dmrcoutput, dmr=1, CpGs=myBetas, what="M", arraytype = "450K", phen.col=cols, annotation=c(array="IlluminaHumanMethylation450k", annotation="ilmn12.hg20")))
   badphen.col <- c(rep("orange", 39), rep("blue", 38))
-  checkException(DMR.plot(dmrcoutput=dmrcoutput, dmr=1, CpGs=myBetas, genome="hg19", phen.col=badphen.col))
+  checkException(DMR.plot(dmrcoutput=dmrcoutput, dmr=1, CpGs=myBetas, what="M", arraytype = "450K", genome="hg19", phen.col=badphen.col))
   ##############################################################################
 }
