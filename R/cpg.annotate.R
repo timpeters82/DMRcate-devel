@@ -25,7 +25,7 @@ cpg.annotate <- function(datatype = c("array", "sequencing"), object, what=c("Be
       tt <- topTable(fit, coef = coef, number = nrow(object))
       nsig <- sum(tt$adj.P.Val < fdr)
       if (nsig == 0) {
-        message("Your contrast returned no individually significant probes. Set pcutoff manually in dmrcate() to return DMRs, but be warned there is an increased risk of Type I errors.")
+        message("Your contrast returned no individually significant probes. Try increasing the fdr. Alternatively, set pcutoff manually in dmrcate() to return DMRs, but be warned there is an increased risk of Type I errors.")
       }
       if (nsig > 0 & nsig <= 100) {
         message(paste("Your contrast returned", nsig, 
@@ -67,7 +67,7 @@ cpg.annotate <- function(datatype = c("array", "sequencing"), object, what=c("Be
       sqrtfdrs <- p.adjust(fit$F.p.value, method="BH")
       nsig <- sum(sqrtfdrs < fdr)
       if (nsig == 0) {
-        message("Your design returned no individually significant probes for ANOVA. Set pcutoff manually in dmrcate() to return DMRs, but be warned there is an increased risk of Type I errors.")
+        message("Your design returned no individually significant probes for ANOVA. Try increasing the fdr. Alternatively, set pcutoff manually in dmrcate() to return DMRs, but be warned there is an increased risk of Type I errors.")
       }
       if (nsig > 0 & nsig <= 100) {
         message(paste("Your design returned", nsig, 
@@ -98,7 +98,7 @@ cpg.annotate <- function(datatype = c("array", "sequencing"), object, what=c("Be
       tt <- topVar(fitvar, coef=coef, number = nrow(object))
       nsig <- sum(tt$Adj.P.Value < fdr)
       if (nsig == 0) {
-        message("Your contrast returned no individually significant probes. Set pcutoff manually in dmrcate() to return DVMRs, but be warned there is an increased risk of Type I errors.")
+        message("Your contrast returned no individually significant probes. Try increasing the fdr. Alternatively, set pcutoff manually in dmrcate() to return DVMRs, but be warned there is an increased risk of Type I errors.")
       }
       if (nsig > 0 & nsig <= 100) {
         message(paste("Your contrast returned", nsig, 
