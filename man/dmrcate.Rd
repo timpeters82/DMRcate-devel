@@ -40,7 +40,7 @@ dmrcate(object,
     \code{"BH"} (Benjamini-Hochberg).
   }
   \item{pcutoff}{
-    \emph{p}-value cutoff to determine DMRs. Default is automatically determined by the number of significant CpGs returned by either \code{limma} or \code{DSS} for that contrast, but can be set manually with a numeric value.
+    \emph{p}-value cutoff to determine DMRs. Default is automatically determined by the number of significant CpGs returned by either \code{limma} or \code{DSS} for that contrast, but can be set manually with a numeric value. Default is highly recommended, and thresholding can be adjusted using the \code{fdr} argument in \code{cpg.annotate()}.
   }
   \item{consec}{
     Use \code{DMRcate} in consecutive mode. Treats CpG sites as equally spaced.

@@ -45,6 +45,10 @@ object <- rbind.fill(fitted)
 object$fdr <- p.adjust(object$raw, method = p.adjust.method)
 if (pcutoff == "fdr") {
   nsig <- sum(object$is.sig)
+  if (nsig == 0) {
+    txt <- "The FDR you specified in cpg.annotate() returned no significant CpGs, hence there are no DMRs.\n    Try specifying a value of 'pcutoff' in dmrcate() and/or increasing 'fdr' in cpg.annotate()."
+    stop(paste(strwrap(txt, exdent = 2), collapse = "\n"))
+  }
   pcutoff <- sort(object$fdr)[nsig]
 }
 object$sig <- object$fdr <= pcutoff

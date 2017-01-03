@@ -69,8 +69,9 @@ cpg.annotate(datatype = c("array", "sequencing"), object, what=c("Beta", "M"),
   }
   \item{fdr}{
     FDR cutoff (Benjamini-Hochberg) for which CpG sites are individually called
-    as significant. Used only to determine effect size, and not for
-    downstream thresholding. Not used when \code{analysis.type = "variability"}.
+    as significant. Used to index default thresholding in dmrcate(). \emph{Highly 
+    recommended as the primary thresholding parameter for calling DMRs}. 
+    Not used when \code{analysis.type = "variability"}.
   }
   \item{coef}{
     The column index in \code{design} corresponding to the phenotype
