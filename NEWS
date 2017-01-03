@@ -1,3 +1,6 @@
+CHANGES IN DMRcate VERSION 1.10.2
+- Bugfix for when there are no significant CpG sites at the given threshold
+
 CHANGES IN DMRcate VERSION 1.10.1
 
 - Data filtering for EPIC arrays now incorporates probe information (via DMRcatedata_1.8.3) from Pidsley and Zotenko et al. (2016) Genome Biology 17(1), 208.
