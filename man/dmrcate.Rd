@@ -51,8 +51,7 @@ dmrcate(object,
     becomes the minumum distance separating DMRs.
   }
   \item{betacutoff}{
-    Optional filter; removes any region from the results that does not have at least one
-    CpG site with a beta fold change exceeding this value.
+    Optional filter; removes any region from the results where the absolute mean beta shift is less than the given value.
   }
    \item{min.cpgs}{
     Minimum number of consecutive CpGs constituting a DMR.

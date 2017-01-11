@@ -147,6 +147,9 @@ results <- data.frame(coord = coord, no.cpgs = no.cpgs, minfdr = minfdr,
                       row.names = seq(R), stringsAsFactors = FALSE)
 results <- results[order(Stouffer, -no.cpgs), , drop = FALSE]
 results <- results[results$no.cpgs >= min.cpgs, ]
+if (!is.null(betacutoff)) {
+   results <- results[abs(results$meanbetafc) >= betacutoff, ]
+}
 message("Done!")
 output <- NULL
 output$input <- object
