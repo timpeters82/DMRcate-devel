@@ -33,14 +33,15 @@ dmrcate(object,
   }
   \item{C}{
     Scaling factor for bandwidth. Gaussian kernel is calculated where 
-    \code{lambda}/\code{C} = sigma. Empirical testing shows that when \code{lambda=1000}, near-optimal prediction of sequencing-derived DMRs is obtained when \code{C} is approximately 2, i.e. 1 standard deviation of Gaussian kernel = 500 base pairs. Cannot be < 0.2.
+    \code{lambda}/\code{C} = sigma. Empirical testing shows that, for 450k data when \code{lambda=1000}, near-optimal prediction of sequencing-derived DMRs is obtained when \code{C} is approximately 2, i.e. 1 standard deviation of Gaussian kernel = 500 base pairs. Should be a lot larger for sequencing data - suggest C=50. Cannot be < 0.2.
   }
   \item{p.adjust.method}{
     Method for \emph{p}-value adjustment from the significance test. Default is
     \code{"BH"} (Benjamini-Hochberg).
   }
   \item{pcutoff}{
-    \emph{p}-value cutoff to determine DMRs. Default is automatically determined by the number of significant CpGs returned by either \code{limma} or \code{DSS} for that contrast, but can be set manually with a numeric value.
+    \emph{p}-value cutoff to determine DMRs. Default is automatically determined by the number of significant CpGs returned by either \code{limma} or \code{DSS} for that contrast, but can be set manually with a numeric value. Default is highly recommended, and thresholding can be adjusted using the \code{fdr} argument in \code{cpg.annotate()}.
+
   }
   \item{consec}{
     Use \code{DMRcate} in consecutive mode. Treats CpG sites as equally spaced.
@@ -51,8 +52,7 @@ dmrcate(object,
     becomes the minumum distance separating DMRs.
   }
   \item{betacutoff}{
-    Optional filter; removes any region from the results that does not have at least one
-    CpG site with a beta fold change exceeding this value.
+    Optional filter; removes any region from the results where the absolute mean beta shift is less than the given value.
   }
    \item{min.cpgs}{
     Minimum number of consecutive CpGs constituting a DMR.
@@ -122,8 +122,13 @@ myMs.noSNPs <- rmSNPandCH(myMs, dist=2, mafcut=0.05)
 patient <- factor(sub("-.*", "", colnames(myMs)))
 type <- factor(sub(".*-", "", colnames(myMs)))
 design <- model.matrix(~patient + type) 
+<<<<<<< HEAD
 myannotation <- cpg.annotate(myMs.noSNPs, analysis.type="differential",
     design=design, coef=39)
+=======
+myannotation <- cpg.annotate("array", myMs.noSNPs, what="M", arraytype = "450K",
+                             analysis.type="differential", design=design, coef=39)
+>>>>>>> master
 dmrcoutput <- dmrcate(myannotation, lambda=1000)
 }
 }

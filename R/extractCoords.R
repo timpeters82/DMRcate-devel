@@ -1,13 +1,8 @@
-extractCoords <- function(xx) 
+#Thank you to Xavier Pastor from Bioconductor mailing list for this patch
+extractCoords <- function(xx)
 {
-  if (length(xx) > 1) {
-    t(sapply(xx, extractCoords))
-  }
-  else {
-    coords <- strsplit(xx, ":")[[1]]
-    chrom <- coords[1]
-    chromStart <- strsplit(coords[2], "-")[[1]][1]
-    chromEnd <- strsplit(coords[2], "-")[[1]][2]
-    return(c(chrom = chrom, chromStart = chromStart, chromEnd = chromEnd))
-  }
+    coords <- sapply(xx, strsplit, '[:-]')
+    coords <- as.data.frame(do.call(rbind, coords), stringsAsFactors=F)
+    colnames(coords) <- c('chrom', 'chromStart', 'chromEnd')
+    return(coords)
 }

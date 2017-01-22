@@ -4,7 +4,7 @@
   Filter probes
 }
 \description{
-  Filters a matrix of M-values (or beta values) by distance to SNP. Also (optionally) removes cross-hybridising probes and sex-chromosome probes.
+  Filters a matrix of M-values (or beta values) by distance to SNP/variant. Also (optionally) removes cross-hybridising probes and sex-chromosome probes.
 }
 \usage{
 rmSNPandCH(object, dist = 2, mafcut = 0.05, and = TRUE, rmcrosshyb = TRUE, rmXY=FALSE)
@@ -15,7 +15,7 @@ rmSNPandCH(object, dist = 2, mafcut = 0.05, and = TRUE, rmcrosshyb = TRUE, rmXY=
     as rownames.
   }
   \item{dist}{
-    Maximum distance (from CpG to SNP) of probes to be filtered out. See
+    Maximum distance (from CpG to SNP/variant) of probes to be filtered out. See
     details for when Illumina occasionally lists a CpG-to-SNP distance
     as being < 0.
   }
@@ -30,11 +30,11 @@ rmSNPandCH(object, dist = 2, mafcut = 0.05, and = TRUE, rmcrosshyb = TRUE, rmXY=
     \code{TRUE}.
   }
   \item{rmcrosshyb}{
-    If \code{TRUE}, filters out probes found by Chen et al. (2013) to be
-    cross-reactive with areas of the genome not at the site of
-    interest. Many of these sites are on the X-chromosome, leading to
+    If \code{TRUE}, filters out probes found by Pidsley and Zotenko et al. (2016)
+    for EPIC or Chen et al. (2013) for 450K to be cross-reactive with areas of the genome not
+    at the site of interest. Many of these sites are on the X-chromosome, leading to
     potential confounding if the sample group is a mix of males and
-    females. There are 30,969 probes in total in this list. Default is
+    females. There are 63,707 probes in total in this list. Default is
     \code{TRUE}.
   }
   \item{rmXY}{
@@ -54,11 +54,15 @@ rmSNPandCH(object, dist = 2, mafcut = 0.05, and = TRUE, rmcrosshyb = TRUE, rmXY=
   probes matching user input filtered out.
 }
 \references{
+  Pidsley R, Zotenko E, Peters TJ, Lawrence MG, Risbridger GP, Molloy P, 
+  Van Dijk S, Muhlhausler B, Stirzaker C, Clark SJ. Critical evaluation of 
+  the Illumina MethylationEPIC BeadChip microarray for whole-genome DNA 
+  methylation profiling. \emph{Genome Biology}. 2016 17(1), 208.
+  
   Chen YA, Lemire M, Choufani S, Butcher DT, Grafodatskaya D, Zanke BW,
   Gallinger S, Hudson TJ, Weksberg R. Discovery of cross-reactive probes
   and polymorphic CpGs in the Illumina Infinium HumanMethylation450
   microarray. \emph{Epigenetics}. 2013 Jan 11;8(2).
-
   \url{http://supportres.illumina.com/documents/myillumina/88bab663-307c-444a-848e-0ed6c338ee4d/humanmethylation450_15017482_v.1.2.snpupdate.table.v3.txt}
 
 }

@@ -12,15 +12,30 @@ if (consec & is.null(conseclambda)) {
 }
 object <- data.frame(ID = object$ID, weights = abs(object$stat), 
                      CHR = as.character(object$CHR), pos = object$pos, betafc = object$betafc, 
-                     indfdr = object$indfdr)
-if (is.null(C)) {
-  if (nrow(object) < 485513) {
+                     indfdr = object$indfdr, is.sig=object$is.sig)
+
+object <- object[order(object$CHR, object$pos),]
+
+# Automatic bandwidth specification
+if (is.null(C) & !consec) {
+  if (nrow(object) < 900000) {
     C = 2
   }
   else {
     C = 50
   }
 }
+
+if (consec) {
+   lambda = conseclambda
+   message(paste("Consecutive mode specified, lambda is now set at", conseclambda, "consecutive CpGs."))
+   if (is.null(C)){
+       stop("Error: argument C must be specified (in CpG sites) for consecutive mode.")
+   }
+   object$realcoordforconsec <- object$pos
+   object$pos <- unlist(sapply(as.numeric(table(object$CHR)), function (x) 1:x))
+}
+
 lag = lambda
 chr.unique <- unique(c(as.character(object$CHR)))
 fitted <- mclapply(chr.unique, fitParallel, object = object, 
@@ -29,7 +44,11 @@ fitted <- mclapply(chr.unique, fitParallel, object = object,
 object <- rbind.fill(fitted)
 object$fdr <- p.adjust(object$raw, method = p.adjust.method)
 if (pcutoff == "fdr") {
-  nsig <- sum(object$indfdr < 0.05)
+  nsig <- sum(object$is.sig)
+  if (nsig == 0) {
+    txt <- "The FDR you specified in cpg.annotate() returned no significant CpGs, hence there are no DMRs.\n    Try specifying a value of 'pcutoff' in dmrcate() and/or increasing 'fdr' in cpg.annotate()."
+    stop(paste(strwrap(txt, exdent = 2), collapse = "\n"))
+  }
   pcutoff <- sort(object$fdr)[nsig]
 }
 object$sig <- object$fdr <= pcutoff
@@ -84,6 +103,9 @@ o <- order(chr, pos)
 sigprobes <- sigprobes[o, ]
 chr <- as.character(sigprobes$CHR)
 pos <- sigprobes$pos
+if (consec){
+   realpos <- sigprobes$realcoordforconsec
+}
 n <- nrow(sigprobes)
 stopifnot(n >= 2)
 s <- seq(n - 1)
@@ -106,8 +128,13 @@ U <- function(x) {
   u
 }
 chr <- tapply(chr, region, U)
-start <- tapply(pos, region, min)
-end <- tapply(pos, region, max)
+if (consec) {
+    start <- tapply(realpos, region, min)
+    end <- tapply(realpos, region, max)
+    } else {
+    start <- tapply(pos, region, min)
+    end <- tapply(pos, region, max)
+    }
 fmt <- "%s:%1d-%1d"
 coord <- sprintf(fmt, chr, start, end)
 P <- function(x) {
@@ -120,6 +147,9 @@ results <- data.frame(coord = coord, no.cpgs = no.cpgs, minfdr = minfdr,
                       row.names = seq(R), stringsAsFactors = FALSE)
 results <- results[order(Stouffer, -no.cpgs), , drop = FALSE]
 results <- results[results$no.cpgs >= min.cpgs, ]
+if (!is.null(betacutoff)) {
+   results <- results[abs(results$meanbetafc) >= betacutoff, ]
+}
 message("Done!")
 output <- NULL
 output$input <- object
