@@ -6,6 +6,8 @@ cpg.annotate <- function(datatype = c("array", "sequencing"), object, what=c("Be
     if(class(object) == "matrix"){
       if(arraytype=="450K"){grset <- makeGenomicRatioSetFromMatrix(object, array = "IlluminaHumanMethylation450k", annotation = "ilmn12.hg19", mergeManifest = TRUE, what = what)}
       if(arraytype=="EPIC"){grset <- makeGenomicRatioSetFromMatrix(object, array = "IlluminaHumanMethylationEPIC", annotation = "ilm10b2.hg19", mergeManifest = TRUE, what = what)}
+    } else {
+	grset <- object
     }
     object <- getM(grset)
     analysis.type <- match.arg(analysis.type)
