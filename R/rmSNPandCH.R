@@ -21,7 +21,6 @@ rmSNPandCH <- function(object, dist=2, mafcut=0.05, and=TRUE, rmcrosshyb=TRUE, r
   test0 <- (dist0 >= -1) & (dist0 <= dist)
   test1 <-
     unlist(env$snpsall$MinorAlleleFrequency, use.names=FALSE) > mafcut
-
   test <- if (and) (test0 & test1) else (test0 | test1)
   ## 'any' by group
   ntrue <- cumsum(test)[cumsum(len0)]
@@ -38,3 +37,4 @@ rmSNPandCH <- function(object, dist=2, mafcut=0.05, and=TRUE, rmcrosshyb=TRUE, r
   
   object[!(rownames(object) %in% badprobes),]
 }
+

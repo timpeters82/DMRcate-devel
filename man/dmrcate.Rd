@@ -41,7 +41,6 @@ dmrcate(object,
   }
   \item{pcutoff}{
     \emph{p}-value cutoff to determine DMRs. Default is automatically determined by the number of significant CpGs returned by either \code{limma} or \code{DSS} for that contrast, but can be set manually with a numeric value. Default is highly recommended, and thresholding can be adjusted using the \code{fdr} argument in \code{cpg.annotate()}.
-
   }
   \item{consec}{
     Use \code{DMRcate} in consecutive mode. Treats CpG sites as equally spaced.
@@ -122,13 +121,8 @@ myMs.noSNPs <- rmSNPandCH(myMs, dist=2, mafcut=0.05)
 patient <- factor(sub("-.*", "", colnames(myMs)))
 type <- factor(sub(".*-", "", colnames(myMs)))
 design <- model.matrix(~patient + type) 
-<<<<<<< HEAD
-myannotation <- cpg.annotate(myMs.noSNPs, analysis.type="differential",
-    design=design, coef=39)
-=======
 myannotation <- cpg.annotate("array", myMs.noSNPs, what="M", arraytype = "450K",
                              analysis.type="differential", design=design, coef=39)
->>>>>>> master
 dmrcoutput <- dmrcate(myannotation, lambda=1000)
 }
 }

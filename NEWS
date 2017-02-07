@@ -33,3 +33,4 @@ NEW FEATURES
 •	A GRanges object can be produced from the results.
 •	XY probes can also be filtered out using rmSNPandCH().
 •	DMR.plot() allows group median lines to be plotted to better visualise distances between groups (Thanks to Susan van Dijk and Magnus Tobiasson for their advice).
+

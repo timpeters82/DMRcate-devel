@@ -33,7 +33,6 @@ We now can load in the test data set of beta values. We assume at this point tha
 
 The TCGA (Cancer Genome Atlas - colorectal cancer) 450K data in \texttt{myBetas} only comes from chromosome 20, but DMRcate will have no problem taking in the approximately half million probes as input for this pipeline either.
 
-
 <<loaddata>>=
 data(dmrcatedata)
 myMs <- logit2(myBetas)
@@ -48,7 +47,6 @@ Some of the methylation measurements on the array may be confounded by proximity
     \includegraphics[width=\textwidth]{heynSNP.pdf}
 \end{figure}
 
-
 It is with this in mind that we filter out probes 2 nucleotides or closer to a SNP that have a minor allele frequency greater than 0.05, and the approximately 63,000 \cite{Pidsley, Chen} cross-reactive probes on either 450K and/or EPIC, so as to reduce confounding. Here we use a combination of \textit{in silico} analysis from \cite{Pidsley, Chen} and Illumina\textregistered's database of approximately 150,000 potentially SNP-confounded probes, to filter these probes out. About 600 are removed from our M-matrix of approximately 10,000:
 
 <<filter>>=
@@ -58,12 +56,10 @@ myMs.noSNPs <- rmSNPandCH(myMs, dist=2, mafcut=0.05)
 nrow(myMs.noSNPs)
 @
 
-
 Next we want to annotate our matrix of M-values with relevant information. We also use the backbone of the \texttt{limma} pipeline for differential array analysis to get \textit{t}-statistics changes and, optionally, filter probes by their fdr-corrected \textit{p}-value.
 Here we have 38 patients with 2 tissue samples each taken from them. We want to compare within patients across tissue samples, so we set up our variables for a standard limma pipeline, and set \texttt{coef=39} in \texttt{cpg.annotate} since this corresponds to the phenotype comparison in \texttt{design}. 
 
 \texttt{cpg.annotate()} takes either a data matrix with Illumina probe IDs, or an already prepared GenomicRatioSet from \texttt{minfi}.
-
 
 <<annotate>>=
 patient <- factor(sub("-.*", "", colnames(myMs)))
