@@ -70,9 +70,10 @@ bychr <- function(i) {
     n <- nrow(this.chr)
     s <- seq(n - 1)
     w <- which(this.chr$sig)
+    this.pos <- this.chr$pos
     if(length(w) > 0){
       step.pos <- rep(NA, length(w) - 1)
-      step.pos <- (pos[w][-1] - pos[w][-length(w)] > lag)
+      step.pos <- (this.pos[w][-1] - this.pos[w][-length(w)] > lag)
       step.pos <- c(TRUE, step.pos)
       step.dmr <- rep(NA, n)
       step.dmr[w] <- step.pos
