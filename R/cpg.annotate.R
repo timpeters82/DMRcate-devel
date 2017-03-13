@@ -20,7 +20,7 @@ cpg.annotate <- function(datatype = c("array", "sequencing"), object, what=c("Be
       }
       fit <- lmFit(object, design, ...)
       if (contrasts) {
-        stopifnot(coef %in% colnames(cont.matrix))
+        #stopifnot(coef %in% colnames(cont.matrix))
         fit <- contrasts.fit(fit, cont.matrix)
       }
       fit <- eBayes(fit)
