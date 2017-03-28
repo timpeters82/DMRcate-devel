@@ -2,6 +2,7 @@ extractRanges <-function(dmrcoutput, genome=c("hg19", "hg38", "mm10"))
 {
   env <- new.env(parent=emptyenv())
   data(dmrcatedata, envir=env)
+  genome <- match.arg(genome)
   stopifnot(is(dmrcoutput, "dmrcate.output"))
   coords <- extractCoords(dmrcoutput$results$coord)
   coords <- cbind(coords, dmrcoutput$results[, c("no.cpgs", "minfdr", "Stouffer", "maxbetafc", "meanbetafc")])

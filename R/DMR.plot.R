@@ -3,6 +3,9 @@ DMR.plot <- function(ranges, dmr, CpGs, what=c("Beta", "M"), arraytype=c("EPIC",
 {
   env <- new.env(parent=emptyenv())
   data(dmrcatedata, envir=env)
+  what <- match.arg(what)
+  arraytype <- match.arg(arraytype)
+  genome <- match.arg(genome)
   stopifnot(class(CpGs) %in% c("matrix", "GRanges", "GenomicRatioSet"))
   stopifnot(dmr %in% 1:length(ranges))
   data(dmrcatedata)
