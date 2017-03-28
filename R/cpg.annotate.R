@@ -1,4 +1,4 @@
-function (datatype = c("array", "sequencing"), object, what = c("Beta", 
+cpg.annotate <- function (datatype = c("array", "sequencing"), object, what = c("Beta", 
                                                                 "M"), arraytype = c("EPIC", "450K"), analysis.type = c("differential", 
                                                                                                                        "variability", "ANOVA", "diffVar"), design, contrasts = FALSE, 
           cont.matrix = NULL, fdr = 0.05, coef, ...) 
