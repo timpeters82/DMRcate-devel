@@ -8,6 +8,7 @@ Internal DMRcate objects and functions
 \alias{fitParallel}
 \alias{KernelSums}
 \alias{KernelTest}
+\alias{Segment}
 \alias{SparseDeltas}
 \description{
 Internal DMRcate objects and functions
