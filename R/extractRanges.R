@@ -20,7 +20,7 @@ extractRanges <-function(dmrcoutput, genome=c("hg19", "hg38", "mm10"))
   op.A <- sapply(proms, function(l) paste(l$tx_name, collapse= ", "))
   name.A <- names(proms)
   m.A <- as.numeric(name.A)
-  M <- max(m.A)
+  M <- length(ranges)
   overlapping.promoters <- rep(NA_character_, M)
   overlapping.promoters[m.A] <- op.A
   ranges$overlapping.promoters <- overlapping.promoters
