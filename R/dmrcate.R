@@ -173,7 +173,7 @@ dmrcate <-
       )
 
     # Order and filter DMRs
-    o <- order(results$Stouffer, -results$no.cpgs)
+    
     keep <- (results$no.cpgs >= min.cpgs)
     results <- results[keep, ]
     if (!is.null(betacutoff))
@@ -181,6 +181,8 @@ dmrcate <-
       keep <- (abs(results$meanbetafc) >= betacutoff)
       results <- results[keep,]
     }
+    o <- order(results$Stouffer, -results$no.cpgs)
+    results <- results[o,]
     message("Done!")
 
 
