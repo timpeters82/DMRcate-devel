@@ -16,7 +16,6 @@ extractRanges <-function(dmrcoutput, genome=c("hg19", "hg38", "mm10"))
   )
   promsidx <- as.data.frame(findOverlaps(ranges, promoters(tx, 2000, 2000)))
   proms <- tapply(promsidx$subjectHits, promsidx$queryHits, function(x) tx[x])
-
   op.A <- sapply(proms, function(l) paste(l$tx_name, collapse= ", "))
   name.A <- names(proms)
   m.A <- as.numeric(name.A)
@@ -24,6 +23,5 @@ extractRanges <-function(dmrcoutput, genome=c("hg19", "hg38", "mm10"))
   overlapping.promoters <- rep(NA_character_, M)
   overlapping.promoters[m.A] <- op.A
   ranges$overlapping.promoters <- overlapping.promoters
-
   ranges
 }

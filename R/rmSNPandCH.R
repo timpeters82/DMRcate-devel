@@ -37,3 +37,4 @@ rmSNPandCH <- function(object, dist=2, mafcut=0.05, and=TRUE, rmcrosshyb=TRUE, r
   
   object[!(rownames(object) %in% badprobes),]
 }
+

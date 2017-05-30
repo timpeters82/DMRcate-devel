@@ -63,7 +63,6 @@ rmSNPandCH(object, dist = 2, mafcut = 0.05, and = TRUE, rmcrosshyb = TRUE, rmXY=
   Gallinger S, Hudson TJ, Weksberg R. Discovery of cross-reactive probes
   and polymorphic CpGs in the Illumina Infinium HumanMethylation450
   microarray. \emph{Epigenetics}. 2013 Jan 11;8(2).
-  
   \url{http://supportres.illumina.com/documents/myillumina/88bab663-307c-444a-848e-0ed6c338ee4d/humanmethylation450_15017482_v.1.2.snpupdate.table.v3.txt}
 
 }

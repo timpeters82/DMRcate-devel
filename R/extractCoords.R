@@ -1,4 +1,3 @@
-
 extractCoords <-
   function(coords.M)
   {

@@ -7,7 +7,7 @@
   Either:
   - Annotate a matrix/GenomicRatioSet representing 450K or EPIC data with probe weights 
   (depending on \code{analysis.type}) and chromosomal position, or
-  
+
   - Standardise this information from \code{DSS:::DMLtest()} to the
     same data format.
   
