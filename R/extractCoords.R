@@ -11,3 +11,4 @@ extractCoords <-
     colnames(df.MA) <- c('chrom', 'chromStart', 'chromEnd')
     df.MA
   }
+

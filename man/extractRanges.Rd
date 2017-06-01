@@ -16,7 +16,8 @@ extractRanges(dmrcoutput, genome = c("hg19", "hg38", "mm10"))
 }
   \item{genome}{
     Reference genome for annotating DMRs with promoter overlaps. 
-    Can be one of \code{"hg19"}, \code{"hg38"} or \code{"mm10"}
+    Can be one of \code{"hg19"}, \code{"hg38"} or \code{"mm10"}.
+    Ranges are assumed to map to the reference stated; there is no liftover.
   }
 }
 \value{
