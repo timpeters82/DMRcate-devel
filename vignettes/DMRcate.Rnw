@@ -17,8 +17,9 @@
 \end{abstract}
 
 <<bioconductor, message=FALSE, warning=FALSE, eval=FALSE>>=
-source("http://bioconductor.org/biocLite.R")
-biocLite("DMRcate")
+if (!requireNamespace("BiocManager", quietly=TRUE))
+    install.packages("BiocManager")
+BiocManager::install("DMRcate")
 @
 
 Load \texttt{DMRcate} into the workspace:
