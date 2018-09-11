@@ -69,7 +69,7 @@ DMR.plot <- function(ranges, dmr, CpGs, what=c("Beta", "M"), arraytype=c("EPIC",
   #  x
   #})
   values(cpgs.ranges) <- NULL
-    basetracks <- list(IdeogramTrack(genome = "hg19", chromosome = as.character(seqnames(ranges.inplot))),
+    basetracks <- list(IdeogramTrack(genome = genome, chromosome = as.character(seqnames(ranges.inplot))),
                        GenomeAxisTrack(),
                        GeneRegionTrack(subsetByOverlaps(tx, ranges.inplot), name = "Gene", showId=TRUE, geneSymbol=TRUE, symbol = subsetByOverlaps(tx, ranges.inplot)$gene_name, col=NULL, fill="lightblue", transcriptAnnotation = "symbol", shape="arrow"),
                        AnnotationTrack(cpgs.ranges, name="CpGs", fill="green", col=NULL, stacking="dense"))
