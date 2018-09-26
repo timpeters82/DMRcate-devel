@@ -33,10 +33,10 @@ testpipeline <- function(){
   checkException(cpg.annotate(datatype="array", myMs.noSNPs, what="M", arraytype = "450K", analysis.type="differential", design=nointerceptdesign,
                           coef=39))
     
-  checkEquals(nrow(myMs.noSNPs), length(cpg.annotate(datatype="array", object=myMs.noSNPs, what="M", arraytype = "450K", analysis.type="differential", design=design, 
-                                                 coef=39)$ID))
-  checkEquals(class(cpg.annotate(datatype="array", myMs.noSNPs, what="M", arraytype = "450K", analysis.type="differential", design=design, 
-                             coef=39)), "annot")
+  #checkEquals(nrow(myMs.noSNPs), length(cpg.annotate(datatype="array", object=myMs.noSNPs, what="M", arraytype = "450K", analysis.type="differential", design=design, 
+  #                                               coef=39)$ID))
+  #checkEquals(class(cpg.annotate(datatype="array", myMs.noSNPs, what="M", arraytype = "450K", analysis.type="differential", design=design, 
+  #                           coef=39)), "annot")
   ###################################################################################
   
   myannotation <- cpg.annotate("array", myMs.noSNPs, what="M", arraytype = "450K", analysis.type="differential", design=design, 
