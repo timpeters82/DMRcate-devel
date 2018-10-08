@@ -16,7 +16,7 @@ cpg.annotate <- function (datatype = c("array", "sequencing"), object, what = c(
       }
       if (arraytype == "EPIC") {
         grset <- makeGenomicRatioSetFromMatrix(object, 
-                                               array = "IlluminaHumanMethylationEPIC", annotation = "ilm10b2.hg19", 
+                                               array = "IlluminaHumanMethylationEPIC", annotation = "ilm10b4.hg19", 
                                                mergeManifest = TRUE, what = what)
       }
     }

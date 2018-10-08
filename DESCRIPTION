@@ -1,6 +1,6 @@
 Package: DMRcate
 Title: Methylation array and sequencing spatial analysis methods
-Version: 1.17.5
+Version: 1.17.6
 Date: 2018-08-10
 Author: Tim Peters
 Maintainer: Tim Peters <t.peters@garvan.org.au>
@@ -13,7 +13,7 @@ Description: De novo identification and extraction of differentially methylated 
 Depends: R (>= 3.3.0), minfi, DSS, DMRcatedata
 Imports: limma, missMethyl, GenomicRanges, parallel, methods, graphics, plyr, Gviz, IRanges, stats, utils, S4Vectors
 biocViews: DifferentialMethylation, GeneExpression, Microarray, MethylationArray, Genetics, DifferentialExpression, GenomeAnnotation, DNAMethylation, OneChannel, TwoChannel, MultipleComparison, QualityControl, TimeCourse
-Suggests: knitr, RUnit, BiocGenerics, IlluminaHumanMethylation450kanno.ilmn12.hg19, IlluminaHumanMethylationEPICanno.ilm10b2.hg19
+Suggests: knitr, RUnit, BiocGenerics, IlluminaHumanMethylation450kanno.ilmn12.hg19, IlluminaHumanMethylationEPICanno.ilm10b4.hg19
 License: file LICENSE
 VignetteBuilder: knitr
 

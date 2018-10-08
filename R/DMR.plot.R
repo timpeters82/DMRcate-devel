@@ -14,7 +14,7 @@ DMR.plot <- function(ranges, dmr, CpGs, what=c("Beta", "M"), arraytype=c("EPIC",
   if(class(CpGs) %in% c("matrix", "GenomicRatioSet")){
     if(class(CpGs) == "matrix"){
       if(arraytype=="450K"){grset <- makeGenomicRatioSetFromMatrix(CpGs, array = "IlluminaHumanMethylation450k", annotation = "ilmn12.hg19", mergeManifest = TRUE, what = what)}
-      if(arraytype=="EPIC"){grset <- makeGenomicRatioSetFromMatrix(CpGs, array = "IlluminaHumanMethylationEPIC", annotation = "ilm10b2.hg19", mergeManifest = TRUE, what = what)}
+      if(arraytype=="EPIC"){grset <- makeGenomicRatioSetFromMatrix(CpGs, array = "IlluminaHumanMethylationEPIC", annotation = "ilm10b4.hg19", mergeManifest = TRUE, what = what)}
     }
     CpGs <- getBeta(grset)
     RSanno <- getAnnotation(grset)
