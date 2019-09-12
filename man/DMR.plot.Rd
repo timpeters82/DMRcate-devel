@@ -6,14 +6,12 @@
 }
 \description{
   Plots an individual DMR (in context of possibly other DMRs) as found by \code{dmrcate}. 
-  Heatmap and mean methylation plots are shown as well as genomic coordinates 
-  and proximal coding regions.
+  Heatmaps are shown as well as proximal coding regions, smoothed group means and chromosome ideogram.
 }
 \usage{
 DMR.plot(ranges, dmr, CpGs, what=c("Beta", "M"), 
          arraytype=c("EPIC", "450K"), phen.col, 
-         genome = c("hg19", "hg38", "mm10"), 
-         samps = NULL, ...)
+         genome = c("hg19", "hg38", "mm10"), ...)
 }
 \arguments{
   \item{ranges}{
@@ -32,17 +30,16 @@ DMR.plot(ranges, dmr, CpGs, what=c("Beta", "M"),
     
     - A GenomicRatioSet, annotated with the appropriate array and data types
     
-    - A GRanges object describing individual CpGs to be plotted, containing
-      methylated reads and total coverage for each sample. Please see the 
-      worked example in the vignette for the correct structure of this object.
+    - A BSseq object containing per-CpG methylation and coverage counts for
+    the samples to be plotted
   }
   \item{what}{
     Does \code{CpGs} (if a matrix) contain Beta or M-values? Not needed
-    if object is a GenomicRatioSet or GRanges object.
+    if object is a GenomicRatioSet or BSseq object.
   }
   \item{arraytype}{
     Is \code{CpGs} (if a matrix) sourced from EPIC or 450K data? Not needed
-    if object is a GenomicRatioSet or GRanges object.
+    if object is a GenomicRatioSet or BSseq object.
   }
   \item{phen.col}{
     Vector of colors denoting phenotypes of \emph{all} samples described in
@@ -51,10 +48,6 @@ DMR.plot(ranges, dmr, CpGs, what=c("Beta", "M"),
   \item{genome}{
     Reference genome for annotating DMRs. Can be one of \code{"hg19"},
     \code{"hg38"} or \code{"mm10"}
-  }
-  \item{samps}{
-    Vector of samples to be plotted, corresponding to indices of \code{phen.col}. 
-    Default is all samples plotted.
   }
   \item{\dots}{
     Extra arguments passed to \code{Gviz:::plotTracks()}.
@@ -67,7 +60,7 @@ DMR.plot(ranges, dmr, CpGs, what=c("Beta", "M"),
   Aaron Statham <a.statham@garvan.org.au>, Tim J. Peters <t.peters@garvan.org.au>
 }
 \examples{
-\dontrun{
+
 data(dmrcatedata)
 myMs <- logit2(myBetas)
 myMs.noSNPs <- rmSNPandCH(myMs, dist=2, mafcut=0.05)
@@ -80,8 +73,7 @@ dmrcoutput <- dmrcate(myannotation, lambda=1000, C=2)
 results.ranges <- extractRanges(dmrcoutput, genome = "hg19")
 groups <- c(Tumour="magenta", Normal="forestgreen")
 cols <- groups[as.character(type)]
-samps <- c(1:6, 38+(1:6))
-DMR.plot(ranges=results.ranges, dmr=1, CpGs=myBetas, what="Beta", arraytype = "450K", 
-         phen.col=cols, genome="hg19", samps=samps)
-}
+DMR.plot(ranges=results.ranges, dmr=1, CpGs=myBetas[,c(1:6, 38+(1:6))], what="Beta", arraytype = "450K", 
+         phen.col=cols[c(1:6, 38+(1:6))], genome="hg19")
+
 }

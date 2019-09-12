@@ -1,3 +1,17 @@
+CHANGES IN DMRcate VERSION 2.0.0
+- Full utility for WGBS and RRBS assays implemented using sequencing.annotate(): Users can either input a) A BSseq object and model matrix from edgeR::modelMatrixMeth, or b) Output from DSS::DMLtest() or DSS::DMLtest.multiFactor(),
+- Major reconstruction of class types in S4: a S3 "annot" object is now a S4 "CpGannotated" object and a S3 "dmrcate.output" object has had its "input" and "pcutoff" slots removed, and "results" are now represented in an S4
+- Improved DMR.plot() using more detailed transcript annotation from hg19, hg38 and mm10 GeneRegionTracks from updated DMRcatedata, as well as smoothed group means (group specified via "phen.col" argument). For bisulfite sequencing assays, the CpGs argument now takes a BSseq object instead of a GRanges object
+- Extra DMR-level summary statistics including Fisher's multiple comparison test and harmonic mean of individual CpG FDRs
+- Addition of the changeFDR() utility function that allows the re-thresholding of a "CpGannotated" object without fitting the entire model again
+- Simplification of the rmSNPandCH() function
+- Overlapping.promoters in extractRanges() are now overlapping.genes
+- All vignette examples use ExperimentHub data
+- Removal of the "p.adjust.method" argument to dmrcate() - it is confusing since thresholding should be performed at the (cpg|sequencing).annotate level
+- Removal of the "samps" argument to DMR.plot() - it is redundant and usage can be specified by subsetting "CpGs" and "phen.col"
+- Multicore processing removed since WGBS DMRs should be able to be produced in serial in < 1 hour
+
+
 CHANGES IN DMRcate VERSION 1.12.1
 - Peak closing sped up with Segment.R
 

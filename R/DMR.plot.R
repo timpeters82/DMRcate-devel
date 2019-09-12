@@ -1,79 +1,93 @@
-DMR.plot <- function(ranges, dmr, CpGs, what=c("Beta", "M"), arraytype=c("EPIC", "450K"), phen.col, genome = c("hg19", "hg38", "mm10"), samps = NULL, ...)
-
+DMR.plot <- function (ranges, dmr, CpGs, what = c("Beta", "M"), arraytype = c("EPIC", 
+                                                                  "450K"), phen.col, genome = c("hg19", "hg38", "mm10"), ...) 
 {
-  env <- new.env(parent=emptyenv())
-  data(dmrcatedata, envir=env)
+  env <- new.env(parent = emptyenv())
+  data(dmrcatedata, envir = env)
   what <- match.arg(what)
   arraytype <- match.arg(arraytype)
   genome <- match.arg(genome)
-  stopifnot(class(CpGs) %in% c("matrix", "GRanges", "GenomicRatioSet"))
+  stopifnot(class(CpGs) %in% c("matrix", "BSseq", "GenomicRatioSet"))
   stopifnot(dmr %in% 1:length(ranges))
-  data(dmrcatedata)
-  if(is.null(samps)){samps=1:length(phen.col)}
   group <- unique(names(phen.col))
-  if(class(CpGs) %in% c("matrix", "GenomicRatioSet")){
-    if(class(CpGs) == "matrix"){
-      if(arraytype=="450K"){grset <- makeGenomicRatioSetFromMatrix(CpGs, array = "IlluminaHumanMethylation450k", annotation = "ilmn12.hg19", mergeManifest = TRUE, what = what)}
-      if(arraytype=="EPIC"){grset <- makeGenomicRatioSetFromMatrix(CpGs, array = "IlluminaHumanMethylationEPIC", annotation = "ilm10b4.hg19", mergeManifest = TRUE, what = what)}
+  if (is(CpGs, "matrix") | is(CpGs, "GenomicRatioSet")) {
+    if (is(CpGs, "matrix")) {
+      if (arraytype == "450K") {
+        grset <- makeGenomicRatioSetFromMatrix(CpGs, 
+                                               array = "IlluminaHumanMethylation450k", annotation = "ilmn12.hg19", 
+                                               mergeManifest = TRUE, what = what)
+      }
+      if (arraytype == "EPIC") {
+        grset <- makeGenomicRatioSetFromMatrix(CpGs, 
+                                               array = "IlluminaHumanMethylationEPIC", annotation = "ilm10b4.hg19", 
+                                               mergeManifest = TRUE, what = what)
+      }
+    }
+    else {
+      grset <- CpGs
     }
     CpGs <- getBeta(grset)
     RSanno <- getAnnotation(grset)
-    RSanno <- RSanno[order(RSanno$chr, RSanno$pos),]
-    CpGs <- CpGs[rownames(RSanno),]
-    colnames(CpGs) <- paste(colnames(CpGs), ".C", sep='')
-    cov <- matrix(1, nrow(CpGs), ncol(CpGs), dimnames = list(rownames(CpGs), sub(".C$", ".cov", colnames(CpGs))))
-    cpgs.ranges <- GRanges(RSanno$chr, IRanges(RSanno$pos, RSanno$pos))
-    dummy <- matrix(0, nrow=nrow(CpGs), ncol=2*ncol(CpGs))
-    dummy[,seq(1, 2*ncol(CpGs), 2)] <- CpGs
-    dummy[,seq(2, 2*ncol(CpGs), 2)] <- cov
-    colnames(dummy)[seq(2, 2*ncol(CpGs), 2)] <- colnames(cov)
-    colnames(dummy)[seq(1, 2*ncol(CpGs), 2)] <- colnames(CpGs)
-    values(cpgs.ranges) <- dummy 
-  } else {
-    stopifnot(length(colnames(values(CpGs)))/2 == length(phen.col))
-    if(!all(gsub(".*\\.", "", colnames(values(CpGs))) == rep(c("C", "cov"), length(phen.col)))){
-        stop("Error: Column names of values(ranges) might not be in the correct format. Must be c('<sample1>.C', '<sample1>.cov', '<sample2>.C', '<sample2>.cov'...) and so on for all samples.")
-      }
+    RSanno <- RSanno[order(RSanno$chr, RSanno$pos), ]
+    CpGs <- CpGs[rownames(RSanno), ]
+    cpgs.ranges <- GRanges(RSanno$chr, IRanges(RSanno$pos, 
+                                               RSanno$pos))
+    values(cpgs.ranges) <- CpGs
+    isbsseq <- FALSE
+  }
+  else {
+    if (any(width(CpGs) > 1)) {
+      stop("Error: all ranges in the BSseq object must be single nucleotides with width 1.")
+    }
+    if (is.null(rownames(colData(CpGs)))) {
+      stop("Error: BSseq object must be annotated with colData with sample IDs as rownames of the data.frame.")
+    }
+    stopifnot(ncol(CpGs) == length(phen.col))
     cpgs.ranges <- CpGs
+    isbsseq <- TRUE
   }
   ranges$ID <- paste0("DMR_", 1:length(ranges))
-  ranges.reduce <- reduce(ranges+5000)
-  dmrs.inplot <- ranges[ranges %over% ranges.reduce[subjectHits(findOverlaps(ranges[dmr], ranges.reduce))]]
+  ranges.reduce <- reduce(ranges + 5000)
+  dmrs.inplot <- ranges[ranges %over% ranges.reduce[subjectHits(findOverlaps(ranges[dmr], 
+                                                                             ranges.reduce))]]
   ranges.inplot <- ranges.reduce[ranges.reduce %over% dmrs.inplot]
   cpgs.ranges <- subsetByOverlaps(cpgs.ranges, ranges.inplot)
-  methRatios <- as.data.frame(values(cpgs.ranges)[,grep("C$", colnames(values(cpgs.ranges)))])/
-                as.data.frame(values(cpgs.ranges)[,grep("cov$", colnames(values(cpgs.ranges)))])
-  methRatios <- GRanges(cpgs.ranges, mcols=methRatios)
-  mcols(methRatios) <- mcols(methRatios)[samps]
-  names(mcols(methRatios)) <- gsub("mcols.", "", gsub("*.C$", "", names(mcols(methRatios))))
-  phen.col <- phen.col[samps]
-  
- 
-  dt.group <- lapply(unique(names(phen.col)), function(i)
-        DataTrack(methRatios[,names(phen.col) %in% i], name=i, background.title=phen.col[i],
-                  type="heatmap", showSampleNames=TRUE, ylim=c(0, 1), genome=genome,
-                  gradient=c("blue", "white", "red")))
- 
-  dt.group <- c(dt.group, list(DataTrack(methRatios, groups=names(phen.col), type="b",
-                                             aggregateGroups=TRUE, col=phen.col[sort(group)], ylim=c(0, 1), name="Group means")))
-     
-  switch(genome, 
-         hg19={tx=env$tx.hg19},
-         hg38={tx=env$tx.hg38},
-         mm10={tx=env$tx.mm10}
-  )
-  extras <- list(AnnotationTrack(dmrs.inplot, name="DMRs", showFeatureId=TRUE, col=NULL, fill="purple", id=dmrs.inplot$ID, 
-                                 fontcolor="black"))
-  #extras <- endoapply(extras, function(x) {
-  #  chromosome(x) <- as.character(seqnames(methRatios[dmr]))
-  #  x
-  #})
-  values(cpgs.ranges) <- NULL
-    basetracks <- list(IdeogramTrack(genome = genome, chromosome = as.character(seqnames(ranges.inplot))),
-                       GenomeAxisTrack(),
-                       GeneRegionTrack(subsetByOverlaps(tx, ranges.inplot), name = "Gene", showId=TRUE, geneSymbol=TRUE, symbol = subsetByOverlaps(tx, ranges.inplot)$gene_name, col=NULL, fill="lightblue", transcriptAnnotation = "symbol", shape="arrow"),
-                       AnnotationTrack(cpgs.ranges, name="CpGs", fill="green", col=NULL, stacking="dense"))
-    plotTracks(c(basetracks, extras, dt.group), from=start(ranges.inplot), to=end(ranges.inplot), ...)
+  if (isbsseq) {
+    methRatios <- GRanges(seqnames(cpgs.ranges), ranges(cpgs.ranges), 
+                          mcols = as.matrix(getCoverage(cpgs.ranges, type = "M"))/as.matrix(getCoverage(cpgs.ranges, 
+                                                                                                        type = "Cov")))
   }
-  
-  
+  else {
+    methRatios <- cpgs.ranges
+  }
+  values(methRatios) <- as.matrix(values(methRatios))
+  colnames(values(methRatios)) <- gsub("mcols.", "", colnames(values(methRatios)))
+  dt.group <- lapply(unique(names(phen.col)), function(i) DataTrack(methRatios[, 
+                                                                               names(phen.col) %in% i], name = i, background.title = phen.col[i], 
+                                                                    type = "heatmap", showSampleNames = TRUE, ylim = c(0, 
+                                                                                                                       1), genome = genome, gradient = c("blue", "white", 
+                                                                                                                                                         "red")))
+  dt.group <- c(dt.group, list(DataTrack(methRatios, groups = names(phen.col), 
+                                         type = "smooth", aggregateGroups = TRUE, 
+                                         aggregation = function (x) mean(x, na.rm=TRUE),
+                                         col = phen.col[sort(group)], 
+                                         ylim = c(0, 1), name = "Smoothed\n group means", na.rm=TRUE)))
+  switch(genome, hg19 = {
+    grt = env$hg19.grt
+  }, hg38 = {
+    grt = env$hg38.grt
+  }, mm10 = {
+    grt = env$mm10.grt
+  })
+  chromosome(grt) <- as.character(seqnames(methRatios)[1])
+  extras <- list(AnnotationTrack(dmrs.inplot, name = "DMRs", 
+                                 showFeatureId = TRUE, col = NULL, fill = "purple", id = dmrs.inplot$ID, 
+                                 fontcolor = "black"))
+  values(cpgs.ranges) <- NULL
+  basetracks <- list(IdeogramTrack(genome = genome, chromosome = as.character(seqnames(ranges.inplot))), 
+                     GenomeAxisTrack(), grt, AnnotationTrack(GRanges(seqnames(cpgs.ranges), 
+                                                                     ranges(cpgs.ranges)), name = "CpGs", fill = "green", 
+                                                             col = NULL, stacking = "dense"))
+  suppressWarnings(plotTracks(c(basetracks, extras, dt.group), 
+                              from = start(ranges.inplot), to = end(ranges.inplot), 
+                              ...))
+}

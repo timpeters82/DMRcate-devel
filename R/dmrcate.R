@@ -2,17 +2,15 @@ dmrcate <-
   function (object,
             lambda = 1000,
             C = NULL,
-            p.adjust.method = "BH",
             pcutoff = "fdr",
             consec = FALSE,
             conseclambda = 10,
             betacutoff = NULL,
-            min.cpgs = 2,
-            mc.cores = 1
-  )
+            min.cpgs = 2
+)
   {
     ## Arguments
-    stopifnot(is(object, "annot"))
+    stopifnot(is(object, "CpGannotated"))
     stopifnot(lambda >= 1)
     stopifnot(pcutoff == "fdr" | (0 <= pcutoff & pcutoff <= 1))
     stopifnot(C >= 0.2)
@@ -22,26 +20,22 @@ dmrcate <-
 
     ## Modified 'object'
     object <-
-      data.frame(ID = object$ID,
-                 weights = abs(object$stat),
-                 CHR = as.character(object$CHR),
-                 pos = object$pos,
-                 betafc = object$betafc,
-                 indfdr = object$indfdr,
-                 is.sig = object$is.sig
+      data.frame(ID = object@ID,
+                 weights = abs(object@stat),
+                 CHR = as.character(object@CHR),
+                 pos = object@pos,
+                 diff = object@diff,
+                 indfdr = object@ind.fdr,
+                 is.sig = object@is.sig
                  )
     # Order by position
     object <- object[order(object$CHR, object$pos),]
 
     # Automatic bandwidth specification
     if (is.null(C) & !consec) {
-      if (nrow(object) < 900000) {
-        C = 2
-      }
-      else {
-        C = 50
-      }
+      C = 2
     }
+      
 
     ## Handle 'consec' case
     if (consec)
@@ -59,19 +53,18 @@ dmrcate <-
     lag = lambda
     chr.unique <- unique(c(as.character(object$CHR)))
     fitted <-
-      mclapply(chr.unique,
+         lapply(chr.unique,
                fitParallel,
                object = object,
                consec = consec,
                conseclambda = conseclambda,
                lambda = lambda,
-               C = C,
-               mc.cores = mc.cores
-      )
+               C = C
+    )
     object <- rbind.fill(fitted)
 
     ## FDR stuff
-    object$fdr <- p.adjust(object$raw, method = p.adjust.method)
+    object$fdr <- p.adjust(object$raw, method = "BH")
     if (pcutoff == "fdr")
       {
       nsig <- sum(object$is.sig)
@@ -159,15 +152,19 @@ dmrcate <-
       }
     # results <- region-wise stats
     fn_Stouffer <- function(x) pnorm(sum(qnorm(x))/sqrt(length(x)))
+    fn_HMFDR <- function (x) 1/mean(1/x)
+    fn_Fisher <- function (x) pchisq((sum(log(x))*-2), df=length(x)*2, lower.tail=FALSE)
     fn_max <- function(x) x[which.max(abs(x))]
     results <-
       data.frame(
         coord = coord.A,
         no.cpgs = no_cpg.A,
-        minfdr = REGIONSTAT("fdr", min),
+        min_smoothed_fdr = REGIONSTAT("fdr", min),
         Stouffer = REGIONSTAT("indfdr", fn_Stouffer),
-        maxbetafc = REGIONSTAT("betafc", fn_max),
-        meanbetafc = REGIONSTAT("betafc", mean),
+        HMFDR = REGIONSTAT("indfdr", fn_HMFDR),
+        Fisher = REGIONSTAT("indfdr", fn_Fisher),
+        maxdiff = REGIONSTAT("diff", fn_max),
+        meandiff = REGIONSTAT("diff", mean),
         row.names = seq(A),
         stringsAsFactors = FALSE
       )
@@ -176,21 +173,9 @@ dmrcate <-
     
     keep <- (results$no.cpgs >= min.cpgs)
     results <- results[keep, ]
-    if (!is.null(betacutoff))
-    {
-      keep <- (abs(results$meanbetafc) >= betacutoff)
-      results <- results[keep,]
-    }
-    o <- order(results$Stouffer, -results$no.cpgs)
+    o <- order(results$Fisher, -results$no.cpgs)
     results <- results[o,]
     message("Done!")
-
-
-    ## Output list
-    output <- NULL
-    output$input <- object
-    output$results <- results
-    output$cutoff <- pcutoff
-    class(output) <- "dmrcate.output"
-    output
+    return(new("DMResults", coord=results$coord, no.cpgs=results$no.cpgs, min_smoothed_fdr=results$min_smoothed_fdr,
+        Stouffer=results$Stouffer, HMFDR=results$HMFDR, Fisher=results$Fisher, maxdiff=results$maxdiff, meandiff=results$meandiff))
   }

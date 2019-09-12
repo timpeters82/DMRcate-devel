@@ -8,7 +8,7 @@ cpg.annotate <- function (datatype = c("array", "sequencing"), object, what = c(
   arraytype <- match.arg(arraytype)
   if (datatype == "array") {
     stopifnot(class(object) %in% c("matrix", "GenomicRatioSet"))
-    if (class(object) == "matrix") {
+    if (is(object, "matrix")) {
       if (arraytype == "450K") {
         grset <- makeGenomicRatioSetFromMatrix(object, 
                                                array = "IlluminaHumanMethylation450k", annotation = "ilmn12.hg19", 
@@ -16,7 +16,7 @@ cpg.annotate <- function (datatype = c("array", "sequencing"), object, what = c(
       }
       if (arraytype == "EPIC") {
         grset <- makeGenomicRatioSetFromMatrix(object, 
-                                               array = "IlluminaHumanMethylationEPIC", annotation = "ilm10b4.hg19", 
+                                               array = "IlluminaHumanMethylationEPIC", annotation = "ilm10b2.hg19", 
                                                mergeManifest = TRUE, what = what)
       }
     }
@@ -57,14 +57,14 @@ cpg.annotate <- function (datatype = c("array", "sequencing"), object, what = c(
       betafit <- eBayes(betafit)
       betatt <- topTable(betafit, coef = coef, number = nrow(object))
       m <- match(rownames(tt), rownames(betatt))
-      tt$betafc <- betatt$logFC[m]
+      tt$diff <- betatt$logFC[m]
       m <- match(rownames(object), rownames(tt))
       tt <- tt[m, ]
       anno <- getAnnotation(grset)
       stat <- tt$t
       annotated <- data.frame(ID = rownames(tt), stat = stat, 
-                              CHR = anno$chr, pos = anno$pos, betafc = tt$betafc, 
-                              indfdr = tt$adj.P.Val, is.sig = tt$adj.P.Val < 
+                              CHR = anno$chr, pos = anno$pos, diff = tt$diff, 
+                              ind.fdr = tt$adj.P.Val, is.sig = tt$adj.P.Val < 
                                 fdr)
     }, variability = {
       RSanno <- getAnnotation(grset)
@@ -72,7 +72,7 @@ cpg.annotate <- function (datatype = c("array", "sequencing"), object, what = c(
       weights <- apply(object, 1, var)
       weights <- weights/mean(weights)
       annotated <- data.frame(ID = rownames(object), stat = weights, 
-                              CHR = RSanno$chr, pos = RSanno$pos, betafc = rep(0, 
+                              CHR = RSanno$chr, pos = RSanno$pos, diff = rep(0, 
                                                                                nrow(object)), indfdr = rep(0, nrow(object)), 
                               is.sig = weights > quantile(weights, 0.95))
     }, ANOVA = {
@@ -97,7 +97,7 @@ cpg.annotate <- function (datatype = c("array", "sequencing"), object, what = c(
       anno <- getAnnotation(grset)
       stat <- sqrtFs
       annotated <- data.frame(ID = rownames(object), stat = stat, 
-                              CHR = anno$chr, pos = anno$pos, betafc = 0, 
+                              CHR = anno$chr, pos = anno$pos, diff = 0, 
                               indfdr = sqrtfdrs, is.sig = sqrtfdrs < fdr)
     }, diffVar = {
       stopifnot(is.matrix(design))
@@ -129,30 +129,19 @@ cpg.annotate <- function (datatype = c("array", "sequencing"), object, what = c(
       anno <- getAnnotation(grset)
       stat <- tt$t
       annotated <- data.frame(ID = rownames(tt), stat = stat, 
-                              CHR = anno$chr, pos = anno$pos, betafc = 0, 
+                              CHR = anno$chr, pos = anno$pos, diff = 0, 
                               indfdr = tt$Adj.P.Value, is.sig = tt$Adj.P.Value < 
                                 fdr)
     })
-    annotated <- annotated[order(annotated$CHR, annotated$pos), 
-                           ]
-    class(annotated) <- "annot"
-    return(annotated)
+    annotated <- annotated[order(annotated$CHR, annotated$pos),]
+    return(new("CpGannotated", ID=as.character(annotated$ID), stat=annotated$stat, CHR=as.character(annotated$CHR), 
+               pos=annotated$pos, diff=annotated$diff, ind.fdr=annotated$ind.fdr, is.sig=annotated$is.sig))
+    
   }
   if (datatype == "sequencing") {
-    if (!all(c("stat", "chr", "pos", "diff", "fdr") %in% 
-             colnames(object))) 
-      stop("Error: object does not contain all required columns, was it created by DSS::DMLtest()? Must contain colNames 'stat', 'chr', 'pos', 'diff' and 'fdr'.")
-    if (analysis.type != "differential") 
-      stop("Error: only differential analysis.type available for sequencing assays")
-    annotated <- data.frame(ID = rownames(object), stat = object$stat, 
-                            CHR = object$chr, pos = object$pos, betafc = object$diff, 
-                            indfdr = object$fdr, is.sig = object$fdr < fdr)
-    annotated <- annotated[order(annotated$CHR, annotated$pos), 
-                           ]
-    class(annotated) <- "annot"
+    stop("Sequencing mode is deprecated for cpg.annotate(). Please use sequencing.annotate().")
   }
   else {
     message("Error: datatype must be one of 'array' or 'sequencing'")
   }
-  return(annotated)
 }

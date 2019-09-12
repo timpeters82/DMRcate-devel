@@ -9,7 +9,7 @@
 \begin{document}
 \title{The \texttt{DMRcate} package user's guide}
 
-\author{Peters TJ, Buckley MJ, Statham A, Pidsley R, Clark SJ, Molloy PL}
+\author{Peters TJ}
 \maketitle
 
 \renewcommand{\abstractname}{Summary}
@@ -31,16 +31,29 @@ library(DMRcate)
 
 \section*{Illumina\textregistered Array Workflow}
 
-We now can load in the test data set of beta values. We assume at this point that normalisation and filtering out bad-quality probes via their detection \textit{p}-values have already been done. Many packages are available for these purposes, including \texttt{minfi}, \texttt{wateRmelon} and \texttt{methylumi}. M-values (logit-transform of beta) are preferable to beta values for significance testing via \texttt{limma} because of increased sensitivity, but we will retain the beta matrix for visualisation purposes later on.
+For this vignette, we will demonstrate DMRcate's array utility using data from \texttt{ExperimentHub}, namely Illumina HumanMethylationEPIC data from the data packages \texttt{FlowSorted.Blood.EPIC}. Specifically, we are interested in the methylation differences between CD4+ and CD8+ T cells.  
 
-The TCGA (Cancer Genome Atlas - colorectal cancer) 450K data in \texttt{myBetas} only comes from chromosome 20, but DMRcate will have no problem taking in the approximately half million probes as input for this pipeline either.
-
-<<loaddata>>=
-data(dmrcatedata)
-myMs <- logit2(myBetas)
+<<tcells>>=
+library(ExperimentHub)
+eh <- ExperimentHub()
+FlowSorted.Blood.EPIC <- eh[["EH1136"]]  
+tcell <- FlowSorted.Blood.EPIC[,colData(FlowSorted.Blood.EPIC)$CD4T==100 | 
+                                 colData(FlowSorted.Blood.EPIC)$CD8T==100]
 @
 
-Some of the methylation measurements on the array may be confounded by proximity to SNPs, and cross-hybridisation to other areas of the genome\cite{Pidsley, Chen}. In particular, probes that are 0, 1, or 2 nucleotides from the methylcytosine of interest show a markedly different distribution to those farther away, in healthy tissue (Figure 1). 
+Firstly we have to filter out any probes where any sample has a failed position. Then we will normalise using \texttt{minfi::preprocessFunnorm}. After this, we extract the \emph{M}-values from the GenomicRatioSet.
+
+<<detpnorm>>==
+detP <- detectionP(tcell)
+remove <- apply(detP, 1, function (x) any(x > 0.01))
+tcell <- tcell[!remove,]
+tcell <- preprocessFunnorm(tcell)
+tcellms <- getM(tcell)
+@
+
+M-values (logit-transform of beta) are preferable to beta values for significance testing via \texttt{limma} because of increased sensitivity, but we will transform this to a beta matrix for visualisation purposes later on.
+
+Some of the methylation measurements on the array may be confounded by proximity to SNPs, and cross-hybridisation to other areas of the genome\cite{Pidsley, Chena}. In particular, probes that are 0, 1, or 2 nucleotides from the methylcytosine of interest show a markedly different distribution to those farther away, in healthy tissue (Figure 1). 
 
 \begin{figure}[htbp!]
   \caption{Beta distribution of 450K probes from publically available data from blood samples of healthy individuals \cite{Heyn} by their proximity to a SNP. ``All SNP probes'' refers to the 153 113 probes listed by Illumina\textregistered\ whose values may potentially be confounded by a SNP.
@@ -49,112 +62,220 @@ Some of the methylation measurements on the array may be confounded by proximity
     \includegraphics[width=\textwidth]{heynSNP.pdf}
 \end{figure}
 
-It is with this in mind that we filter out probes 2 nucleotides or closer to a SNP that have a minor allele frequency greater than 0.05, and the approximately 63,000 \cite{Pidsley, Chen} cross-reactive probes on either 450K and/or EPIC, so as to reduce confounding. Here we use a combination of \textit{in silico} analysis from \cite{Pidsley, Chen} and Illumina\textregistered's database of approximately 150,000 potentially SNP-confounded probes, to filter these probes out. About 600 are removed from our M-matrix of approximately 10,000:
+It is with this in mind that we filter out probes 2 nucleotides or closer to a SNP that have a minor allele frequency greater than 0.05, and the approximately 63,000 \cite{Pidsley, Chena} cross-reactive probes on either 450K and/or EPIC, so as to reduce confounding. Here we use a combination of \textit{in silico} analyses from \cite{Pidsley, Chena}.  About 600 are removed from our M-matrix of approximately 10,000:
 
 <<filter>>=
-nrow(snpsall)
-nrow(myMs)
-myMs.noSNPs <- rmSNPandCH(myMs, dist=2, mafcut=0.05)
-nrow(myMs.noSNPs)
+data(dmrcatedata)
+nrow(tcellms)
+tcellms.noSNPs <- rmSNPandCH(tcellms, dist=2, mafcut=0.05)
+nrow(tcellms.noSNPs)
 @
 
-Next we want to annotate our matrix of M-values with relevant information. We also use the backbone of the \texttt{limma} pipeline for differential array analysis to get \textit{t}-statistics changes and, optionally, filter probes by their fdr-corrected \textit{p}-value.
-Here we have 38 patients with 2 tissue samples each taken from them. We want to compare within patients across tissue samples, so we set up our variables for a standard limma pipeline, and set \texttt{coef=39} in \texttt{cpg.annotate} since this corresponds to the phenotype comparison in \texttt{design}. 
+
+Here we have 6 CD8+ T cell assays, and 7 CD4+ T cell assays; we want to call DMRs between these groups. One of the CD4+ assays is a technical replicate, so we will average these two replicates like so:
+
+<<avearrays>>==
+tcell$Replicate
+tcell$Replicate[tcell$Replicate==""] <- tcell$Sample_Name[tcell$Replicate==""]
+tcellms.noSNPs <- limma::avearrays(tcellms.noSNPs, tcell$Replicate)
+tcell <- tcell[,!duplicated(tcell$Replicate)]
+@
+
+Next we want to annotate our matrix of M-values with relevant information. We also use the backbone of the \texttt{limma} pipeline for differential array analysis. We want to compare within patients across tissue samples, so we set up our variables for a standard limma pipeline, and set \texttt{coef=2} in \texttt{cpg.annotate} since this corresponds to the phenotype comparison in \texttt{design}. 
 
 \texttt{cpg.annotate()} takes either a data matrix with Illumina probe IDs, or an already prepared GenomicRatioSet from \texttt{minfi}.
 
 <<annotate>>=
-patient <- factor(sub("-.*", "", colnames(myMs)))
-type <- factor(sub(".*-", "", colnames(myMs)))
-design <- model.matrix(~patient + type) 
-myannotation <- cpg.annotate("array", myMs.noSNPs, what="M", arraytype = "450K",
-                             analysis.type="differential", design=design, coef=39)
-#Or, alternatively
-grset <- makeGenomicRatioSetFromMatrix(myMs.noSNPs, array = "IlluminaHumanMethylation450k", 
-                                       annotation = "ilmn12.hg19", mergeManifest = TRUE, 
-                                       what = "M")
-myannotation <- cpg.annotate("array", grset, analysis.type="differential", design=design, 
-                             coef=39)
-
+type <- factor(tcell$CellType)
+design <- model.matrix(~type) 
+myannotation <- cpg.annotate("array", tcellms.noSNPs, what="M", arraytype = "EPIC",
+                             analysis.type="differential", design=design, coef=2)
+myannotation
 @
 
 Now we can find our most differentially methylated regions with \texttt{dmrcate()}.
 
-For each chromosome, two smoothed estimates are computed: one weighted with \texttt{myannotation\$stat} and one not, for a null comparison. The two estimates are compared via a Satterthwaite approximation\cite{Satterthwaite}, and a significance test is calculated at all hg19 coordinates that an input probe maps to. After fdr-correction, regions are then agglomerated from groups of significant probes where the distance to the next consecutive probe is less than \texttt{lambda} nucleotides.
+For each chromosome, two smoothed estimates are computed: one weighted with per-CpG \textit{t}-statistics and one not, for a null comparison. The two estimates are compared via a Satterthwaite approximation\cite{Satterthwaite}, and a significance test is calculated at all hg19 coordinates that an input probe maps to. After fdr-correction, regions are then agglomerated from groups of post-smoothed significant probes where the distance to the next consecutive probe is less than \texttt{lambda} nucleotides.
 
 
 <<dmrcate, warning=FALSE>>=
 dmrcoutput <- dmrcate(myannotation, lambda=1000, C=2)
+dmrcoutput
 @
 
-We can convert our DMR list to a GRanges object, which uses the \texttt{genome} argument to annotate overlapping promoter regions (+/- 2000 bp from TSS).  and pass it to DMR.plot, which uses the \texttt{Gviz} package as a backend for contextualising each DMR.  We'll choose one associated with the GATA5 locus.
+We can convert our DMR list to a GRanges object, which uses the \texttt{genome} argument to annotate overlapping gene loci. 
 
 <<ranges>>=
 results.ranges <- extractRanges(dmrcoutput, genome = "hg19")
 results.ranges
 @
 
-Now we can plot a significant DMR. We use functionality from the \texttt{Gviz} package as a backend for this purpose. We will plot a DMR associated with the GATA5 locus for the first 6 tumour/normal matched pairs.
+DMRs are ranked by Fisher's multiple comparison statistic, but \texttt{Stouffer} scores and the harmonic mean of the individual component FDRs (\texttt{HMFDR}) are also given in this object. and pass it to DMR.plot, which uses the \texttt{Gviz} package as a backend for contextualising each DMR.  
+
 
 <<plotting>>=
-groups <- c(Tumour="magenta", Normal="forestgreen")
+groups <- c(CD8T="magenta", CD4T="forestgreen")
 cols <- groups[as.character(type)]
-samps <- c(1:6, 38+(1:6))
-DMR.plot(ranges=results.ranges, dmr=1, CpGs=myBetas, what="Beta", arraytype = "450K", 
-         phen.col=cols, genome="hg19", samps=samps)
+cols
+tcellbetas <- ilogit2(tcellms.noSNPs)
+colnames(tcellbetas) <- gsub("-1", "", tcell$Sample_Name)
+
+DMR.plot(ranges=results.ranges, dmr=1, CpGs=tcellbetas, what="Beta", 
+         arraytype = "EPIC", phen.col=cols, genome="hg19")
 @
 
-\section*{WGBS Workflow}
+Consonant with the expected biology, our top DMR shows the CD8+ T cells hypomethylated across parts of the CD8A locus. The two distinct hypomethylated sections have been merged because they are less than 1000 bp apart - specified by \texttt{lambda} in the call to \texttt{dmrcate()}. To call these as separate DMRs, make \texttt{lambda} smaller.
 
-WGBS is a little different. Because the data is represented binomially (that is, by the number of methylated reads followed by the total coverage for that particular CpG site) rather than the continuous distribution afforded by array intensities, we must model the differential methylation signal in a way that respects this. A popular way of doing this is via the beta-binomial distribution. We currently recommend using the method implemented in the DSS package\cite{Feng}, because it uses dispersion shrinkage via a Bayesian framework - similar to \texttt{edgeR} for RNA-Seq count data.
+\section*{Bisulfite sequencing workflow}
 
-The \texttt{CpGs} GRanges object contains simulated data for 3 Treatment vs. 3 Control samples for $10^{5}$ CpG sites, generated by WGBSSuite\cite{Rackham}. 
-<<wgbssuitecpgs>>=
-CpGs <- CpGs[1:5000]
-CpGs
+Bisulfite sequencing assays are fundamentally different to arrays, because methylation is represented as a pair of methylated and unmethylated reads per sample, instead of a single beta value. Although we could simply take the logit-proportion of methylated reads per CpG, this removes the effect of varying coverage of read depth across the genome. For example, a sampling depth of 30 methylated reads and 10 unmethylated reads is a much more precise estimate of the methylation level of a given CpG site than 3 methylated and 1 unmethylated. Hence, we take advantage of the fact that the overall effect can be expressed as an interaction between the coefficient of interest and a two-level factor representing methylated and unmethylated reads \cite{Chenb}.
+
+The example shown here will be performed on a BSseq object containing bisulfite sequencing of regulatory T cells from various tissues as part of the \texttt{tissueTreg} package\cite{Delacher}, imported using ExperimentHub. First, we will import the data:
+
+<<loadeh, message=FALSE>>=
+bis_1072 <- eh[["EH1072"]]
+bis_1072
+colnames(bis_1072)
 @
 
-Note the structure of the metadata columns for this object: samples come in column pairs, with the number of methylated reads followed by the total coverage for that CpG site. Naturally, $\langle$sample$\rangle$.cov must always be $\geq \langle$sample$\rangle$.C. This structure must be in place in order for downstream tasks such as \texttt{DMR.plot()} to be run.
-Using this structure, we can now extract the methylation and coverage counts, and prepare a \texttt{bsseq} object as we would for \texttt{DSS}, and call differentially methylated CpG sites.
+The data contains 15 samples: 3 (unmatched) replicates of mouse Tregs from fat, liver, skin and lymph, plus a group of 3 CD4+ conventional T cells (Tcon). We will annotate the BSseq object to reflect this phenotypic information:
 
-<<prepareDSS, warning=FALSE>>=
-meth <- as.data.frame(CpGs)[,c(1:2, grep(".C$", colnames(as.data.frame(CpGs))))]
-coverage <- as.data.frame(CpGs)[,c(1:2, grep(".cov$", colnames(as.data.frame(CpGs))))]
-
-treat1 <- data.frame(chr=coverage$seqnames, pos=coverage$start, 
-                     N=coverage$Treatment1.cov, X=meth$Treatment1.C)
-
-treat2 <- data.frame(chr=coverage$seqnames, pos=coverage$start, 
-                     N=coverage$Treatment2.cov, X=meth$Treatment2.C)
-
-treat3 <- data.frame(chr=coverage$seqnames, pos=coverage$start, 
-                     N=coverage$Treatment3.cov, X=meth$Treatment3.C)
-
-ctrl1 <- data.frame(chr=coverage$seqnames, pos=coverage$start, 
-                     N=coverage$Control1.cov, X=meth$Control1.C)
-
-ctrl2 <- data.frame(chr=coverage$seqnames, pos=coverage$start, 
-                     N=coverage$Control2.cov, X=meth$Control2.C)
-
-ctrl3 <- data.frame(chr=coverage$seqnames, pos=coverage$start, 
-                     N=coverage$Control3.cov, X=meth$Control3.C)
-
-samples <- list(treat1, treat2, treat3, ctrl1, ctrl2, ctrl3)
-sampnames <- sub("\\..*", "", colnames(meth))[-c(1:2)]
-obj_bsseq <- makeBSseqData(samples, sampnames)
-DSSres <- DMLtest(obj_bsseq, group1=sampnames[1:3], group2=sampnames[4:6], smoothing=FALSE) 
+<<bisphen>>=
+pData(bis_1072) <- data.frame(replicate=gsub(".*-", "", colnames(bis_1072)),
+                              tissue=substr(colnames(bis_1072), 1, 
+                                            nchar(colnames(bis_1072))-3), 
+                              row.names=colnames(bis_1072))
+colData(bis_1072)$tissue <- gsub("-", "_", colData(bis_1072)$tissue)
+as.data.frame(colData(bis_1072))
 @
 
-We can now enter \texttt{DSSres} into the \texttt{DMRcate} workflow. Because CpGs are much closer together than they are when represented by Illumina arrays, we will shrink the kernel size by increasing \texttt{C}. We will also run this in serial (\texttt{mc.cores=1}). If you want to run \texttt{dmrcate()} in parallel (1 chromosome per core), please check your processor specifications by running \texttt{detectCores()}.
+For standardisation purposes (and for \texttt{DMR.plot} to recognise the genome) we will change the chromosome naming convention to UCSC:
 
-<<wgbsDMRcate, warning=FALSE>>=
-wgbsannot <- cpg.annotate("sequencing", DSSres)
-wgbs.DMRs <- dmrcate(wgbsannot, lambda = 1000, C = 50, pcutoff = 0.05, mc.cores = 1)
-wgbs.ranges <- extractRanges(wgbs.DMRs, genome = "hg19")
-groups <- c(Treatment="darkorange", Control="blue")
-cols <- groups[sub("[0-9]", "", sampnames)]
-DMR.plot(ranges=wgbs.ranges, dmr=3, CpGs=CpGs, phen.col=cols, genome="hg19")
+<<changeseqlevs>>=
+bis_1072 <- renameSeqlevels(bis_1072, mapSeqlevels(seqlevels(bis_1072), "UCSC"))
 @
+
+For demonstration purposes, we will retain CpGs on chromosome 2 only:
+
+<<chr2filter>>=
+bis_1072 <- bis_1072[seqnames(bis_1072)=="chr2",]
+bis_1072
+@
+
+Now we can prepare the model to be fit for \texttt{sequencing.annotate()}. The arguments are equivalent to \texttt{cpg.annotate()} but for a couple of exceptions: 
+\begin{itemize}
+  \item There is an extra argument \texttt{all.cov} giving an option whether to retain only CpGs where \textit{all} samples have non-zero coverage, or whether to retain CpGs with only partial sample representation.
+  \item The design matrix should be constructed to reflect the 2-factor structure of methylated and unmethylated reads. Fortunately, \texttt{edgeR::modelMatrixMeth()} can take a regular design matrix and transform is into the appropriate structure ready for model fitting. 
+\end{itemize}
+
+<<bsdesign, message=FALSE>>=
+library(limma)
+tissue <- factor(pData(bis_1072)$tissue)
+tissue <- relevel(tissue, "Liver_Treg")
+
+#Regular matrix design
+design <- model.matrix(~tissue)
+colnames(design) <- gsub("tissue|\\(|\\)", "", colnames(design))
+rownames(design) <- colnames(bis_1072)
+design
+
+#Methylation matrix design
+methdesign <- edgeR::modelMatrixMeth(design)
+methdesign
+@
+
+Just like for \texttt{cpg.annotate()}, we can specify a contrast matrix to find our comparisons of interest.
+
+<<fitBSseq>>=
+cont.mat <- makeContrasts(treg_vs_tcon=Lymph_N_Treg-Lymph_N_Tcon,
+                          fat_vs_ln=Fat_Treg-Lymph_N_Treg,
+                          skin_vs_ln=Skin_Treg-Lymph_N_Treg,
+                          fat_vs_skin=Fat_Treg-Skin_Treg,
+                          levels=methdesign)
+cont.mat
+@
+
+Say we want to find DMRs between the regulatory and conventional T cells from the lymph node. First we would fit the model, where \texttt{sequencing.annotate()} transforms counts into log2CPMs (via \texttt{limma::voom()}) and fits \texttt{limma} under the hood to generate per-CpG \textit{t}-statistics, indexing the FDR at 0.05: 
+
+<<sequencingannotate>>=
+seq_annot <- sequencing.annotate(bis_1072, methdesign, all.cov = TRUE, 
+                                   contrasts = TRUE, cont.matrix = cont.mat, 
+                                   coef = "treg_vs_tcon", fdr=0.05)
+seq_annot
+@
+
+And then, just like before, we can call DMRs with \texttt{dmrcate()}:
+
+<<seqdmrcate>>=
+dmrcate.res <- dmrcate(seq_annot, C=2, min.cpgs = 5)
+dmrcate.res
+treg_vs_tcon.ranges <- extractRanges(dmrcate.res, genome="mm10")
+treg_vs_tcon.ranges
+@
+
+Looks like the top DMR is associated with the \textit{Tank} locus and hypomethylated in the Treg cells (since \texttt{meandiff < 0}). We can plot it like so:
+
+<<seqDMRplot1>>=
+cols <- as.character(plyr::mapvalues(tissue, unique(tissue), 
+                                     c("darkorange", "maroon", "blue", 
+                                       "black", "magenta")))
+names(cols) <- tissue
+
+DMR.plot(treg_vs_tcon.ranges, dmr = 1, 
+         CpGs=bis_1072[,tissue %in% c("Lymph_N_Tcon", "Lymph_N_Treg")], 
+         phen.col = cols[tissue %in% c("Lymph_N_Tcon", "Lymph_N_Treg")], 
+         genome="mm10")
+@
+
+Now, let's find DMRs between fat and skin Tregs. 
+
+<<fatskin>>=
+seq_annot <- sequencing.annotate(bis_1072, methdesign, all.cov = TRUE, 
+                                   contrasts = TRUE, cont.matrix = cont.mat, 
+                                   coef = "fat_vs_skin", fdr=0.05)
+@
+
+Because this comparison is a bit more subtle, there are no significantly differential CpGs at this threshold. So we can use \texttt{changeFDR()} to relax the FDR to 0.25, taking into account that there is an increased risk of false positives.
+
+<<redefinethresh>>==
+seq_annot <- changeFDR(seq_annot, 0.25)
+@
+
+
+<<dmrsfatskin>>=
+dmrcate.res <- dmrcate(seq_annot, C=2, min.cpgs = 5)
+fat_vs_skin.ranges <- extractRanges(dmrcate.res, genome="mm10")
+@
+
+Now let's plot the top DMR with not only fat and skin, but with all samples:
+
+<<seqDMRplot2>>=
+cols
+DMR.plot(fat_vs_skin.ranges, dmr = 1, CpGs=bis_1072, phen.col = cols, genome="mm10")
+@
+
+Here we can see the methylation of skin cells over this section of Itga4 is hypermethylated not only relative to fat, but to the other tissues as well.
+
+As an alternative to \texttt{limma}, there is also the option of taking CpG-level differential statistics using \texttt{DSS::DMLtest()} or \texttt{DSS::DMLtest.multiFactor()}. There is no need to pass arguments such as \texttt{design}, \texttt{coef}, etc. to \texttt{sequencing.annotate()} in this case since we do this outside of the function. \texttt{fdr}, however, must be specified. For example:
+
+<<DSS, message=FALSE>>=
+library(DSS)
+DMLfit <- DMLfit.multiFactor(bis_1072, design=data.frame(tissue=tissue), formula=~tissue)
+DSS_treg.vs.tcon <- DMLtest.multiFactor(DMLfit, Contrast=matrix(c(0, 0, -1, 1, 0)))
+#Make sure to filter out all sites where the test statistic is NA
+DSS_treg.vs.tcon <- DSS_treg.vs.tcon[!is.na(DSS_treg.vs.tcon$stat),]
+
+seq_annot <- sequencing.annotate(obj=DSS_treg.vs.tcon, fdr=0.05)
+seq_annot
+
+dmrcate.res <- dmrcate(seq_annot, C=2, min.cpgs = 5)
+DSS.treg_vs_tcon.ranges <- extractRanges(dmrcate.res, genome="mm10")
+
+findOverlaps(treg_vs_tcon.ranges, DSS.treg_vs_tcon.ranges)
+@
+
+All of the 31 DMRs found using results from \texttt{limma} are also found using \texttt{DSS::DMLtest.multiFactor()}, with an extra 27 DMRs found by the latter at the same FDR. This suggests that DMLtest.multiFactor() is a little more permissive in calling differential methylation.
+
 
 <<sessionInfo>>=
 sessionInfo()
@@ -162,7 +283,7 @@ sessionInfo()
 
 
 
-\begin{thebibliography}{9}
+\begin{thebibliography}{99}
 
 \bibitem{Pidsley}
   Pidsley R, Zotenko E, Peters TJ, Lawrence MG, Risbridger GP, Molloy P, 
@@ -170,7 +291,7 @@ sessionInfo()
   the Illumina MethylationEPIC BeadChip microarray for whole-genome DNA 
   methylation profiling. \emph{Genome Biology}. 2016 17(1), 208.
 
-\bibitem{Chen}
+\bibitem{Chena}
   Chen YA, Lemire M, Choufani S, Butcher DT, Grafodatskaya D, Zanke BW, Gallinger S, Hudson TJ, Weksberg R. 
   Discovery of cross-reactive probes and polymorphic CpGs in the Illumina Infinium HumanMethylation450 microarray. 
   \emph{Epigenetics}. 2013 Jan 11;8(2).
@@ -185,15 +306,25 @@ sessionInfo()
   An Approximate Distribution of Estimates of Variance Components., 
   \emph{Biometrics Bulletin}. 1946 \textbf{2}: 110-114
   
+\bibitem{Chenb}  
+  Chen Y, Pal B, Visvader JE, Smyth GK. 
+  Differential methylation analysis of reduced representation bisulfite sequencing experiments using edgeR. 
+  \emph{F1000Research}. 2017 \textbf{6}, 2055.
+  
+\bibitem{Delacher}
+  Delacher M, Imbusch CD, Weichenhan D, Breiling A, Hotz-Wagenblatt A, Trager U, ... Feuerer M. (2017). 
+  Genome-wide DNA-methylation landscape defines specialization of regulatory T cells in tissues. 
+  \emph{Nature Immunology}. 2017 \textbf{18}(10), 1160-1172. 
+  
+
 \bibitem{Feng}
   Feng H, Conneely KN, Wu H.
   A Bayesian hierarchical model to detect differentially methylated loci from single nucleotide resolution sequencing data. 
   \emph{Nucleic Acids Research}. 2014 \textbf{42}(8), e69. 
   
-\bibitem{Rackham}
-  Rackham, OJL, Dellaportas P, Petretto E, Bottolo, L. 
-  WGBSSuite: Simulating Whole Genome Bisulphite Sequencing data and benchmarking differential DNA methylation analysis tools. 
-  \emph{Bioinformatics} 2015. (Oxford, England), (March).
+\bibitem{Park}
+  Park Y, and Wu H. Differential methylation analysis for BS-seq data under general experimental design. 
+  \emph{Bioinformatics}. 2016 \textbf{32}(10), 1446-1453. 
+  
 \end{thebibliography}
-
 \end{document}

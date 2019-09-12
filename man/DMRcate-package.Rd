@@ -3,13 +3,13 @@
 \alias{DMRcate}
 \docType{package}
 \title{
-DMR calling from bisulphite sequencing and Illumina array data
+DMR calling from bisulfite sequencing and Illumina array data
 }
 \description{
   \emph{De novo} identification and extraction of differentially
-  methylated regions (DMRs) in the human genome using array and sequencing
+  methylated regions (DMRs) in the human genome using Illumin array and bisulfite sequencing
   data. \code{DMRcate} extracts and annotates differentially methylated regions
-  (DMRs) using an array-bias corrected smoothed estimate. Functions are
+  (DMRs) using a kernel-smoothed estimate. Functions are
   provided for filtering probes possibly confounded by SNPs and
   cross-hybridisation. Includes GRanges generation and plotting functions.
 }
@@ -33,6 +33,5 @@ dmrcoutput <- dmrcate(myannotation, lambda=1000, C=2)
 results.ranges <- extractRanges(dmrcoutput, genome = "hg19")
 groups <- c(Tumour="magenta", Normal="forestgreen")
 cols <- groups[as.character(type)]
-samps <- c(1:6, 38+(1:6))
-DMR.plot(ranges=results.ranges, dmr=1, CpGs=myBetas, phen.col=cols, genome="hg19", samps=samps)
+DMR.plot(ranges=results.ranges, dmr=1, CpGs=myBetas, phen.col=cols, genome="hg19")
 }

@@ -70,9 +70,8 @@ rmSNPandCH(object, dist = 2, mafcut = 0.05, and = TRUE, rmcrosshyb = TRUE, rmXY=
   Tim J. Peters <t.peters@garvan.org.au>
 }
 \examples{
-\dontrun{
 data(dmrcatedata)
 myMs <- logit2(myBetas)
 myMs.noSNPs <- rmSNPandCH(myMs, dist=2, mafcut=0.05)
-}
+
 }

@@ -4,21 +4,25 @@ import(limma)
 import(DMRcatedata)
 import(Gviz)
 import(GenomicRanges)
-import(parallel)
+import(GenomeInfoDb)
 import(minfi)
+import(bsseq)
 import(DSS)
 import(IRanges)
 import(missMethyl)
-importFrom("plyr",rbind.fill)
-importFrom("graphics",plot)
-importFrom("S4Vectors",subjectHits)
-importFrom("stats", "approx", "p.adjust", "pchisq", "pnorm", "qnorm")
-importFrom("utils", "data")
+import(SummarizedExperiment)
+importFrom("plyr", rbind.fill)
+importFrom("graphics", plot)
+importFrom("S4Vectors", subjectHits)
+importFrom("stats", approx, p.adjust, pchisq, pnorm, qnorm)
+importFrom("edgeR", modelMatrixMeth)
+importFrom("utils", data)
 export(dmrcate)
 exportMethods(
 	cpg.annotate, 
+	sequencing.annotate,
 	rmSNPandCH, 
 	DMR.plot,
-	extractRanges
+	extractRanges,
+	changeFDR
 	)
-

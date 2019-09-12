@@ -1,15 +1,11 @@
 \name{cpg.annotate}
 \alias{cpg.annotate}
 \title{
-  Annotate CpGs with their chromosome position and test statistic
+  Annotate Illumina CpGs with their chromosome position and test statistic
 }
 \description{
-  Either:
-  - Annotate a matrix/GenomicRatioSet representing 450K or EPIC data with probe weights 
-  (depending on \code{analysis.type}) and chromosomal position, or
-  - Standardise this information from \code{DSS:::DMLtest()} to the
-    same data format.
-  
+Annotate a matrix/GenomicRatioSet representing 450K or EPIC data with probe weights and chromosomal position.
+
 }
 \usage{
 
@@ -28,9 +24,7 @@ cpg.annotate(datatype = c("array", "sequencing"), object, what=c("Beta", "M"),
     - A matrix of \emph{M}-values, with unique Illumina probe IDs as 
     rownames and unique sample IDs as column names or,
     
-    - A GenomicRatioSet, appropriately annotated or,
-    
-    - Output from \code{DSS:::DMLtest()}.
+    - A GenomicRatioSet, appropriately annotated.
   }
   \item{what}{
     Does the data matrix contain Beta or M-values? Not needed
@@ -85,22 +79,10 @@ cpg.annotate(datatype = c("array", "sequencing"), object, what=c("Beta", "M"),
   }
 }
 \value{
-  An object of class "annot", for passing to \code{dmrcate}, containing
-  the vectors:
-  \itemize{
-    \item \code{ID}: Illumina probe ID or row number
-    \item \code{stat}: \emph{t}-, Wald or \emph{F}-statistics between phenotypes for each CpG
-    \item \code{CHR}: Chromosome which the CpG maps to
-    \item \code{pos}: Genomic coordinate (on \code{CHR}) that the CpG maps to
-    \item \code{betafc}: The beta fold change according to the given design
-    \item \code{indfdr}: Individually-derived FDRs for each CpG 
-    \item \code{is.sig}: Logical denoting either significance from \code{fdr} 
-          (\code{analysis.type \%in\% c("differential", "ANOVA", "diffVar")}) 
-          or top ventile of variable probes (\code{analysis.type="variability"})
+  A \code{\link{CpGannotated-class}}.
   }
-}
 \references{
-Smyth, G. K. (2005). Limma: linear models for microarray data. In: \emph{Bioinformatics and Computational Biology Solutions using R and Bioconductor}, R. Gentleman, V. Carey, S. Dudoit, R. Irizarry, W. Huber (eds.), Springer, New York, pages 397-420.
+Ritchie, M. E., Phipson, B., Wu, D., Hu, Y., Law, C. W., Shi, W., & Smyth, G. K. (2015). limma powers differential expression analyses for RNA-sequencing and microarray studies. \emph{Nucleic Acids Research}, \bold{43}(7), e47. 
 
 Feng, H., Conneely, K. N., & Wu, H. (2014). A Bayesian hierarchical model to detect differentially methylated loci from single nucleotide resolution sequencing data. \emph{Nucleic Acids Research}, \bold{42}(8), e69. 
 
@@ -113,7 +95,6 @@ Peters T.J., Buckley M.J., Statham, A., Pidsley R., Samaras K., Lord R.V., Clark
   Tim J. Peters <t.peters@garvan.org.au>
 }
 \examples{
-\dontrun{
 data(dmrcatedata)
 myMs <- logit2(myBetas)
 myMs.noSNPs <- rmSNPandCH(myMs, dist=2, mafcut=0.05)
@@ -122,7 +103,6 @@ type <- factor(sub(".*-", "", colnames(myMs)))
 design <- model.matrix(~patient + type) 
 myannotation <- cpg.annotate("array", myMs.noSNPs, what="M", arraytype = "450K",
                              analysis.type="differential", design=design, coef=39)
-}
 }
 
 
