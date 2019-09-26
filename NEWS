@@ -7,6 +7,7 @@ CHANGES IN DMRcate VERSION 2.0.0
 - Simplification of the rmSNPandCH() function
 - Overlapping.promoters in extractRanges() are now overlapping.genes
 - All vignette examples use ExperimentHub data
+- Extra data object from DMRcatedata needed for rmSNPandCH(), extractRanges() and DMR.plot() are now in ExperimentHub
 - Removal of the "p.adjust.method" argument to dmrcate() - it is confusing since thresholding should be performed at the (cpg|sequencing).annotate level
 - Removal of the "samps" argument to DMR.plot() - it is redundant and usage can be specified by subsetting "CpGs" and "phen.col"
 - Multicore processing removed since WGBS DMRs should be able to be produced in serial in < 1 hour

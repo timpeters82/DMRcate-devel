@@ -62,7 +62,7 @@ cpg.annotate(datatype = c("array", "sequencing"), object, what=c("Beta", "M"),
   }
   \item{fdr}{
     FDR cutoff (Benjamini-Hochberg) for which CpG sites are individually called
-    as significant. Used to index default thresholding in dmrcate(). \emph{Highly 
+    as significant. Used to index default thresholding in dmrcate(). \strong{Highly 
     recommended as the primary thresholding parameter for calling DMRs}. 
     Not used when \code{analysis.type = "variability"}.
   }

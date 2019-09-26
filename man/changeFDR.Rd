@@ -38,7 +38,8 @@ bis_1072 <- bis_1072[seqnames(bis_1072)=="chr2",]
 tissue <- factor(pData(bis_1072)$tissue)
 tissue <- relevel(tissue, "Liver_Treg")
 design <- model.matrix(~tissue)
-colnames(design) <- gsub("tissue|\\(|\\)", "", colnames(design))
+colnames(design) <- gsub("tissue", "", colnames(design))
+colnames(design)[1] <- "Intercept"
 rownames(design) <- colnames(bis_1072)
 methdesign <- modelMatrixMeth(design)
 cont.mat <- makeContrasts(treg_vs_tcon=Lymph_N_Treg-Lymph_N_Tcon,

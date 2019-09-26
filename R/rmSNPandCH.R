@@ -4,26 +4,26 @@ rmSNPandCH <- function(object, dist=2, mafcut=0.05, and=TRUE, rmcrosshyb=TRUE, r
   dist <- as.integer(dist)
   stopifnot(0 <= mafcut & mafcut <= 1)
   
-  env <- new.env(parent=emptyenv())
-  data(snpsall, envir=env)
+  eh <- ExperimentHub()
+  snpsall <- eh[["EH3130"]]
   
-  dist0 <- as.integer(env$snpsall$distances)
+  dist0 <- as.integer(snpsall$distances)
   distrange <- range(dist0)
   stopifnot(dist >= min(distrange) && dist <= max(distrange))
   
   test0 <- (dist0 >= -1) & (dist0 <= dist)
-  test1 <-  env$snpsall$mafs > mafcut
+  test1 <-  snpsall$mafs > mafcut
   test <- if (and) (test0 & test1) else (test0 | test1)
   
   badprobes <- snpsall$probe[test]
   if(rmcrosshyb){
-    data(crosshyb, envir=env)
-    badprobes <- union(badprobes, as.character(env$crosshyb))
+    crosshyb <- eh[["EH3129"]]
+    badprobes <- union(badprobes, as.character(crosshyb))
   }
   
   if(rmXY){
-    data(XY.probes, envir=env)
-    badprobes <- union(badprobes, env$XY.probes)
+    XY.probes <- eh[['EH3131']]
+    badprobes <- union(badprobes, XY.probes)
   }
   
   object[!(rownames(object) %in% badprobes),]

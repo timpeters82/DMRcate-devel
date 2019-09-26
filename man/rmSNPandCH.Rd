@@ -75,6 +75,11 @@ eh <- ExperimentHub()
 FlowSorted.Blood.EPIC <- eh[["EH1136"]]  
 tcell <- FlowSorted.Blood.EPIC[,colData(FlowSorted.Blood.EPIC)$CD4T==100 | 
                                  colData(FlowSorted.Blood.EPIC)$CD8T==100]
+                                 detP <- detectionP(tcell)
+detP <- detectionP(tcell)
+remove <- apply(detP, 1, function (x) any(x > 0.01))
+tcell <- tcell[!remove,]
+tcell <- preprocessFunnorm(tcell)
 tcellms <- getM(tcell)
 tcellms.noSNPs <- rmSNPandCH(tcellms, dist=2, mafcut=0.05)
 

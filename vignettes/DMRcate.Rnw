@@ -33,7 +33,7 @@ library(DMRcate)
 
 For this vignette, we will demonstrate DMRcate's array utility using data from \texttt{ExperimentHub}, namely Illumina HumanMethylationEPIC data from the data packages \texttt{FlowSorted.Blood.EPIC}. Specifically, we are interested in the methylation differences between CD4+ and CD8+ T cells.  
 
-<<tcells>>=
+<<tcells, message=FALSE>>=
 library(ExperimentHub)
 eh <- ExperimentHub()
 FlowSorted.Blood.EPIC <- eh[["EH1136"]]  
@@ -62,9 +62,9 @@ Some of the methylation measurements on the array may be confounded by proximity
     \includegraphics[width=\textwidth]{heynSNP.pdf}
 \end{figure}
 
-It is with this in mind that we filter out probes 2 nucleotides or closer to a SNP that have a minor allele frequency greater than 0.05, and the approximately 63,000 \cite{Pidsley, Chena} cross-reactive probes on either 450K and/or EPIC, so as to reduce confounding. Here we use a combination of \textit{in silico} analyses from \cite{Pidsley, Chena}.  About 600 are removed from our M-matrix of approximately 10,000:
+It is with this in mind that we filter out probes 2 nucleotides or closer to a SNP that have a minor allele frequency greater than 0.05, and the approximately 48,000 \cite{Pidsley, Chena} cross-reactive probes on either 450K and/or EPIC, so as to reduce confounding. Here we use a combination of \textit{in silico} analyses from \cite{Pidsley, Chena}.  About 60,000 are removed from our M-matrix of approximately 864,000:
 
-<<filter>>=
+<<filter, message=FALSE>>=
 nrow(tcellms)
 tcellms.noSNPs <- rmSNPandCH(tcellms, dist=2, mafcut=0.05)
 nrow(tcellms.noSNPs)
@@ -84,11 +84,14 @@ Next we want to annotate our matrix of M-values with relevant information. We al
 
 \texttt{cpg.annotate()} takes either a data matrix with Illumina probe IDs, or an already prepared GenomicRatioSet from \texttt{minfi}.
 
-<<annotate>>=
+<<annotate, message=FALSE>>=
 type <- factor(tcell$CellType)
 design <- model.matrix(~type) 
 myannotation <- cpg.annotate("array", tcellms.noSNPs, what="M", arraytype = "EPIC",
                              analysis.type="differential", design=design, coef=2)
+@
+
+<<showmyannotation>>=
 myannotation
 @
 
@@ -104,15 +107,17 @@ dmrcoutput
 
 We can convert our DMR list to a GRanges object, which uses the \texttt{genome} argument to annotate overlapping gene loci. 
 
-<<ranges>>=
+<<ranges, message=FALSE>>=
 results.ranges <- extractRanges(dmrcoutput, genome = "hg19")
 results.ranges
 @
 
-DMRs are ranked by Fisher's multiple comparison statistic, but \texttt{Stouffer} scores and the harmonic mean of the individual component FDRs (\texttt{HMFDR}) are also given in this object. and pass it to DMR.plot, which uses the \texttt{Gviz} package as a backend for contextualising each DMR.  
+DMRs are ranked by Fisher's multiple comparison statistic, but \texttt{Stouffer} scores and the harmonic mean of the individual component FDRs (\texttt{HMFDR}) are also given in this object as alternative options for ranking DMR significance.
+
+We can then pass this GRanges object to \textt{DMR.plot()}, which uses the \texttt{Gviz} package as a backend for contextualising each DMR.  
 
 
-<<plotting>>=
+<<plotting, message=FALSE>>=
 groups <- c(CD8T="magenta", CD4T="forestgreen")
 cols <- groups[as.character(type)]
 cols
@@ -127,7 +132,7 @@ Consonant with the expected biology, our top DMR shows the CD8+ T cells hypometh
 
 \section*{Bisulfite sequencing workflow}
 
-Bisulfite sequencing assays are fundamentally different to arrays, because methylation is represented as a pair of methylated and unmethylated reads per sample, instead of a single beta value. Although we could simply take the logit-proportion of methylated reads per CpG, this removes the effect of varying coverage of read depth across the genome. For example, a sampling depth of 30 methylated reads and 10 unmethylated reads is a much more precise estimate of the methylation level of a given CpG site than 3 methylated and 1 unmethylated. Hence, we take advantage of the fact that the overall effect can be expressed as an interaction between the coefficient of interest and a two-level factor representing methylated and unmethylated reads \cite{Chenb}.
+Bisulfite sequencing assays are fundamentally different to arrays, because methylation is represented as a pair of methylated and unmethylated reads per sample, instead of a single beta value. Although we could simply take the logit-proportion of methylated reads per CpG, this removes the effect of varying read depth across the genome. For example, a sampling depth of 30 methylated reads and 10 unmethylated reads is a much more precise estimate of the methylation level of a given CpG site than 3 methylated and 1 unmethylated. Hence, we take advantage of the fact that the overall effect can be expressed as an interaction between the coefficient of interest and a two-level factor representing methylated and unmethylated reads \cite{Chenb}.
 
 The example shown here will be performed on a BSseq object containing bisulfite sequencing of regulatory T cells from various tissues as part of the \texttt{tissueTreg} package\cite{Delacher}, imported using ExperimentHub. First, we will import the data:
 
@@ -137,7 +142,7 @@ bis_1072
 colnames(bis_1072)
 @
 
-The data contains 15 samples: 3 (unmatched) replicates of mouse Tregs from fat, liver, skin and lymph, plus a group of 3 CD4+ conventional T cells (Tcon). We will annotate the BSseq object to reflect this phenotypic information:
+The data contains 15 samples: 3 (unmatched) replicates of mouse Tregs from fat, liver, skin and lymph node, plus a group of 3 CD4+ conventional lymph node T cells (Tcon). We will annotate the BSseq object to reflect this phenotypic information:
 
 <<bisphen>>=
 pData(bis_1072) <- data.frame(replicate=gsub(".*-", "", colnames(bis_1072)),
@@ -174,7 +179,8 @@ tissue <- relevel(tissue, "Liver_Treg")
 
 #Regular matrix design
 design <- model.matrix(~tissue)
-colnames(design) <- gsub("tissue|\\(|\\)", "", colnames(design))
+colnames(design) <- gsub("tissue", "", colnames(design))
+colnames(design)[1] <- "Intercept"
 rownames(design) <- colnames(bis_1072)
 design
 
@@ -194,7 +200,7 @@ cont.mat <- makeContrasts(treg_vs_tcon=Lymph_N_Treg-Lymph_N_Tcon,
 cont.mat
 @
 
-Say we want to find DMRs between the regulatory and conventional T cells from the lymph node. First we would fit the model, where \texttt{sequencing.annotate()} transforms counts into log2CPMs (via \texttt{limma::voom()}) and fits \texttt{limma} under the hood to generate per-CpG \textit{t}-statistics, indexing the FDR at 0.05: 
+Say we want to find DMRs between the regulatory and conventional T cells from the lymph node. First we would fit the model, where \texttt{sequencing.annotate()} transforms counts into log2CPMs (via \texttt{limma::voom()}) and uses \texttt{limma} under the hood to generate per-CpG \textit{t}-statistics, indexing the FDR at 0.05: 
 
 <<sequencingannotate>>=
 seq_annot <- sequencing.annotate(bis_1072, methdesign, all.cov = TRUE, 
