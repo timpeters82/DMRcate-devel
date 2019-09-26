@@ -76,15 +76,25 @@ two-sample tests. \emph{ Journal of Nonparametric Statistics}. 2013
 Tim J. Peters <t.peters@garvan.org.au>, Mike J. Buckley <Mike.Buckley@csiro.au>, Tim Triche Jr. <tim.triche@usc.edu>
 }
 \examples{
-data(dmrcatedata)
-myMs <- logit2(myBetas)
-myMs.noSNPs <- rmSNPandCH(myMs, dist=2, mafcut=0.05)
-patient <- factor(sub("-.*", "", colnames(myMs)))
-type <- factor(sub(".*-", "", colnames(myMs)))
-design <- model.matrix(~patient + type) 
-myannotation <- cpg.annotate("array", myMs.noSNPs, what="M", arraytype = "450K",
-                             analysis.type="differential", design=design, coef=39, fdr=0.01)
-dmrcoutput <- dmrcate(myannotation, lambda=1000)
+library(ExperimentHub)
+eh <- ExperimentHub()
+FlowSorted.Blood.EPIC <- eh[["EH1136"]]  
+tcell <- FlowSorted.Blood.EPIC[,colData(FlowSorted.Blood.EPIC)$CD4T==100 | 
+                                 colData(FlowSorted.Blood.EPIC)$CD8T==100]
+detP <- detectionP(tcell)
+remove <- apply(detP, 1, function (x) any(x > 0.01))
+tcell <- tcell[!remove,]
+tcell <- preprocessFunnorm(tcell)
+tcellms <- getM(tcell)
+tcellms.noSNPs <- rmSNPandCH(tcellms, dist=2, mafcut=0.05)
+tcell$Replicate[tcell$Replicate==""] <- tcell$Sample_Name[tcell$Replicate==""]
+tcellms.noSNPs <- limma::avearrays(tcellms.noSNPs, tcell$Replicate)
+tcell <- tcell[,!duplicated(tcell$Replicate)]
+type <- factor(tcell$CellType)
+design <- model.matrix(~type) 
+myannotation <- cpg.annotate("array", tcellms.noSNPs, what="M", arraytype = "EPIC",
+                             analysis.type="differential", design=design, coef=2)
+dmrcoutput <- dmrcate(myannotation, lambda=1000, C=2)
 }
 
 

@@ -95,14 +95,25 @@ Peters T.J., Buckley M.J., Statham, A., Pidsley R., Samaras K., Lord R.V., Clark
   Tim J. Peters <t.peters@garvan.org.au>
 }
 \examples{
-data(dmrcatedata)
-myMs <- logit2(myBetas)
-myMs.noSNPs <- rmSNPandCH(myMs, dist=2, mafcut=0.05)
-patient <- factor(sub("-.*", "", colnames(myMs)))
-type <- factor(sub(".*-", "", colnames(myMs)))
-design <- model.matrix(~patient + type) 
-myannotation <- cpg.annotate("array", myMs.noSNPs, what="M", arraytype = "450K",
-                             analysis.type="differential", design=design, coef=39)
+library(ExperimentHub)
+library(limma)
+eh <- ExperimentHub()
+FlowSorted.Blood.EPIC <- eh[["EH1136"]]  
+tcell <- FlowSorted.Blood.EPIC[,colData(FlowSorted.Blood.EPIC)$CD4T==100 | 
+                                 colData(FlowSorted.Blood.EPIC)$CD8T==100]
+detP <- detectionP(tcell)
+remove <- apply(detP, 1, function (x) any(x > 0.01))
+tcell <- tcell[!remove,]
+tcell <- preprocessFunnorm(tcell)
+tcellms <- getM(tcell)
+tcellms.noSNPs <- rmSNPandCH(tcellms, dist=2, mafcut=0.05)
+tcell$Replicate[tcell$Replicate==""] <- tcell$Sample_Name[tcell$Replicate==""]
+tcellms.noSNPs <- avearrays(tcellms.noSNPs, tcell$Replicate)
+tcell <- tcell[,!duplicated(tcell$Replicate)]
+type <- factor(tcell$CellType)
+design <- model.matrix(~type) 
+myannotation <- cpg.annotate("array", tcellms.noSNPs, what="M", arraytype = "EPIC",
+                             analysis.type="differential", design=design, coef=2)
 }
 
 

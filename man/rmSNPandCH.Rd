@@ -70,8 +70,12 @@ rmSNPandCH(object, dist = 2, mafcut = 0.05, and = TRUE, rmcrosshyb = TRUE, rmXY=
   Tim J. Peters <t.peters@garvan.org.au>
 }
 \examples{
-data(dmrcatedata)
-myMs <- logit2(myBetas)
-myMs.noSNPs <- rmSNPandCH(myMs, dist=2, mafcut=0.05)
+library(ExperimentHub)
+eh <- ExperimentHub()
+FlowSorted.Blood.EPIC <- eh[["EH1136"]]  
+tcell <- FlowSorted.Blood.EPIC[,colData(FlowSorted.Blood.EPIC)$CD4T==100 | 
+                                 colData(FlowSorted.Blood.EPIC)$CD8T==100]
+tcellms <- getM(tcell)
+tcellms.noSNPs <- rmSNPandCH(tcellms, dist=2, mafcut=0.05)
 
 }

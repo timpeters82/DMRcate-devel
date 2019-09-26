@@ -5,7 +5,7 @@ rmSNPandCH <- function(object, dist=2, mafcut=0.05, and=TRUE, rmcrosshyb=TRUE, r
   stopifnot(0 <= mafcut & mafcut <= 1)
   
   env <- new.env(parent=emptyenv())
-  data(dmrcatedata, envir=env)
+  data(snpsall, envir=env)
   
   dist0 <- as.integer(env$snpsall$distances)
   distrange <- range(dist0)
@@ -17,10 +17,12 @@ rmSNPandCH <- function(object, dist=2, mafcut=0.05, and=TRUE, rmcrosshyb=TRUE, r
   
   badprobes <- snpsall$probe[test]
   if(rmcrosshyb){
+    data(crosshyb, envir=env)
     badprobes <- union(badprobes, as.character(env$crosshyb))
   }
   
   if(rmXY){
+    data(XY.probes, envir=env)
     badprobes <- union(badprobes, env$XY.probes)
   }
   

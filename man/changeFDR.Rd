@@ -23,14 +23,32 @@ A re-indexed \code{\link{CpGannotated-class}} object.
 Tim Peters <t.peters@garvan.org.au>
 }
 \examples{
-data(dmrcatedata)
-myMs <- logit2(myBetas)
-myMs.noSNPs <- rmSNPandCH(myMs, dist=2, mafcut=0.05)
-patient <- factor(sub("-.*", "", colnames(myMs)))
-type <- factor(sub(".*-", "", colnames(myMs)))
-design <- model.matrix(~patient + type) 
-myannotation <- cpg.annotate("array", myMs.noSNPs, what="M", arraytype = "450K",
-                             analysis.type="differential", design=design, coef=39)
-myannotation_0.01 <- changeFDR(myannotation, 0.01)
+library(ExperimentHub)
+library(limma)
+library(edgeR)
+eh <- ExperimentHub()
+bis_1072 <- eh[["EH1072"]]
+pData(bis_1072) <- data.frame(replicate=gsub(".*-", "", colnames(bis_1072)),
+                              tissue=substr(colnames(bis_1072), 1, 
+                                            nchar(colnames(bis_1072))-3), 
+                              row.names=colnames(bis_1072))
+colData(bis_1072)$tissue <- gsub("-", "_", colData(bis_1072)$tissue)
+bis_1072 <- renameSeqlevels(bis_1072, mapSeqlevels(seqlevels(bis_1072), "UCSC"))
+bis_1072 <- bis_1072[seqnames(bis_1072)=="chr2",]
+tissue <- factor(pData(bis_1072)$tissue)
+tissue <- relevel(tissue, "Liver_Treg")
+design <- model.matrix(~tissue)
+colnames(design) <- gsub("tissue|\\(|\\)", "", colnames(design))
+rownames(design) <- colnames(bis_1072)
+methdesign <- modelMatrixMeth(design)
+cont.mat <- makeContrasts(treg_vs_tcon=Lymph_N_Treg-Lymph_N_Tcon,
+                          fat_vs_ln=Fat_Treg-Lymph_N_Treg,
+                          skin_vs_ln=Skin_Treg-Lymph_N_Treg,
+                          fat_vs_skin=Fat_Treg-Skin_Treg,
+                          levels=methdesign)
+seq_annot <- sequencing.annotate(bis_1072, methdesign, all.cov = TRUE, 
+                                   contrasts = TRUE, cont.matrix = cont.mat, 
+                                   coef = "fat_vs_skin", fdr=0.05)
+seq_annot <- changeFDR(seq_annot, 0.25)
 }
 

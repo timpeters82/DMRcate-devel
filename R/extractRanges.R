@@ -1,7 +1,6 @@
 extractRanges <-function(dmrcoutput, genome=c("hg19", "hg38", "mm10"))
 {
   env <- new.env(parent=emptyenv())
-  data(dmrcatedata, envir=env)
   genome <- match.arg(genome)
   if(!is(dmrcoutput, "DMResults")){
     stop("Error: dmrcoutput is not a DMResults object. Please create one with dmrcate().")
@@ -13,9 +12,12 @@ extractRanges <-function(dmrcoutput, genome=c("hg19", "hg38", "mm10"))
   coords$chromEnd <- as.integer(as.character(coords$chromEnd))
   ranges <- makeGRangesFromDataFrame(coords, keep.extra.columns = TRUE)
   switch(genome,
-    hg19={grt=env$hg19.generanges},
-    hg38={grt=env$hg38.generanges},
-    mm10={grt=env$mm10.generanges}
+    hg19={data(hg19.generanges, envir=env);
+          grt=env$hg19.generanges},
+    hg38={data(hg38.generanges, envir=env);
+          grt=env$hg38.generanges},
+    mm10={data(mm10.generanges, envir=env);
+          grt=env$mm10.generanges}
   )
   genesidx <- as.data.frame(findOverlaps(ranges, grt))
   genesover <- tapply(genesidx$subjectHits, genesidx$queryHits, function(x) grt$symbol[x])

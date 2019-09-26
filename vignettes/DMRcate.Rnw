@@ -65,7 +65,6 @@ Some of the methylation measurements on the array may be confounded by proximity
 It is with this in mind that we filter out probes 2 nucleotides or closer to a SNP that have a minor allele frequency greater than 0.05, and the approximately 63,000 \cite{Pidsley, Chena} cross-reactive probes on either 450K and/or EPIC, so as to reduce confounding. Here we use a combination of \textit{in silico} analyses from \cite{Pidsley, Chena}.  About 600 are removed from our M-matrix of approximately 10,000:
 
 <<filter>>=
-data(dmrcatedata)
 nrow(tcellms)
 tcellms.noSNPs <- rmSNPandCH(tcellms, dist=2, mafcut=0.05)
 nrow(tcellms.noSNPs)

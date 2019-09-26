@@ -2,7 +2,6 @@ DMR.plot <- function (ranges, dmr, CpGs, what = c("Beta", "M"), arraytype = c("E
                                                                   "450K"), phen.col, genome = c("hg19", "hg38", "mm10"), ...) 
 {
   env <- new.env(parent = emptyenv())
-  data(dmrcatedata, envir = env)
   what <- match.arg(what)
   arraytype <- match.arg(arraytype)
   genome <- match.arg(genome)
@@ -72,10 +71,13 @@ DMR.plot <- function (ranges, dmr, CpGs, what = c("Beta", "M"), arraytype = c("E
                                          col = phen.col[sort(group)], 
                                          ylim = c(0, 1), name = "Smoothed\n group means", na.rm=TRUE)))
   switch(genome, hg19 = {
+    data(hg19.grt, envir = env);
     grt = env$hg19.grt
   }, hg38 = {
+    data(hg38.grt, envir = env);
     grt = env$hg38.grt
   }, mm10 = {
+    data(mm10.grt, envir = env);
     grt = env$mm10.grt
   })
   chromosome(grt) <- as.character(seqnames(methRatios)[1])
