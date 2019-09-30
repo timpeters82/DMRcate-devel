@@ -159,10 +159,10 @@ For standardisation purposes (and for \texttt{DMR.plot} to recognise the genome)
 bis_1072 <- renameSeqlevels(bis_1072, mapSeqlevels(seqlevels(bis_1072), "UCSC"))
 @
 
-For demonstration purposes, we will retain CpGs on chromosome 2 only:
+For demonstration purposes, we will retain CpGs on chromosome 19 only:
 
 <<chr2filter>>=
-bis_1072 <- bis_1072[seqnames(bis_1072)=="chr2",]
+bis_1072 <- bis_1072[seqnames(bis_1072)=="chr19",]
 bis_1072
 @
 
@@ -173,7 +173,6 @@ Now we can prepare the model to be fit for \texttt{sequencing.annotate()}. The a
 \end{itemize}
 
 <<bsdesign, message=FALSE>>=
-library(limma)
 tissue <- factor(pData(bis_1072)$tissue)
 tissue <- relevel(tissue, "Liver_Treg")
 
@@ -218,9 +217,9 @@ treg_vs_tcon.ranges <- extractRanges(dmrcate.res, genome="mm10")
 treg_vs_tcon.ranges
 @
 
-Looks like the top DMR is associated with the \textit{Tank} locus and hypomethylated in the Treg cells (since \texttt{meandiff < 0}). We can plot it like so:
+Looks like the top DMR is associated with the \textit{Jak2} locus and hypomethylated in the Treg cells (since \texttt{meandiff < 0}). We can plot it like so:
 
-<<seqDMRplot1>>=
+<<seqDMRplot1, message=FALSE>>=
 cols <- as.character(plyr::mapvalues(tissue, unique(tissue), 
                                      c("darkorange", "maroon", "blue", 
                                        "black", "magenta")))
@@ -240,7 +239,7 @@ seq_annot <- sequencing.annotate(bis_1072, methdesign, all.cov = TRUE,
                                    coef = "fat_vs_skin", fdr=0.05)
 @
 
-Because this comparison is a bit more subtle, there are no significantly differential CpGs at this threshold. So we can use \texttt{changeFDR()} to relax the FDR to 0.25, taking into account that there is an increased risk of false positives.
+Because this comparison is a bit more subtle, there are very few significantly differential CpGs at this threshold. So we can use \texttt{changeFDR()} to relax the FDR to 0.25, taking into account that there is an increased risk of false positives.
 
 <<redefinethresh>>==
 seq_annot <- changeFDR(seq_annot, 0.25)
@@ -254,12 +253,12 @@ fat_vs_skin.ranges <- extractRanges(dmrcate.res, genome="mm10")
 
 Now let's plot the top DMR with not only fat and skin, but with all samples:
 
-<<seqDMRplot2>>=
+<<seqDMRplot2, message=FALSE>>=
 cols
 DMR.plot(fat_vs_skin.ranges, dmr = 1, CpGs=bis_1072, phen.col = cols, genome="mm10")
 @
 
-Here we can see the methylation of skin cells over this section of Itga4 is hypermethylated not only relative to fat, but to the other tissues as well.
+Here we can see the methylation of skin cells over this section of \textit{Gcnt1} is hypomethylated not only relative to fat, but to the other tissues as well.
 
 As an alternative to \texttt{limma}, there is also the option of taking CpG-level differential statistics using \texttt{DSS::DMLtest()} or \texttt{DSS::DMLtest.multiFactor()}. There is no need to pass arguments such as \texttt{design}, \texttt{coef}, etc. to \texttt{sequencing.annotate()} in this case since we do this outside of the function. \texttt{fdr}, however, must be specified. For example:
 
@@ -279,7 +278,7 @@ DSS.treg_vs_tcon.ranges <- extractRanges(dmrcate.res, genome="mm10")
 findOverlaps(treg_vs_tcon.ranges, DSS.treg_vs_tcon.ranges)
 @
 
-All of the 31 DMRs found using results from \texttt{limma} are also found using \texttt{DSS::DMLtest.multiFactor()}, with an extra 27 DMRs found by the latter at the same FDR. This suggests that DMLtest.multiFactor() is a little more permissive in calling differential methylation.
+All of the 9 DMRs found using results from \texttt{limma} are also found using \texttt{DSS::DMLtest.multiFactor()}, with an extra 21 DMRs found by the latter at the same FDR. This suggests that DMLtest.multiFactor() is a little more permissive in calling differential methylation.
 
 
 <<sessionInfo>>=
