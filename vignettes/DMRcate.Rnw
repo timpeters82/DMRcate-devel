@@ -41,13 +41,21 @@ tcell <- FlowSorted.Blood.EPIC[,colData(FlowSorted.Blood.EPIC)$CD4T==100 |
                                  colData(FlowSorted.Blood.EPIC)$CD8T==100]
 @
 
-Firstly we have to filter out any probes where any sample has a failed position. Then we will normalise using \texttt{minfi::preprocessFunnorm}. After this, we extract the \emph{M}-values from the GenomicRatioSet.
+For demonstration purposes, we will restrict this analysis to probes on chromosome 2:
+
+<<filterchr2>>=
+locs <- IlluminaHumanMethylationEPICanno.ilm10b4.hg19::Locations
+chr2probes <- rownames(locs)[locs$chr %in% "chr2"]
+tcell <- subsetByLoci(tcell, includeLoci = chr2probes)
+@
+
+Firstly we have to filter out any probes where any sample has a failed position. Then we will normalise using \texttt{minfi::preprocessNoob}. After this, we extract the \emph{M}-values from the GenomicRatioSet.
 
 <<detpnorm>>==
 detP <- detectionP(tcell)
 remove <- apply(detP, 1, function (x) any(x > 0.01))
 tcell <- tcell[!remove,]
-tcell <- preprocessFunnorm(tcell)
+tcell <- preprocessNoob(tcell)
 tcellms <- getM(tcell)
 @
 
@@ -62,7 +70,7 @@ Some of the methylation measurements on the array may be confounded by proximity
     \includegraphics[width=\textwidth]{heynSNP.pdf}
 \end{figure}
 
-It is with this in mind that we filter out probes 2 nucleotides or closer to a SNP that have a minor allele frequency greater than 0.05, and the approximately 48,000 \cite{Pidsley, Chena} cross-reactive probes on either 450K and/or EPIC, so as to reduce confounding. Here we use a combination of \textit{in silico} analyses from \cite{Pidsley, Chena}.  About 60,000 are removed from our M-matrix of approximately 864,000:
+It is with this in mind that we filter out probes 2 nucleotides or closer to a SNP that have a minor allele frequency greater than 0.05, and the approximately 48,000 \cite{Pidsley, Chena} cross-reactive probes on either 450K and/or EPIC, so as to reduce confounding. Here we use a combination of \textit{in silico} analyses from \cite{Pidsley, Chena}.  About 4000 are removed from our M-matrix of approximately 65000:
 
 <<filter, message=FALSE>>=
 nrow(tcellms)
@@ -114,7 +122,7 @@ results.ranges
 
 DMRs are ranked by Fisher's multiple comparison statistic, but \texttt{Stouffer} scores and the harmonic mean of the individual component FDRs (\texttt{HMFDR}) are also given in this object as alternative options for ranking DMR significance.
 
-We can then pass this GRanges object to \textt{DMR.plot()}, which uses the \texttt{Gviz} package as a backend for contextualising each DMR.  
+We can then pass this GRanges object to \texttt{DMR.plot()}, which uses the \texttt{Gviz} package as a backend for contextualising each DMR.  
 
 
 <<plotting, message=FALSE>>=
@@ -191,11 +199,11 @@ methdesign
 Just like for \texttt{cpg.annotate()}, we can specify a contrast matrix to find our comparisons of interest.
 
 <<fitBSseq>>=
-cont.mat <- makeContrasts(treg_vs_tcon=Lymph_N_Treg-Lymph_N_Tcon,
-                          fat_vs_ln=Fat_Treg-Lymph_N_Treg,
-                          skin_vs_ln=Skin_Treg-Lymph_N_Treg,
-                          fat_vs_skin=Fat_Treg-Skin_Treg,
-                          levels=methdesign)
+cont.mat <- limma::makeContrasts(treg_vs_tcon=Lymph_N_Treg-Lymph_N_Tcon,
+                                 fat_vs_ln=Fat_Treg-Lymph_N_Treg,
+                                 skin_vs_ln=Skin_Treg-Lymph_N_Treg,
+                                 fat_vs_skin=Fat_Treg-Skin_Treg,
+                                 levels=methdesign)
 cont.mat
 @
 
