@@ -33,7 +33,7 @@ FlowSorted.Blood.EPIC <- eh[["EH1136"]]
 tcell <- FlowSorted.Blood.EPIC[,colData(FlowSorted.Blood.EPIC)$CD4T==100 | 
                                  colData(FlowSorted.Blood.EPIC)$CD8T==100]
 locs <- IlluminaHumanMethylationEPICanno.ilm10b4.hg19::Locations
-chr2probes <- rownames(locs)[locs$chr %in% "chr2"]
+chr2probes <- rownames(locs)[locs$chr=="chr2"]
 tcell <- subsetByLoci(tcell, includeLoci = chr2probes)
 detP <- detectionP(tcell)
 remove <- apply(detP, 1, function (x) any(x > 0.01))

@@ -45,7 +45,7 @@ For demonstration purposes, we will restrict this analysis to probes on chromoso
 
 <<filterchr2>>=
 locs <- IlluminaHumanMethylationEPICanno.ilm10b4.hg19::Locations
-chr2probes <- rownames(locs)[locs$chr %in% "chr2"]
+chr2probes <- rownames(locs)[locs$chr=="chr2"]
 tcell <- subsetByLoci(tcell, includeLoci = chr2probes)
 @
 
