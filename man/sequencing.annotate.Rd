@@ -73,6 +73,7 @@ pData(bis_1072) <- data.frame(replicate=gsub(".*-", "", colnames(bis_1072)),
                               row.names=colnames(bis_1072))
 colData(bis_1072)$tissue <- gsub("-", "_", colData(bis_1072)$tissue)
 bis_1072 <- renameSeqlevels(bis_1072, mapSeqlevels(seqlevels(bis_1072), "UCSC"))
+bis_1072 <- bis_1072[seqnames(bis_1072)=="chr19",]
 tissue <- factor(pData(bis_1072)$tissue)
 tissue <- relevel(tissue, "Liver_Treg")
 design <- model.matrix(~tissue)
@@ -87,7 +88,7 @@ cont.mat <- limma::makeContrasts(treg_vs_tcon=Lymph_N_Treg-Lymph_N_Tcon,
                                  levels=methdesign)
 seq_annot <- sequencing.annotate(bis_1072, methdesign, all.cov = TRUE, 
                                    contrasts = TRUE, cont.matrix = cont.mat, 
-                                   coef = "treg_vs_tcon", fdr=0.1)
+                                   coef = "treg_vs_tcon", fdr=0.05)
 }
 
 
