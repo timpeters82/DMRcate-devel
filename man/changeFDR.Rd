@@ -24,8 +24,6 @@ Tim Peters <t.peters@garvan.org.au>
 }
 \examples{
 library(ExperimentHub)
-library(limma)
-library(edgeR)
 eh <- ExperimentHub()
 bis_1072 <- eh[["EH1072"]]
 pData(bis_1072) <- data.frame(replicate=gsub(".*-", "", colnames(bis_1072)),
@@ -35,13 +33,14 @@ pData(bis_1072) <- data.frame(replicate=gsub(".*-", "", colnames(bis_1072)),
 colData(bis_1072)$tissue <- gsub("-", "_", colData(bis_1072)$tissue)
 bis_1072 <- renameSeqlevels(bis_1072, mapSeqlevels(seqlevels(bis_1072), "UCSC"))
 bis_1072 <- bis_1072[seqnames(bis_1072)=="chr19",]
+bis_1072 <- bis_1072[138151:138250,]
 tissue <- factor(pData(bis_1072)$tissue)
 tissue <- relevel(tissue, "Liver_Treg")
 design <- model.matrix(~tissue)
 colnames(design) <- gsub("tissue", "", colnames(design))
 colnames(design)[1] <- "Intercept"
 rownames(design) <- colnames(bis_1072)
-methdesign <- modelMatrixMeth(design)
+methdesign <- edgeR::modelMatrixMeth(design)
 cont.mat <- makeContrasts(treg_vs_tcon=Lymph_N_Treg-Lymph_N_Tcon,
                           fat_vs_ln=Fat_Treg-Lymph_N_Treg,
                           skin_vs_ln=Skin_Treg-Lymph_N_Treg,

@@ -74,6 +74,7 @@ pData(bis_1072) <- data.frame(replicate=gsub(".*-", "", colnames(bis_1072)),
 colData(bis_1072)$tissue <- gsub("-", "_", colData(bis_1072)$tissue)
 bis_1072 <- renameSeqlevels(bis_1072, mapSeqlevels(seqlevels(bis_1072), "UCSC"))
 bis_1072 <- bis_1072[seqnames(bis_1072)=="chr19",]
+bis_1072 <- bis_1072[240201:240300,]
 tissue <- factor(pData(bis_1072)$tissue)
 tissue <- relevel(tissue, "Liver_Treg")
 design <- model.matrix(~tissue)
