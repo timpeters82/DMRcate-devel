@@ -41,7 +41,7 @@ colnames(design) <- gsub("tissue", "", colnames(design))
 colnames(design)[1] <- "Intercept"
 rownames(design) <- colnames(bis_1072)
 methdesign <- edgeR::modelMatrixMeth(design)
-cont.mat <- makeContrasts(treg_vs_tcon=Lymph_N_Treg-Lymph_N_Tcon,
+cont.mat <- limma::makeContrasts(treg_vs_tcon=Lymph_N_Treg-Lymph_N_Tcon,
                           fat_vs_ln=Fat_Treg-Lymph_N_Treg,
                           skin_vs_ln=Skin_Treg-Lymph_N_Treg,
                           fat_vs_skin=Fat_Treg-Skin_Treg,
