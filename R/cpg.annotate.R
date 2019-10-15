@@ -62,19 +62,17 @@ cpg.annotate <- function (datatype = c("array", "sequencing"), object, what = c(
       tt <- tt[m, ]
       anno <- getAnnotation(grset)
       stat <- tt$t
-      annotated <- data.frame(ID = rownames(tt), stat = stat, 
-                              CHR = anno$chr, pos = anno$pos, diff = tt$diff, 
-                              ind.fdr = tt$adj.P.Val, is.sig = tt$adj.P.Val < 
-                                fdr)
+      annotated <- GRanges(as.character(anno$chr), IRanges(anno$pos, anno$pos), stat = stat,
+                           diff = tt$diff, ind.fdr = tt$adj.P.Val, is.sig = tt$adj.P.Val < fdr)
+      names(annotated) <- rownames(tt)
     }, variability = {
       RSanno <- getAnnotation(grset)
       wholevar <- var(object)
       weights <- apply(object, 1, var)
       weights <- weights/mean(weights)
-      annotated <- data.frame(ID = rownames(object), stat = weights, 
-                              CHR = RSanno$chr, pos = RSanno$pos, diff = rep(0, 
-                                                                               nrow(object)), indfdr = rep(0, nrow(object)), 
-                              is.sig = weights > quantile(weights, 0.95))
+      annotated <- GRanges(as.character(RSanno$chr), IRanges(RSanno$pos, RSanno$pos), stat = weights,
+                           diff = rep(0, nrow(object)), ind.fdr = rep(0, nrow(object)), is.sig = weights > quantile(weights, 0.95))
+      names(annotated) <- rownames(object)
     }, ANOVA = {
       message("You are annotating in ANOVA mode: consider making the value of fdr quite small, e.g. 0.001")
       stopifnot(is.matrix(design))
@@ -96,9 +94,9 @@ cpg.annotate <- function (datatype = c("array", "sequencing"), object, what = c(
       }
       anno <- getAnnotation(grset)
       stat <- sqrtFs
-      annotated <- data.frame(ID = rownames(object), stat = stat, 
-                              CHR = anno$chr, pos = anno$pos, diff = 0, 
-                              indfdr = sqrtfdrs, is.sig = sqrtfdrs < fdr)
+      annotated <- GRanges(as.character(anno$chr), IRanges(anno$pos, anno$pos), stat = stat,
+                           diff = 0, ind.fdr = sqrtfdrs, is.sig = sqrtfdrs < fdr)
+      names(annotated) <-  rownames(object)
     }, diffVar = {
       stopifnot(is.matrix(design))
       if (!contrasts) {
@@ -128,14 +126,12 @@ cpg.annotate <- function (datatype = c("array", "sequencing"), object, what = c(
       tt <- tt[m, ]
       anno <- getAnnotation(grset)
       stat <- tt$t
-      annotated <- data.frame(ID = rownames(tt), stat = stat, 
-                              CHR = anno$chr, pos = anno$pos, diff = 0, 
-                              indfdr = tt$Adj.P.Value, is.sig = tt$Adj.P.Value < 
-                                fdr)
+      annotated <- GRanges(as.character(anno$chr), IRanges(anno$pos, anno$pos), stat = stat,
+                           diff = 0, ind.fdr = tt$Adj.P.Value, is.sig = tt$Adj.P.Value < fdr)
+      names(annotated) <-  rownames(tt)  
     })
-    annotated <- annotated[order(annotated$CHR, annotated$pos),]
-    return(new("CpGannotated", ID=as.character(annotated$ID), stat=annotated$stat, CHR=as.character(annotated$CHR), 
-               pos=annotated$pos, diff=annotated$diff, ind.fdr=annotated$ind.fdr, is.sig=annotated$is.sig))
+    annotated <- sort(annotated)
+    return(new("CpGannotated", ranges=annotated))
     
   }
   if (datatype == "sequencing") {

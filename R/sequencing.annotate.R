@@ -11,10 +11,10 @@ sequencing.annotate <- function(obj, methdesign, all.cov=FALSE, contrasts = FALS
     obj$pval <- 2*pnorm(-abs(obj$stat))
     obj$fdr <- p.adjust(obj$pval, method="BH")
     nsig <- sum(obj$fdr < fdr)
-    annotated <- data.frame(ID = rownames(obj), stat = obj$stat, 
-                            CHR = obj$chr, pos = obj$pos, diff = obj$diff, 
-                            indfdr = obj$fdr, is.sig = obj$fdr < fdr)
-    annotated <- annotated[order(annotated$CHR, annotated$pos),]
+    annotated <- GRanges(as.character(obj$chr), IRanges(obj$pos, obj$pos), stat = obj$stat,
+                         diff = obj$diff, ind.fdr = obj$fdr, is.sig = obj$fdr < fdr)
+    names(annotated) <- rownames(obj)
+    annotated <- sort(annotated)
     
   } else if(is(obj, "BSseq")){
     phen <- pData(obj)
@@ -59,12 +59,10 @@ sequencing.annotate <- function(obj, methdesign, all.cov=FALSE, contrasts = FALS
     fit <- eBayes(fit)
     tt <- topTable(fit, coef = coef, number = nrow(ym), sort.by = "none")
     nsig <- sum(tt$adj.P.Val < fdr)
-    
-    annotated <- data.frame(ID = paste0("cpg", 1:nrow(tt)), stat = tt$t, 
-                            CHR = as.character(seqnames(obj)), pos = start(obj), diff = tt$logFC, 
-                            indfdr = tt$adj.P.Val, is.sig = tt$adj.P.Val < 
-                              fdr)
-    annotated <- annotated[order(annotated$CHR, annotated$pos),]
+    annotated <- GRanges(as.character(seqnames(obj)), IRanges(start(obj), start(obj)), stat = tt$t,
+                         diff = tt$logFC,, ind.fdr = tt$adj.P.Val, is.sig = tt$adj.P.Val < fdr)
+    names(annotated) <- paste0("cpg", 1:nrow(tt))
+    annotated <- sort(annotated)
     
   } else {
     stop("Error: obj must be a data.frame or BSseq object")
@@ -84,6 +82,5 @@ sequencing.annotate <- function(obj, methdesign, all.cov=FALSE, contrasts = FALS
     message(paste("Your contrast returned", nsig, 
                   "individually significant CpGs; this is plenty. Consider decreasing the 'fdr' parameter using changeFDR(), for more precise DMR definition."))
   }
-  return(new("CpGannotated", ID=as.character(annotated$ID), stat=annotated$stat, CHR=as.character(annotated$CHR), 
-             pos=annotated$pos, diff=annotated$diff, ind.fdr=annotated$indfdr, is.sig=annotated$is.sig))
+  return(new("CpGannotated", ranges=annotated))
 }

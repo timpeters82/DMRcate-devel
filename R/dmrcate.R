@@ -20,13 +20,13 @@ dmrcate <-
 
     ## Modified 'object'
     object <-
-      data.frame(ID = object@ID,
-                 weights = abs(object@stat),
-                 CHR = as.character(object@CHR),
-                 pos = object@pos,
-                 diff = object@diff,
-                 indfdr = object@ind.fdr,
-                 is.sig = object@is.sig
+      data.frame(ID = names(object@ranges),
+                 weights = abs(object@ranges$stat),
+                 CHR = seqnames(object@ranges),
+                 pos = start(object@ranges),
+                 diff = object@ranges$diff,
+                 indfdr = object@ranges$ind.fdr,
+                 is.sig = object@ranges$is.sig
                  )
     # Order by position
     object <- object[order(object$CHR, object$pos),]
