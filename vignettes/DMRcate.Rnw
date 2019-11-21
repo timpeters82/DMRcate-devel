@@ -31,7 +31,7 @@ library(DMRcate)
 
 \section*{Illumina\textregistered Array Workflow}
 
-For this vignette, we will demonstrate DMRcate's array utility using data from \texttt{ExperimentHub}, namely Illumina HumanMethylationEPIC data from the data packages \texttt{FlowSorted.Blood.EPIC}. Specifically, we are interested in the methylation differences between CD4+ and CD8+ T cells.  
+For this vignette, we will demonstrate DMRcate's array utility using data from \texttt{ExperimentHub}, namely Illumina HumanMethylationEPIC data from the data packages \texttt{FlowSorted.Blood.EPIC}\cite{Salas}. Specifically, we are interested in the methylation differences between CD4+ and CD8+ T cells.  
 
 <<tcells, message=FALSE>>=
 library(ExperimentHub)
@@ -296,6 +296,13 @@ sessionInfo()
 
 
 \begin{thebibliography}{99}
+
+\bibitem{Salas}
+  Salas, L. A., Koestler, D. C., Butler, R. A., Hansen, H. M., Wiencke, J. K.,
+  Kelsey, K. T., & Christensen, B. C. (2018). An optimized library for
+  reference-based deconvolution of whole-blood biospecimens assayed using the 
+  Illumina HumanMethylationEPIC BeadArray. Genome Biology, 19(1), 64. 
+  https://doi.org/10.1186/s13059-018-1448-7
 
 \bibitem{Pidsley}
   Pidsley R, Zotenko E, Peters TJ, Lawrence MG, Risbridger GP, Molloy P, 
