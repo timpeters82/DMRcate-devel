@@ -299,7 +299,7 @@ sessionInfo()
 
 \bibitem{Salas}
   Salas, L. A., Koestler, D. C., Butler, R. A., Hansen, H. M., Wiencke, J. K.,
-  Kelsey, K. T., & Christensen, B. C. (2018). An optimized library for
+  Kelsey, K. T., Christensen, B. C. (2018). An optimized library for
   reference-based deconvolution of whole-blood biospecimens assayed using the 
   Illumina HumanMethylationEPIC BeadArray. Genome Biology, 19(1), 64. 
   https://doi.org/10.1186/s13059-018-1448-7
