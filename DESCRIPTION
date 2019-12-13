@@ -1,6 +1,6 @@
 Package: DMRcate
 Title: Methylation array and sequencing spatial analysis methods
-Version: 2.1.3
+Version: 2.0.3
 Date: 2019-13-12
 Author: Tim Peters
 Maintainer: Tim Peters <t.peters@garvan.org.au>
