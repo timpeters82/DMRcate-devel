@@ -10,14 +10,14 @@ cpg.annotate <- function (datatype = c("array", "sequencing"), object, what = c(
     stopifnot(class(object) %in% c("matrix", "GenomicRatioSet"))
     if (is(object, "matrix")) {
       if (arraytype == "450K") {
-        grset <- makeGenomicRatioSetFromMatrix(object, 
+        grset <- makeGenomicRatioSetFromMatrix(mat = object, 
                                                array = "IlluminaHumanMethylation450k", annotation = "ilmn12.hg19", 
-                                               mergeManifest = TRUE, what = what)
+                                               what = what)
       }
       if (arraytype == "EPIC") {
-        grset <- makeGenomicRatioSetFromMatrix(object, 
+        grset <- makeGenomicRatioSetFromMatrix(mat = object, 
                                                array = "IlluminaHumanMethylationEPIC", annotation = "ilm10b4.hg19", 
-                                               mergeManifest = TRUE, what = what)
+                                               what = what)
       }
     }
     else {
