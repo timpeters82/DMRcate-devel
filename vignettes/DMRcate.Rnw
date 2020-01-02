@@ -31,7 +31,7 @@ library(DMRcate)
 
 \section*{Illumina\textregistered Array Workflow}
 
-For this vignette, we will demonstrate DMRcate's array utility using data from \texttt{ExperimentHub}, namely Illumina HumanMethylationEPIC data from the data packages \texttt{FlowSorted.Blood.EPIC}\cite{Salas}. Specifically, we are interested in the methylation differences between CD4+ and CD8+ T cells.  
+For this vignette, we will demonstrate DMRcate's array utility using data from \texttt{ExperimentHub}, namely Illumina HumanMethylationEPIC data from the data packages \texttt{FlowSorted.Blood.EPIC}. Specifically, we are interested in the methylation differences between CD4+ and CD8+ T cells.  
 
 <<tcells, message=FALSE>>=
 library(ExperimentHub)
@@ -41,21 +41,13 @@ tcell <- FlowSorted.Blood.EPIC[,colData(FlowSorted.Blood.EPIC)$CD4T==100 |
                                  colData(FlowSorted.Blood.EPIC)$CD8T==100]
 @
 
-For demonstration purposes, we will restrict this analysis to probes on chromosome 2:
-
-<<filterchr2>>=
-locs <- IlluminaHumanMethylationEPICanno.ilm10b4.hg19::Locations
-chr2probes <- rownames(locs)[locs$chr=="chr2"]
-tcell <- subsetByLoci(tcell, includeLoci = chr2probes)
-@
-
 Firstly we have to filter out any probes where any sample has a failed position. Then we will normalise using \texttt{minfi::preprocessNoob}. After this, we extract the \emph{M}-values from the GenomicRatioSet.
 
 <<detpnorm>>==
 detP <- detectionP(tcell)
 remove <- apply(detP, 1, function (x) any(x > 0.01))
 tcell <- tcell[!remove,]
-tcell <- preprocessNoob(tcell)
+tcell <- preprocessFunnorm(tcell)
 tcellms <- getM(tcell)
 @
 
@@ -70,7 +62,7 @@ Some of the methylation measurements on the array may be confounded by proximity
     \includegraphics[width=\textwidth]{heynSNP.pdf}
 \end{figure}
 
-It is with this in mind that we filter out probes 2 nucleotides or closer to a SNP that have a minor allele frequency greater than 0.05, and the approximately 48,000 \cite{Pidsley, Chena} cross-reactive probes on either 450K and/or EPIC, so as to reduce confounding. Here we use a combination of \textit{in silico} analyses from \cite{Pidsley, Chena}.  About 4000 are removed from our M-matrix of approximately 65000:
+It is with this in mind that we filter out probes 2 nucleotides or closer to a SNP that have a minor allele frequency greater than 0.05, and the approximately 48,000 \cite{Pidsley, Chena} cross-reactive probes on either 450K and/or EPIC, so as to reduce confounding. Here we use a combination of \textit{in silico} analyses from \cite{Pidsley, Chena}.  About 60,000 are removed from our M-matrix of approximately 864,000:
 
 <<filter, message=FALSE>>=
 nrow(tcellms)
@@ -86,6 +78,9 @@ tcell$Replicate
 tcell$Replicate[tcell$Replicate==""] <- tcell$Sample_Name[tcell$Replicate==""]
 tcellms.noSNPs <- limma::avearrays(tcellms.noSNPs, tcell$Replicate)
 tcell <- tcell[,!duplicated(tcell$Replicate)]
+tcell <- tcell[rownames(tcellms.noSNPs),]
+assays(tcell)[["M"]] <- tcellms.noSNPs
+assays(tcell)[["Beta"]] <- ilogit2(tcellms.noSNPs)
 @
 
 Next we want to annotate our matrix of M-values with relevant information. We also use the backbone of the \texttt{limma} pipeline for differential array analysis. We want to compare within patients across tissue samples, so we set up our variables for a standard limma pipeline, and set \texttt{coef=2} in \texttt{cpg.annotate} since this corresponds to the phenotype comparison in \texttt{design}. 
@@ -95,7 +90,7 @@ Next we want to annotate our matrix of M-values with relevant information. We al
 <<annotate, message=FALSE>>=
 type <- factor(tcell$CellType)
 design <- model.matrix(~type) 
-myannotation <- cpg.annotate("array", tcellms.noSNPs, what="M", arraytype = "EPIC",
+myannotation <- cpg.annotate("array", tcell, arraytype = "EPIC",
                              analysis.type="differential", design=design, coef=2)
 @
 
@@ -129,14 +124,24 @@ We can then pass this GRanges object to \texttt{DMR.plot()}, which uses the \tex
 groups <- c(CD8T="magenta", CD4T="forestgreen")
 cols <- groups[as.character(type)]
 cols
-tcellbetas <- ilogit2(tcellms.noSNPs)
-colnames(tcellbetas) <- gsub("-1", "", tcell$Sample_Name)
 
-DMR.plot(ranges=results.ranges, dmr=1, CpGs=tcellbetas, what="Beta", 
+DMR.plot(ranges=results.ranges, dmr=1, CpGs=getBeta(tcell), what="Beta", 
          arraytype = "EPIC", phen.col=cols, genome="hg19")
 @
 
 Consonant with the expected biology, our top DMR shows the CD8+ T cells hypomethylated across parts of the CD8A locus. The two distinct hypomethylated sections have been merged because they are less than 1000 bp apart - specified by \texttt{lambda} in the call to \texttt{dmrcate()}. To call these as separate DMRs, make \texttt{lambda} smaller.
+
+Lastly, we would like to do a gene ontology test on our DMRs; this is made possible by the \texttt{goregion()} function in the \texttt{missMethyl} package. We will take the top 100 DMRs for this enrichment test.
+
+<<goregion>>=
+library(missMethyl)
+enrichment_GO <- goregion(results.ranges[1:100], all.cpg = rownames(tcell), 
+                          collection = "GO", array.type = "EPIC")
+enrichment_GO <- enrichment_GO[order(enrichment_GO$P.DE),]
+head(enrichment_GO, 10)
+@
+
+From this enrichment test we can see the most enriched terms are germane to the contrast at hand, including lymphocyte activation and differentiation, T cell activation and MHC protein binding.
 
 \section*{Bisulfite sequencing workflow}
 
@@ -296,13 +301,6 @@ sessionInfo()
 
 
 \begin{thebibliography}{99}
-
-\bibitem{Salas}
-  Salas, L. A., Koestler, D. C., Butler, R. A., Hansen, H. M., Wiencke, J. K.,
-  Kelsey, K. T., Christensen, B. C. (2018). An optimized library for
-  reference-based deconvolution of whole-blood biospecimens assayed using the 
-  Illumina HumanMethylationEPIC BeadArray. Genome Biology, 19(1), 64. 
-  https://doi.org/10.1186/s13059-018-1448-7
 
 \bibitem{Pidsley}
   Pidsley R, Zotenko E, Peters TJ, Lawrence MG, Risbridger GP, Molloy P, 
