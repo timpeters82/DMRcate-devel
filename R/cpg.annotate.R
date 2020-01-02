@@ -7,7 +7,7 @@ cpg.annotate <- function (datatype = c("array", "sequencing"), object, what = c(
   what <- match.arg(what)
   arraytype <- match.arg(arraytype)
   if (datatype == "array") {
-    stopifnot(class(object) %in% c("matrix", "GenomicRatioSet"))
+    stopifnot(class(object)[1] %in% c("matrix", "GenomicRatioSet"))
     if (is(object, "matrix")) {
       if (arraytype == "450K") {
         grset <- makeGenomicRatioSetFromMatrix(mat = object, 

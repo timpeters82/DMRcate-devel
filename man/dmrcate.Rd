@@ -94,9 +94,12 @@ tcellms.noSNPs <- rmSNPandCH(tcellms, dist=2, mafcut=0.05)
 tcell$Replicate[tcell$Replicate==""] <- tcell$Sample_Name[tcell$Replicate==""]
 tcellms.noSNPs <- limma::avearrays(tcellms.noSNPs, tcell$Replicate)
 tcell <- tcell[,!duplicated(tcell$Replicate)]
+tcell <- tcell[rownames(tcellms.noSNPs),]
+assays(tcell)[["M"]] <- tcellms.noSNPs
+assays(tcell)[["Beta"]] <- ilogit2(tcellms.noSNPs)
 type <- factor(tcell$CellType)
 design <- model.matrix(~type) 
-myannotation <- cpg.annotate("array", tcellms.noSNPs, what="M", arraytype = "EPIC",
+myannotation <- cpg.annotate("array", tcell, arraytype = "EPIC",
                              analysis.type="differential", design=design, coef=2)
 dmrcoutput <- dmrcate(myannotation, lambda=1000, C=2)
 }
