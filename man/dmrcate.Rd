@@ -77,22 +77,19 @@ Tim J. Peters <t.peters@garvan.org.au>, Mike J. Buckley <Mike.Buckley@csiro.au>,
 }
 \examples{
 library(ExperimentHub)
+library(limma)
 eh <- ExperimentHub()
-FlowSorted.Blood.EPIC <- eh[["EH1136"]]  
-tcell <- FlowSorted.Blood.EPIC[,colData(FlowSorted.Blood.EPIC)$CD4T==100 | 
-                                 colData(FlowSorted.Blood.EPIC)$CD8T==100]
-locs <- IlluminaHumanMethylationEPICanno.ilm10b4.hg19::Locations
-locs <- locs[order(locs$chr, locs$pos),]
-chr2probes <- rownames(locs)[457851:457950]
-tcell <- subsetByLoci(tcell, includeLoci = chr2probes)
+FlowSorted.Blood.EPIC <- eh[["EH1136"]]
+tcell <- FlowSorted.Blood.EPIC[,colData(FlowSorted.Blood.EPIC)$CD4T==100 |
+                                colData(FlowSorted.Blood.EPIC)$CD8T==100]
 detP <- detectionP(tcell)
 remove <- apply(detP, 1, function (x) any(x > 0.01))
 tcell <- tcell[!remove,]
-tcell <- preprocessNoob(tcell)
+tcell <- preprocessFunnorm(tcell)
 tcellms <- getM(tcell)
 tcellms.noSNPs <- rmSNPandCH(tcellms, dist=2, mafcut=0.05)
 tcell$Replicate[tcell$Replicate==""] <- tcell$Sample_Name[tcell$Replicate==""]
-tcellms.noSNPs <- limma::avearrays(tcellms.noSNPs, tcell$Replicate)
+tcellms.noSNPs <- avearrays(tcellms.noSNPs, tcell$Replicate)
 tcell <- tcell[,!duplicated(tcell$Replicate)]
 tcell <- tcell[rownames(tcellms.noSNPs),]
 assays(tcell)[["M"]] <- tcellms.noSNPs
