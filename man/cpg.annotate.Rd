@@ -106,7 +106,7 @@ remove <- apply(detP, 1, function (x) any(x > 0.01))
 tcell <- tcell[!remove,]
 tcell <- preprocessFunnorm(tcell)
 #Subset to chr2 only
-tcell <- tcell[seqnames(tcell) %in% "chr2",]
+tcell <- tcell[seqnames(tcell) == "chr2",]
 tcellms <- getM(tcell)
 tcellms.noSNPs <- rmSNPandCH(tcellms, dist=2, mafcut=0.05)
 tcell$Replicate[tcell$Replicate==""] <- tcell$Sample_Name[tcell$Replicate==""]
