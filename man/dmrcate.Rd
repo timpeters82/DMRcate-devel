@@ -94,6 +94,7 @@ tcell$Replicate[tcell$Replicate==""] <- tcell$Sample_Name[tcell$Replicate==""]
 tcellms.noSNPs <- avearrays(tcellms.noSNPs, tcell$Replicate)
 tcell <- tcell[,!duplicated(tcell$Replicate)]
 tcell <- tcell[rownames(tcellms.noSNPs),]
+colnames(tcellms.noSNPs) <- colnames(tcell)
 assays(tcell)[["M"]] <- tcellms.noSNPs
 assays(tcell)[["Beta"]] <- ilogit2(tcellms.noSNPs)
 type <- factor(tcell$CellType)
