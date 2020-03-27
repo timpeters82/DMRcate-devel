@@ -5,7 +5,7 @@ DMR.plot <- function (ranges, dmr, CpGs, what = c("Beta", "M"), arraytype = c("E
   what <- match.arg(what)
   arraytype <- match.arg(arraytype)
   genome <- match.arg(genome)
-  stopifnot(class(CpGs) %in% c("matrix", "BSseq", "GenomicRatioSet"))
+  stopifnot(class(CpGs)[1] %in% c("matrix", "BSseq", "GenomicRatioSet"))
   stopifnot(dmr %in% 1:length(ranges))
   group <- unique(names(phen.col))
   if (is(CpGs, "matrix") | is(CpGs, "GenomicRatioSet")) {
