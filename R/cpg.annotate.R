@@ -1,7 +1,8 @@
 cpg.annotate <- function (datatype = c("array", "sequencing"), object, what = c("Beta", 
                                                                 "M"), arraytype = c("EPIC", "450K"), analysis.type = c("differential", 
                                                                                                                        "variability", "ANOVA", "diffVar"), design, contrasts = FALSE, 
-          cont.matrix = NULL, fdr = 0.05, coef, ...) 
+          cont.matrix = NULL, fdr = 0.05, coef, 
+          varFitcoef=NULL, topVarcoef=NULL, ...) 
 {
   analysis.type <- match.arg(analysis.type)
   what <- match.arg(what)
@@ -104,12 +105,11 @@ cpg.annotate <- function (datatype = c("array", "sequencing"), object, what = c(
       } else {
         stopifnot(!is.null(cont.matrix))
       }
-      fitvar <- varFit(object, design = design, ...)
+      fitvar <- varFit(object, design = design, coef=varFitcoef)
       if (contrasts) {
-        stopifnot(coef %in% colnames(cont.matrix))
         fitvar <- contrasts.varFit(fitvar, cont.matrix)
       }
-      tt <- topVar(fitvar, coef = coef, number = nrow(object))
+      tt <- topVar(fitvar, coef = topVarcoef, number = nrow(object))
       nsig <- sum(tt$Adj.P.Value < fdr)
       if (nsig == 0) {
         message("Your contrast returned no individually significant probes. Try increasing the fdr. Alternatively, set pcutoff manually in dmrcate() to return DVMRs, but be warned there is an increased risk of Type I errors.")
