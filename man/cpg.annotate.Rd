@@ -12,7 +12,8 @@ Annotate a matrix/GenomicRatioSet representing 450K or EPIC data with probe weig
 cpg.annotate(datatype = c("array", "sequencing"), object, what=c("Beta", "M"), 
              arraytype=c("EPIC", "450K"), analysis.type = c("differential", 
              "variability", "ANOVA", "diffVar"), design, contrasts = FALSE, 
-             cont.matrix = NULL, fdr = 0.05, coef, ...) 
+             cont.matrix = NULL, fdr = 0.05, coef, varFitcoef=NULL, 
+             topVarcoef=NULL, ...) 
 }
 \arguments{
   \item{datatype}{
@@ -42,19 +43,18 @@ cpg.annotate(datatype = c("array", "sequencing"), object, what=c("Beta", "M"),
     \emph{F}-statistics;
     \code{"diffVar"} to return differentially variable methylated regions, 
     using the \code{missMethyl} package to generate \emph{t}-statistics.
-    All modes are applicable when \code{datatype="array"}, but only 
-    \code{"differential"} is available when \code{datatype="sequencing"}.
+    
   }
   \item{design}{
     Study design matrix. Identical context to differential analysis
     pipeline in \code{limma}. Must have an intercept if \code{contrasts=FALSE}.
     Applies only when 
-    \code{analysis.type \%in\% c("differential", "ANOVA", "diffVar")}. 
-    Only applicable when \code{datatype="array"}.
+    \code{analysis.type \%in\% c("differential", "ANOVA", "diffVar")}.
   }
   \item{contrasts}{
     Logical denoting whether a \code{limma}-style contrast matrix is specified.
-    Only applicable when \code{datatype="array"} and \code{analysis.type \%in\% c("differential", "diffVar")}.
+    Only applicable when \code{datatype="array"} and \code{analysis.type \%in\% 
+    c("differential", "diffVar")}.
   }
   \item{cont.matrix}{
     \code{Limma}-style contrast matrix for explicit contrasting. For each call to \code{cpg.annotate}, only one contrast will be fit. 
@@ -64,18 +64,30 @@ cpg.annotate(datatype = c("array", "sequencing"), object, what=c("Beta", "M"),
     FDR cutoff (Benjamini-Hochberg) for which CpG sites are individually called
     as significant. Used to index default thresholding in dmrcate(). \strong{Highly 
     recommended as the primary thresholding parameter for calling DMRs}. 
-    Not used when \code{analysis.type = "variability"}.
+    Not used when \code{analysis.type == "variability"}.
   }
   \item{coef}{
     The column index in \code{design} corresponding to the phenotype
     comparison. Corresponds to the comparison of interest in \code{design}
     when \code{contrasts=FALSE}, otherwise must be a column name in 
     \code{cont.matrix}. 
-    Only applicable when \code{datatype="array"} and \code{analysis.type \%in\% c("differential", "diffVar")}.
+    Only applicable when \code{analysis.type == "differential"}.
+  }
+   \item{varFitcoef}{
+    The columns of the design matrix containing the comparisons to test for
+    differential variability. If left \code{NULL}, will test all columns.
+    Identical context to \code{missMethyl::varFit()}. Only applicable when
+    \code{analysis.type \%in\% "diffVar"}.
+  }
+  \item{topVarcoef}{
+    Column number or column name specifying which coefficient of the linear
+    model fit is of interest. It should be the same coefficient that 
+    the differential variability testing was performed on. Default is last 
+    column of fit object. Identical context to \code{missMethyl::topVar()}.
+    Only applicable when \code{analysis.type \%in\% "diffVar"}.
   }
   \item{\dots}{
-    Extra arguments passed to the \code{limma} function lmFit() (\code{analysis.type="differential"})
-    or \code{missMethyl} function varFit() (\code{analysis.type = "diffVar"}), and when \code{datatype="array"}.
+    Extra arguments passed to the \code{limma} function lmFit() (\code{analysis.type="differential"}).
   }
 }
 \value{

@@ -41,7 +41,7 @@ tcell <- FlowSorted.Blood.EPIC[,colData(FlowSorted.Blood.EPIC)$CD4T==100 |
                                  colData(FlowSorted.Blood.EPIC)$CD8T==100]
 @
 
-Firstly we have to filter out any probes where any sample has a failed position. Then we will normalise using \texttt{minfi::preprocessNoob}. After this, we extract the \emph{M}-values from the GenomicRatioSet.
+Firstly we have to filter out any probes where any sample has a failed position. Then we will normalise using \texttt{minfi::preprocessFunnorm}. After this, we extract the \emph{M}-values from the GenomicRatioSet.
 
 <<detpnorm>>==
 detP <- detectionP(tcell)
