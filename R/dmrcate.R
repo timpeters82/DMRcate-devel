@@ -173,6 +173,11 @@ dmrcate <-
     
     keep <- (results$no.cpgs >= min.cpgs)
     results <- results[keep, ]
+    if(!(is.null(betacutoff))){
+      message("Warning: betacutoff only meaningful for Illumina array data or WGBS results from DSS::DMLtest().")
+      keep <- (abs(results$meandiff) > betacutoff)
+      results <- results[keep, ]
+    }
     o <- order(results$Fisher, -results$no.cpgs)
     results <- results[o,]
     message("Done!")
