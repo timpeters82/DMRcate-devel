@@ -139,7 +139,7 @@ library(missMethyl)
 enrichment_GO <- goregion(results.ranges[1:100], all.cpg = rownames(tcell), 
                           collection = "GO", array.type = "EPIC")
 enrichment_GO <- enrichment_GO[order(enrichment_GO$P.DE),]
-head(enrichment_GO, 10)
+head(as.matrix(enrichment_GO), 10)
 @
 
 From this enrichment test we can see the most enriched terms are germane to the contrast at hand, including lymphocyte activation and differentiation, T cell activation and MHC protein binding.
