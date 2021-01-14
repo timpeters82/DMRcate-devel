@@ -46,8 +46,8 @@ Firstly we have to filter out any probes where any sample has a failed position.
 <<detpnorm>>==
 detP <- detectionP(tcell)
 remove <- apply(detP, 1, function (x) any(x > 0.01))
-tcell <- tcell[!remove,]
 tcell <- preprocessFunnorm(tcell)
+tcell <- tcell[!rownames(tcell) %in% names(which(remove)),]
 tcellms <- getM(tcell)
 @
 
