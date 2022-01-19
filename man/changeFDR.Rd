@@ -24,6 +24,9 @@ Tim Peters <t.peters@garvan.org.au>
 }
 \examples{
 library(ExperimentHub)
+library(SummarizedExperiment)
+library(bsseq)
+library(GenomeInfoDb)
 eh <- ExperimentHub()
 bis_1072 <- eh[["EH1072"]]
 pData(bis_1072) <- data.frame(replicate=gsub(".*-", "", colnames(bis_1072)),

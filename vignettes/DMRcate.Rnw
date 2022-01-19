@@ -159,7 +159,7 @@ colnames(bis_1072)
 The data contains 15 samples: 3 (unmatched) replicates of mouse Tregs from fat, liver, skin and lymph node, plus a group of 3 CD4+ conventional lymph node T cells (Tcon). We will annotate the BSseq object to reflect this phenotypic information:
 
 <<bisphen>>=
-pData(bis_1072) <- data.frame(replicate=gsub(".*-", "", colnames(bis_1072)),
+bsseq::pData(bis_1072) <- data.frame(replicate=gsub(".*-", "", colnames(bis_1072)),
                               tissue=substr(colnames(bis_1072), 1, 
                                             nchar(colnames(bis_1072))-3), 
                               row.names=colnames(bis_1072))

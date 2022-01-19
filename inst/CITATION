@@ -1,5 +1,3 @@
-For Illumina arrays:
-
 citEntry(entry="article",
 	author = c(person(c("Timothy","J"),"Peters"),
 	           person(c("Michael", "J"),"Buckley"),
@@ -23,12 +21,10 @@ citEntry(entry="article",
 )
 
 	
-For WGBS:
-
 citEntry(entry="article",
 	author = c(person(c("Timothy","J"),"Peters"),
 	           person(c("Michael", "J"),"Buckley"),
-	           person(c("Yunshun","Chen"),
+	           person(c("Yunshun","Chen")),
 	           person(c("Gordon","K"),"Smyth"),
 	           person(c("Christopher","C"),"Goodnow"),
 		   person(c("Susan","J"),"Clark")),
@@ -37,10 +33,9 @@ citEntry(entry="article",
 	year = 2021,
 	volume = 49,
 	issue = 19,
-        pages = e109,
 	url = "https://academic.oup.com/nar/article/49/19/e109/6329576",
 	 textVersion = paste(sep="",
-    "Timothy J. Peters, Michael J. Buckley, Yunshun Chen, Gordon K. Smyth, Christopher C. Goodnow and Susan J. Clark ",
+    "Timothy J. Peters, Michael J. Buckley, Yunshun Chen, Gordon K. Smyth, Christopher C. Goodnow and Susan J. Clark ",
     "Calling differentially methylated regions from whole genome bisulphite sequencing with DMRcate, ",
     "Nucleic Acids Research, ", "2021, ", "49(19):e109, ", "doi:10.1093/nar/gkab637."
 )

@@ -1,7 +1,7 @@
 Package: DMRcate
 Title: Methylation array and sequencing spatial analysis methods
-Version: 2.9.1
-Date: 2021-12-09
+Version: 2.9.2
+Date: 2022-19-01
 Author: Tim Peters
 Maintainer: Tim Peters <t.peters@garvan.org.au>
 Authors@R: c(person("Tim", "Peters", role = c("cre", "aut"),
@@ -10,10 +10,10 @@ Authors@R: c(person("Tim", "Peters", role = c("cre", "aut"),
              person("Aaron", "Statham", role = "ctb"),
              person("Tim", "Triche, Jr.", role = "ctb"))
 Description: De novo identification and extraction of differentially methylated regions (DMRs) from the human genome using Whole Genome Bisulfite Sequencing (WGBS) and Illumina Infinium Array (450K and EPIC) data. Provides functionality for filtering probes possibly confounded by SNPs and cross-hybridisation. Includes GRanges generation and plotting functions.
-Depends: R (>= 3.6.0), minfi, SummarizedExperiment
-Imports: ExperimentHub, bsseq, GenomeInfoDb, limma, edgeR, DSS, missMethyl, GenomicRanges, methods, graphics, plyr, Gviz, IRanges, stats, utils, S4Vectors
+Depends: R (>= 4.0.0)
+Imports: ExperimentHub, bsseq, GenomeInfoDb, limma, edgeR, DSS, minfi, missMethyl, GenomicRanges, plyr, Gviz, IRanges, stats, utils, S4Vectors, methods, graphics, SummarizedExperiment
 biocViews: DifferentialMethylation, GeneExpression, Microarray, MethylationArray, Genetics, DifferentialExpression, GenomeAnnotation, DNAMethylation, OneChannel, TwoChannel, MultipleComparison, QualityControl, TimeCourse, Sequencing, WholeGenome, Epigenetics, Coverage, Preprocessing, DataImport
-Suggests: knitr, RUnit, BiocGenerics, IlluminaHumanMethylation450kanno.ilmn12.hg19, IlluminaHumanMethylationEPICanno.ilm10b4.hg19
+Suggests: knitr, RUnit, BiocGenerics, IlluminaHumanMethylation450kanno.ilmn12.hg19, IlluminaHumanMethylationEPICanno.ilm10b4.hg19, FlowSorted.Blood.EPIC, tissueTreg
 License: file LICENSE
 VignetteBuilder: knitr
 

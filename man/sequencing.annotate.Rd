@@ -54,9 +54,12 @@ sequencing.annotate(obj, methdesign, all.cov=FALSE, contrasts = FALSE,
   A \code{\link{CpGannotated-class}}.
 }
 \references{
+
+Peters, T. J., Buckley, M.J., Chen, Y., Smyth, G.K., Goodnow, C. C. and Clark, S. J. (2021). Calling differentially methylated regions from whole genome bisulphite sequencing with DMRcate. \emph{Nucleic Acids Research}, \bold{49}(19), e109.
+
 Ritchie, M. E., Phipson, B., Wu, D., Hu, Y., Law, C. W., Shi, W., & Smyth, G. K. (2015). limma powers differential expression analyses for RNA-sequencing and microarray studies. \emph{Nucleic Acids Research}, \bold{43}(7), e47. 
 
-Chen, Y., Pal, B., Visvader, J. E., & Smyth, G. K. (2017). Differential methylation analysis of reduced representation bisulfite sequencing experiments using edgeR. \emph{F1000Research}, \strong{6}, 2055. 
+
 
 }
 
@@ -66,6 +69,8 @@ Chen, Y., Pal, B., Visvader, J. E., & Smyth, G. K. (2017). Differential methylat
 \examples{
 library(ExperimentHub)
 library(SummarizedExperiment)
+library(bsseq)
+library(GenomeInfoDb)
 eh = ExperimentHub()
 bis_1072 <- eh[["EH1072"]]
 pData(bis_1072) <- data.frame(replicate=gsub(".*-", "", colnames(bis_1072)),

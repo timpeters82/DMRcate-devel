@@ -63,6 +63,8 @@ dmrcate(object,
 
 \references{
 
+Peters, T. J., Buckley, M.J., Chen, Y., Smyth, G.K., Goodnow, C. C. and Clark, S. J. (2021). Calling differentially methylated regions from whole genome bisulphite sequencing with DMRcate. \emph{Nucleic Acids Research}, \bold{49}(19), e109.
+
 Peters T.J., Buckley M.J., Statham, A., Pidsley R., Samaras K., Lord R.V., Clark S.J. and  Molloy P.L. \emph{De novo} identification of differentially methylated regions in the human genome. \emph{Epigenetics & Chromatin} 2015, \bold{8}:6,  doi:10.1186/1756-8935-8-6
 
 Wand, M.P. & Jones, M.C. (1995) \emph{Kernel Smoothing}. Chapman & Hall.
@@ -82,13 +84,13 @@ eh <- ExperimentHub()
 FlowSorted.Blood.EPIC <- eh[["EH1136"]]
 tcell <- FlowSorted.Blood.EPIC[,colData(FlowSorted.Blood.EPIC)$CD4T==100 |
                                 colData(FlowSorted.Blood.EPIC)$CD8T==100]
-detP <- detectionP(tcell)
+detP <- minfi::detectionP(tcell)
 remove <- apply(detP, 1, function (x) any(x > 0.01))
 tcell <- tcell[!remove,]
-tcell <- preprocessFunnorm(tcell)
+tcell <- minfi::preprocessFunnorm(tcell)
 #Subset to chr2 only
 tcell <- tcell[seqnames(tcell) == "chr2",]
-tcellms <- getM(tcell)
+tcellms <- minfi::getM(tcell)
 tcellms.noSNPs <- rmSNPandCH(tcellms, dist=2, mafcut=0.05)
 tcell$Replicate[tcell$Replicate==""] <- tcell$Sample_Name[tcell$Replicate==""]
 tcellms.noSNPs <- avearrays(tcellms.noSNPs, tcell$Replicate)
@@ -96,7 +98,7 @@ tcell <- tcell[,!duplicated(tcell$Replicate)]
 tcell <- tcell[rownames(tcellms.noSNPs),]
 colnames(tcellms.noSNPs) <- colnames(tcell)
 assays(tcell)[["M"]] <- tcellms.noSNPs
-assays(tcell)[["Beta"]] <- ilogit2(tcellms.noSNPs)
+assays(tcell)[["Beta"]] <- minfi::ilogit2(tcellms.noSNPs)
 type <- factor(tcell$CellType)
 design <- model.matrix(~type) 
 myannotation <- cpg.annotate("array", tcell, arraytype = "EPIC",
