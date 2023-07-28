@@ -9,9 +9,9 @@
   Heatmaps are shown as well as proximal coding regions, smoothed group means and chromosome ideogram.
 }
 \usage{
-DMR.plot(ranges, dmr, CpGs, what=c("Beta", "M"), 
-         arraytype=c("EPIC", "450K"), phen.col, 
-         genome = c("hg19", "hg38", "mm10"), ...)
+DMR.plot(ranges, dmr, CpGs, what = c("Beta", "M"), arraytype = c("EPIC", "450K"), 
+                    phen.col, genome = c("hg19", "hg38", "mm10"), labels=names(ranges), 
+                    group.means=FALSE, extra.ranges=NULL, extra.title=names(extra.ranges))
 }
 \arguments{
   \item{ranges}{
@@ -49,15 +49,24 @@ DMR.plot(ranges, dmr, CpGs, what=c("Beta", "M"),
     Reference genome for annotating DMRs. Can be one of \code{"hg19"},
     \code{"hg38"} or \code{"mm10"}
   }
-  \item{\dots}{
-    Extra arguments passed to \code{Gviz:::plotTracks()}.
+  \item{labels}{
+    Vector of DMR names to be displayed. Defaults to \code{names(ranges)}.
+  }
+  \item{group.means}{
+    Whether to plot smoothed methylation by individual sample (\code{FALSE}) or by groups defined in \code{phen.col} (\code{TRUE}).
+  }
+  \item{extra.ranges}{
+    Optional GRanges object. Will plot any range overlapping a DMR..
+  }
+  \item{extra.title}{
+    Vector of names for ranges from \code{extra.ranges}. Defaults to \code{names(extra.ranges)}.
   }
 }
 \value{
   A plot to the current device.
 }
 \author{
-  Aaron Statham <a.statham@garvan.org.au>, Tim J. Peters <t.peters@garvan.org.au>
+  Tim J. Peters <t.peters@garvan.org.au>, Aaron Statham <a.statham@garvan.org.au>
 }
 \examples{
 library(ExperimentHub)

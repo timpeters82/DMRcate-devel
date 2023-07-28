@@ -132,17 +132,17 @@ DMR.plot(ranges=results.ranges, dmr=1, CpGs=getBeta(tcell), what="Beta",
 
 Consonant with the expected biology, our top DMR shows the CD8+ T cells hypomethylated across parts of the CD8A locus. The two distinct hypomethylated sections have been merged because they are less than 1000 bp apart - specified by \texttt{lambda} in the call to \texttt{dmrcate()}. To call these as separate DMRs, make \texttt{lambda} smaller.
 
-Lastly, we would like to do a gene ontology test on our DMRs; this is made possible by the \texttt{goregion()} function in the \texttt{missMethyl} package. We will take the top 100 DMRs for this enrichment test.
+Lastly, we would like to do a gene ontology test on our DMRs; this is made possible by the \texttt{goregion()} function in the \texttt{missMethyl} package. We will take the top 100 hypomethylated DMRs in CD8+ T cells for this enrichment test.
 
 <<goregion>>=
 library(missMethyl)
-enrichment_GO <- goregion(results.ranges[1:100], all.cpg = rownames(tcell), 
-                          collection = "GO", array.type = "EPIC")
-enrichment_GO <- enrichment_GO[order(enrichment_GO$P.DE),]
-head(as.matrix(enrichment_GO), 10)
+enrichment_KEGG <- goregion(results.ranges[results.ranges$meandiff < 0][1:100], all.cpg = rownames(tcell), 
+                          collection = "KEGG", array.type = "EPIC")
+enrichment_KEGG <- enrichment_KEGG[order(enrichment_KEGG$P.DE),]
+head(as.matrix(enrichment_KEGG), 10)
 @
 
-From this enrichment test we can see the most enriched terms are germane to the contrast at hand, including lymphocyte activation and differentiation, T cell activation and MHC protein binding.
+From this enrichment test we can see the most enriched terms relate to CD8+ T cell function, including antigen processing and presentation as the top hit, in addition to other infection and immunity terms.
 
 \section*{Bisulfite sequencing workflow}
 
@@ -272,7 +272,7 @@ cols
 DMR.plot(fat_vs_skin.ranges, dmr = 1, CpGs=bis_1072, phen.col = cols, genome="mm10")
 @
 
-Here we can see the methylation of skin cells over this section of \textit{Gcnt1} is hypomethylated not only relative to fat, but to the other tissues as well.
+Here we can see the methylation of skin cells over this region near the \textit{Gcnt1} transcription start site is hypomethylated not only relative to fat, but to the other tissues as well.
 
 As an alternative to \texttt{limma}, there is also the option of taking CpG-level differential statistics using \texttt{DSS::DMLtest()} or \texttt{DSS::DMLtest.multiFactor()}. There is no need to pass arguments such as \texttt{design}, \texttt{coef}, etc. to \texttt{sequencing.annotate()} in this case since we do this outside of the function. \texttt{fdr}, however, must be specified. For example:
 
