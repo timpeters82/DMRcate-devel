@@ -1,3 +1,9 @@
+
+CHANGES IN DMRcate VERSION 2.15.1
+
+- DMR.plot() updated: ellipsis removed; biomaRt gene tracks now used; collapseTranscripts="meta"; exonAnnotation="symbol"; overlapping regions plotted as optional extra
+- goregion() ontology changed to KEGG and for hypomethylated DMRs only
+
 CHANGES IN DMRcate VERSION 2.8.1
 
 CITATION updated.
