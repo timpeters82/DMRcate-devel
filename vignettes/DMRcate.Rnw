@@ -274,27 +274,6 @@ DMR.plot(fat_vs_skin.ranges, dmr = 1, CpGs=bis_1072, phen.col = cols, genome="mm
 
 Here we can see the methylation of skin cells over this region near the \textit{Gcnt1} transcription start site is hypomethylated not only relative to fat, but to the other tissues as well.
 
-As an alternative to \texttt{limma}, there is also the option of taking CpG-level differential statistics using \texttt{DSS::DMLtest()} or \texttt{DSS::DMLtest.multiFactor()}. There is no need to pass arguments such as \texttt{design}, \texttt{coef}, etc. to \texttt{sequencing.annotate()} in this case since we do this outside of the function. \texttt{fdr}, however, must be specified. For example:
-
-<<DSS, message=FALSE>>=
-library(DSS)
-DMLfit <- DMLfit.multiFactor(bis_1072, design=data.frame(tissue=tissue), formula=~tissue)
-DSS_treg.vs.tcon <- DMLtest.multiFactor(DMLfit, Contrast=matrix(c(0, 0, -1, 1, 0)))
-#Make sure to filter out all sites where the test statistic is NA
-DSS_treg.vs.tcon <- DSS_treg.vs.tcon[!is.na(DSS_treg.vs.tcon$stat),]
-
-seq_annot <- sequencing.annotate(obj=DSS_treg.vs.tcon, fdr=0.05)
-seq_annot
-
-dmrcate.res <- dmrcate(seq_annot, C=2, min.cpgs = 5)
-DSS.treg_vs_tcon.ranges <- extractRanges(dmrcate.res, genome="mm10")
-
-findOverlaps(treg_vs_tcon.ranges, DSS.treg_vs_tcon.ranges)
-@
-
-All of the 9 DMRs found using results from \texttt{limma} are also found using \texttt{DSS::DMLtest.multiFactor()}, with an extra 21 DMRs found by the latter at the same FDR. This suggests that DMLtest.multiFactor() is a little more permissive in calling differential methylation.
-
-
 <<sessionInfo>>=
 sessionInfo()
 @
@@ -340,9 +319,6 @@ sessionInfo()
   A Bayesian hierarchical model to detect differentially methylated loci from single nucleotide resolution sequencing data. 
   \emph{Nucleic Acids Research}. 2014 \textbf{42}(8), e69. 
   
-\bibitem{Park}
-  Park Y, and Wu H. Differential methylation analysis for BS-seq data under general experimental design. 
-  \emph{Bioinformatics}. 2016 \textbf{32}(10), 1446-1453. 
-  
+
 \end{thebibliography}
 \end{document}
