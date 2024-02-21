@@ -1,0 +1,191 @@
+\documentclass{article}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{breakurl}
+\usepackage{amsmath}
+\usepackage{amssymb}
+%\VignetteIndexEntry{DMR calling from EPICv2 arrays}
+%\VignetteEngine{knitr::knitr}
+\begin{document}
+\title{\texttt{DMRcate} for EPICv2}
+
+\author{Peters TJ}
+\maketitle
+
+
+\renewcommand{\abstractname}{Summary}
+\begin{abstract}
+Worked example to find DMRs from EPICv2 arrays between B cell ALL and T cell ALL samples.
+\end{abstract}
+
+<<bioconductor, message=FALSE, warning=FALSE, eval=FALSE>>=
+if (!require("BiocManager"))
+	install.packages("BiocManager")
+BiocManager::install("DMRcate")
+@
+
+
+The Illumina Infinium HumanMethylationEPIC v2.0 BeadChip (EPICv2) extends genomic coverage to more than
+920,000 CpG sites. One of the new characteristics of this array compared to previous versions is that
+it contains instances of multiple probes (or ``replicates'') that map to the same CpG site. This is
+potentially useful for performance testing of probes, but for DMRcate we need a 1-to-1 mapping of probe 
+to CpG site, otherwise the kernel will be biased towards those sites with more replicates. This vignette
+will show how to pare down an EPICv2 dataset to a suitable format for DMR calling. We use the AnnotationHub package EPICv2manifest\cite{Peters2024} as a backend for this purpose.
+
+<<libr, message=FALSE, warning=FALSE>>=
+library(DMRcate)
+@
+
+We use a subset of samples kindly taken from Noguera-Castells \emph{et al.} (2023), for finding DMRs between T cell acute lymphoblastic leukaemia (TALL) and B cell acute lymphoblastic leukaemia (BALL). We load the beta 
+matrix from ExperimentHub:
+
+<<libreh, message=FALSE, warning=FALSE>>=
+library(ExperimentHub)
+eh <- ExperimentHub()
+ALLbetas <- eh[["EH9451"]]
+head(ALLbetas)
+@
+
+
+There are 5 TALL samples and 5 BALL samples, which, at a glance, may have distinct methylation profiles. 
+
+<<density>>=
+plot(density(ALLbetas[,1]), col="forestgreen", xlab="Beta value", ylim=c(0, 6), 
+     main="Noguera-Castells et al. 2023 ALL samples", lwd=2)
+invisible(sapply(2:5, function (x) lines(density(ALLbetas[,x]), col="forestgreen", lwd=2)))
+invisible(sapply(6:10, function (x) lines(density(ALLbetas[,x]), col="orange", lwd=2)))
+legend("topleft", c("B cell ALL", "T cell ALL"), text.col=c("forestgreen", "orange"))
+@
+
+
+Now let's \textrm{logit}2 transform the betas into \textit{M}-values, which approximate normality for linear modelling.
+
+<<Ms>>=
+ALLMs <- minfi::logit2(ALLbetas)
+@
+
+
+Just like with the previous EPIC array, there are subsets of probes whose target is near a SNP, and also subsets for which there is evidence of cross-reactivity with other parts of the genome (Peters \textit{et al.} 2024), both which can be filtered out with with \texttt{rmSNPandCH}. We will filter out the SNP-proximal probes, but for this vignette, we will retain the EPICv2 probes for which there is evidence for preferential binding to off-targets, using \texttt{rmcrosshyb=FALSE}, since these off-targets have also been mapped (Peters \textit{et al.} 2024).
+
+
+<<rmSNPandCH>>=
+nrow(ALLMs)
+ALLMs.noSNPs <- rmSNPandCH(ALLMs, rmcrosshyb = FALSE)
+nrow(ALLMs.noSNPs)
+@
+
+Plotting the first two principal components reveals group differences between TALL and BALL:
+
+
+<<PCA>>==
+typecol <- ifelse(grepl("TALL", colnames(ALLMs.noSNPs)), "orange", "forestgreen")
+pca <- prcomp(t(ALLMs.noSNPs))
+plot(pca$x[,1:2], xlab="", ylab="", col=typecol, cex=2, pch=16)
+  lam <- pca$sdev
+  v <- lam^2
+  v <- v/sum(v)
+  k1 <- round(100*v[1], 2)
+  k2 <- round(100*v[2], 2)
+  title(main=paste0("Noguera-Castells et al. 2023 lung samples PCA,\n", k1+k2, 
+                    "% of variance explained"), xlab=paste0(k1, "% of variance explained"), 
+        ylab=paste0(k2, "% of variance explained"))
+  legend("topright", c("T cell ALL", "B cell ALL"), text.col=c("orange", "forestgreen"))
+@
+
+
+EPICv2 data contains groups of probes we call ``replicates'' that map to the same CpG site. Since DMRcate requires a 1-to-1 relationship between rows of methylation measurements and CpG loci, lest the kernel become biased towards sites with multiple mappings, we need to attenuate our \textit{M}-value matrix to maintain this relationship. The function \texttt{rmPosReps()} does this, with user options specified by the argument \texttt{filter.strategy}. The default is to take the \texttt{mean} of each replicate group (with row name represented by the first probe in each group that appears in the manifest):
+
+<<repmean>>==
+ALLMs.noSNPs.repmean <- rmPosReps(ALLMs.noSNPs, filter.strategy="mean")
+@
+
+However, we can also select one probe from each replicate group based on its performance from cross-platform comparisons with EPICv1 and WGBS data (see Peters \textit{et al.} 2024). Probe robustness is measured in terms of either: 
+
+\begin{itemize}
+
+\item its sensitivity to methylation change and measurement precision, relative to a platform consensus obtained from matched EPICv1 and whole genome bisulphite sequencing (WGBS) values (Peters \textit{et al.} 2019)
+
+\item minimum root mean squared error (RMSE) with WGBS (mainly for probes that don't appear on EPICv1)
+
+\end{itemize}
+
+In some cases, a replicated probe will prove superior in both sensitivity and precision, however in many cases superior sensitivity and precision is split between two probes in a replicate group. Furthermore, an individual probe may have superior sensitivity in a group, but superior precision is incurred by the group mean. Hence we give the user the option of choosing \texttt{sensitivity} or \texttt{precision}, based on their appetite for potential Type I error. In cases where there is insufficient evidence for superiority, a replicate probe is taken at random from the group. This strategy is generalised to all replicate groups for the \texttt{random} option. Figure 1 shows the differences in probe selection based on the \texttt{filter.strategy} argument. In practice, the number of differentially methylated CpGs (and hence DMRs) is unlikely to vary greatly depending on the \texttt{filter.strategy} argument, but we provide this optionality to make use of all available probes on the array, and to potentially update the manifest with more rigorous probe benchmarking as usage proliferates.
+
+
+
+\begin{figure}[htbp!]
+  \caption{Variation in probe selection based on the \texttt{filter.strategy} argument from \texttt{rmPosReps()}. Values in the ``Random'' group may differ when reproduced.
+}
+  \centering
+    \includegraphics[width=\textwidth]{ProbeVenn.pdf}
+\end{figure}
+
+The main event, however, is calling DMRs. Let's take our replicate-averaged \textit{M}-value matrix and specify our hypothesis to call DMRs between T cell and B cell ALL samples:
+
+<<hypothesis>>=
+type <- gsub("_.*", "", colnames(ALLMs.noSNPs.repmean))
+type
+design <- model.matrix(~type)
+design
+@
+
+
+Now for \texttt{cpg.annotate()}. In DMRcate 3.0 we have added an extra logical argument \texttt{epicv2Remap} giving the user the option of reassigning probes to an off-target CpG site where there is evidence (based on both \textit{in silico} alignment and concordance with WGBS data) that the probe is preferentially hybridising to that site. As stated previously, this will only apply when you have specified \texttt{rmcrosshyb=FALSE} in \texttt{rmSNPandCH()}. 
+
+<<cpg.annotate>>=
+myannotation <- cpg.annotate("array", object=ALLMs.noSNPs.repmean, what = "M", 
+                             arraytype = "EPICv2", epicv2Remap = TRUE, 
+                             analysis.type="differential", design=design, coef=2, 
+                             fdr=0.001)
+@
+                             
+And then, as usual, call DMRs and annotate them. Unlike previous arrays, the EPICv2 manifest is in hg38:
+
+<<dmrcate>>=
+dmrcoutput <- dmrcate(myannotation, lambda=1000, C=2)
+results.ranges <- extractRanges(dmrcoutput, genome = "hg38")
+results.ranges
+@
+
+And finally, plotting the top DMR. 
+
+<<plot>>=
+groups <- c(BALL="forestgreen", TALL="orange")
+cols <- groups[as.character(type)]
+DMR.plot(ranges=results.ranges, dmr=2, CpGs=ALLbetas, 
+         what = "Beta", arraytype = "EPICv2", phen.col=cols, genome = "hg38") 
+@
+ 
+<<sessionInfo>>=       
+sessionInfo()
+@
+
+
+\begin{thebibliography}{99}
+
+
+\bibitem{Noguera}
+  Noguera-Castells A, Garcia-Prieto CA, Alvarez-Errico D, Esteller, M. 
+  (2023). Validation of the new EPIC DNA methylation microarray (900K EPIC v2) 
+  for high-throughput profiling of the human DNA methylome. \emph{Epigenetics}
+  18(1), 2185742.
+
+\bibitem{Peters2024}
+  Pidsley R, Zotenko E, Peters TJ, Lawrence MG, Risbridger GP, Molloy P, 
+  Van Dijk S, Muhlhausler B, Stirzaker C, Clark SJ. Critical evaluation of 
+  the Illumina MethylationEPIC BeadChip microarray for whole-genome DNA 
+  methylation profiling. \emph{Genome Biology}. 2016 17(1), 208.
+
+\bibitem{Peters2019}
+  Peters TJ, French HJ, Bradford ST, Pidsley R, Stirzaker C, Varinli H, 
+  Nair, S, Qu W, Song J, Giles KA, Statham AL, Speirs H, Speed TP, Clark, SJ. 
+  (2019). Evaluation of cross-platform and interlaboratory concordance via 
+  consensus modelling of genomic measurements. \emph{Bioinformatics}, 2019 
+  35(4), 560-570.
+
+
+
+\end{thebibliography}
+
+
+\end{document}

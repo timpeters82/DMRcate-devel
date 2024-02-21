@@ -6,12 +6,14 @@
 }
 \description{
   Plots an individual DMR (in context of possibly other DMRs) as found by \code{dmrcate}. 
-  Heatmaps are shown as well as proximal coding regions, smoothed group means and chromosome ideogram.
+  Heatmaps are shown as well as proximal coding regions, smoothed methylation values 
+  (with an option for smoothed group means) and chromosome ideogram.
 }
 \usage{
-DMR.plot(ranges, dmr, CpGs, what = c("Beta", "M"), arraytype = c("EPIC", "450K"), 
-                    phen.col, genome = c("hg19", "hg38", "mm10"), labels=names(ranges), 
-                    group.means=FALSE, extra.ranges=NULL, extra.title=names(extra.ranges))
+DMR.plot(ranges, dmr, CpGs, what = c("Beta", "M"), 
+         arraytype = c("EPICv2", "EPICv1", "450K"), phen.col, 
+         genome = c("hg19", "hg38", "mm10"), labels = names(ranges), 
+         group.means = FALSE, extra.ranges = NULL, extra.title = names(extra.ranges))
 }
 \arguments{
   \item{ranges}{
@@ -92,12 +94,12 @@ assays(tcell)[["M"]] <- tcellms.noSNPs
 assays(tcell)[["Beta"]] <- minfi::ilogit2(tcellms.noSNPs)
 type <- factor(tcell$CellType)
 design <- model.matrix(~type) 
-myannotation <- cpg.annotate("array", tcell, arraytype = "EPIC",
+myannotation <- cpg.annotate("array", tcell, arraytype = "EPICv1",
                              analysis.type="differential", design=design, coef=2)
 dmrcoutput <- dmrcate(myannotation, lambda=1000, C=2)
 results.ranges <- extractRanges(dmrcoutput, genome = "hg19")
 groups <- c(CD8T="magenta", CD4T="forestgreen")
 cols <- groups[as.character(type)]
 DMR.plot(ranges=results.ranges, dmr=1, CpGs=minfi::getBeta(tcell), what="Beta", 
-         arraytype = "EPIC", phen.col=cols, genome="hg19")
+         arraytype = "EPICv1", phen.col=cols, genome="hg19")
 }

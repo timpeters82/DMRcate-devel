@@ -1,0 +1,179 @@
+\documentclass{article}
+\usepackage{url}
+\usepackage{hyperref}
+\usepackage{breakurl}
+\usepackage{amsmath}
+\usepackage{amssymb}
+%\VignetteIndexEntry{DMRcate for EPICv1 and 450K assays}
+%\VignetteEngine{knitr::knitr}
+\begin{document}
+\title{Calling DMRs from EPICv1 and 450K data}
+
+\author{Peters TJ}
+\maketitle
+
+\renewcommand{\abstractname}{Summary}
+\begin{abstract}
+This vignette demonstrates how to call DMRs from older versions of Illumina arrays, namely 450K and EPICv1 (pre-2022). 
+\end{abstract}
+
+
+<<bioconductor, message=FALSE, warning=FALSE, eval=FALSE>>=
+if (!require("BiocManager"))
+	install.packages("BiocManager")
+BiocManager::install("DMRcate")
+@
+
+Load \texttt{DMRcate} into the workspace:
+
+<<libr, message=FALSE, warning=FALSE>>=
+library(DMRcate)
+@
+
+For this vignette, we will demonstrate DMRcate's array utility using data from \texttt{ExperimentHub}, namely Illumina HumanMethylationEPIC data from the data packages \texttt{FlowSorted.Blood.EPIC}. Specifically, we are interested in the methylation differences between CD4+ and CD8+ T cells.  
+
+<<tcells, message=FALSE>>=
+library(ExperimentHub)
+eh <- ExperimentHub()
+FlowSorted.Blood.EPIC <- eh[["EH1136"]]  
+tcell <- FlowSorted.Blood.EPIC[,colData(FlowSorted.Blood.EPIC)$CD4T==100 | 
+                                 colData(FlowSorted.Blood.EPIC)$CD8T==100]
+@
+
+Firstly we filter out any probes where any sample has a failed position. Then we normalise using \texttt{minfi::preprocessFunnorm}. After this, we extract the \emph{M}-values from the GenomicRatioSet.
+
+<<detpnorm>>==
+detP <- detectionP(tcell)
+remove <- apply(detP, 1, function (x) any(x > 0.01))
+tcell <- preprocessFunnorm(tcell)
+tcell <- tcell[!rownames(tcell) %in% names(which(remove)),]
+tcellms <- getM(tcell)
+@
+
+\textit{M}-values (logit-transform of beta) are preferable to beta values for significance testing via \texttt{limma} since they approximate normality, and provide greater sensitivity towards the extremes of the distribution, but we will use a beta matrix for visualisation purposes later on.
+
+Some of the methylation measurements on the array may be confounded by proximity to SNPs, and cross-hybridisation to other areas of the genome\cite{Pidsley, Chena}. In particular, probes that are 0, 1, or 2 nucleotides from the methylcytosine of interest show a markedly different distribution to those farther away, in healthy tissue (Figure 1). 
+
+\begin{figure}[htbp!]
+  \caption{Beta distribution of 450K probes from publicly available data from blood samples of healthy individuals \cite{Heyn} by their proximity to a SNP. ``All SNP probes'' refers to the 153,113 probes listed by Illumina whose values may potentially be confounded by a SNP.
+}
+  \centering
+    \includegraphics[width=\textwidth]{heynSNP.pdf}
+\end{figure}
+
+It is with this in mind that we filter out probes 2 nucleotides or closer to a SNP that have a minor allele frequency greater than 0.05, and the approximately 48,000 \cite{Pidsley, Chena} cross-reactive probes on either 450K and/or EPIC, so as to reduce confounding. Here we use a combination of \textit{in silico} analyses from \cite{Pidsley, Chena}.  About 60,000 are removed from our M-matrix of approximately 864,000:
+
+<<filter, message=FALSE>>=
+nrow(tcellms)
+tcellms.noSNPs <- rmSNPandCH(tcellms, dist=2, mafcut=0.05)
+nrow(tcellms.noSNPs)
+@
+
+
+Here we have 6 CD8+ T cell assays, and 7 CD4+ T cell assays; we want to call DMRs between these groups. One of the CD4+ assays is a technical replicate, so we will average these two replicates like so:
+
+<<avearrays>>==
+tcell$Replicate
+tcell$Replicate[tcell$Replicate==""] <- tcell$Sample_Name[tcell$Replicate==""]
+tcellms.noSNPs <- limma::avearrays(tcellms.noSNPs, tcell$Replicate)
+tcell <- tcell[,!duplicated(tcell$Replicate)]
+tcell <- tcell[rownames(tcellms.noSNPs),]
+colnames(tcellms.noSNPs) <- colnames(tcell)
+assays(tcell)[["M"]] <- tcellms.noSNPs
+assays(tcell)[["Beta"]] <- ilogit2(tcellms.noSNPs)
+@
+
+Next we want to annotate our matrix of M-values with relevant information. We also use the backbone of the \texttt{limma} pipeline for differential array analysis. We want to compare within patients across tissue samples, so we set up our variables for a standard limma pipeline, and set \texttt{coef=2} in \texttt{cpg.annotate()} since this corresponds to the phenotype comparison in \texttt{design}. 
+
+\texttt{cpg.annotate()} takes either a data matrix with Illumina probe IDs, or an already prepared GenomicRatioSet from \texttt{minfi}.
+
+<<annotate, message=FALSE>>=
+type <- factor(tcell$CellType)
+design <- model.matrix(~type) 
+myannotation <- cpg.annotate("array", tcell, arraytype = "EPICv1",
+                             analysis.type="differential", design=design, coef=2)
+@
+
+<<showmyannotation>>=
+myannotation
+@
+
+Now we can find our most differentially methylated regions with \texttt{dmrcate()}.
+
+For each chromosome, two smoothed estimates are computed: one weighted with per-CpG \textit{t}-statistics and one not, for a null comparison. The two estimates are compared via a Satterthwaite approximation\cite{Satterthwaite}, and a significance test is calculated at all hg19 coordinates that an input probe maps to. After fdr-correction, regions are then aggregated from groups of post-smoothed significant probes where the distance to the next consecutive probe is less than \texttt{lambda} nucleotides.
+
+
+<<dmrcate, warning=FALSE>>=
+dmrcoutput <- dmrcate(myannotation, lambda=1000, C=2)
+dmrcoutput
+@
+
+We can convert our DMR list to a GRanges object, which uses the \texttt{genome} argument to annotate overlapping gene loci. 
+
+<<ranges, message=FALSE>>=
+results.ranges <- extractRanges(dmrcoutput, genome = "hg19")
+results.ranges
+@
+
+DMRs are ranked by Fisher's multiple comparison statistic, but \texttt{Stouffer} scores and the harmonic mean of the individual component FDRs (\texttt{HMFDR}) are also given in this object as alternative options for ranking DMR significance.
+
+We can then pass this GRanges object to \texttt{DMR.plot()}, which uses the \texttt{Gviz} package as a backend for contextualising each DMR.  
+
+
+<<plotting, message=FALSE>>=
+groups <- c(CD8T="magenta", CD4T="forestgreen")
+cols <- groups[as.character(type)]
+cols
+
+DMR.plot(ranges=results.ranges, dmr=1, CpGs=getBeta(tcell), what="Beta", 
+         arraytype = "EPICv1", phen.col=cols, genome="hg19")
+@
+
+Consonant with the expected biology, our top DMR shows the CD8+ T cells hypomethylated across parts of the CD8A locus. The two distinct hypomethylated sections have been merged because they are less than 1000 bp apart - specified by \texttt{lambda} in the call to \texttt{dmrcate()}. To call these as separate DMRs, make \texttt{lambda} smaller.
+
+Lastly, we would like to do a gene ontology test on our DMRs; this is made possible by the \texttt{goregion()} function in the \texttt{missMethyl} package. We will take the top 100 hypomethylated DMRs in CD8+ T cells for this enrichment test.
+
+<<goregion>>=
+library(missMethyl)
+enrichment_KEGG <- goregion(results.ranges[results.ranges$meandiff < 0][1:100], 
+                            all.cpg = rownames(tcell), collection = "KEGG", 
+                            array.type = "EPIC")
+enrichment_KEGG <- enrichment_KEGG[order(enrichment_KEGG$P.DE),]
+head(enrichment_KEGG, 10)
+@
+
+From this enrichment test we can see the most enriched terms relate to CD8+ T cell function, including antigen processing and presentation as the top hit, in addition to other infection and immunity terms.
+
+
+<<sessionInfo>>=
+sessionInfo()
+@
+
+
+
+\begin{thebibliography}{99}
+
+\bibitem{Pidsley}
+  Pidsley R, Zotenko E, Peters TJ, Lawrence MG, Risbridger GP, Molloy P, 
+  Van Dijk S, Muhlhausler B, Stirzaker C, Clark SJ. Critical evaluation of 
+  the Illumina MethylationEPIC BeadChip microarray for whole-genome DNA 
+  methylation profiling. \emph{Genome Biology}. 2016 17(1), 208.
+
+\bibitem{Chena}
+  Chen YA, Lemire M, Choufani S, Butcher DT, Grafodatskaya D, Zanke BW, Gallinger S, Hudson TJ, Weksberg R. 
+  Discovery of cross-reactive probes and polymorphic CpGs in the Illumina Infinium HumanMethylation450 microarray. 
+  \emph{Epigenetics}. 2013 Jan 11;8(2).
+
+\bibitem{Heyn}
+  Heyn H, Li N, Ferreira HJ, Moran S, Pisano DG, Gomez A, Esteller M. 
+  Distinct DNA methylomes of newborns and centenarians.
+  \emph{Proceedings of the National Academy of Sciences}. 2012 \textbf{109}(26), 10522-7.
+  
+\bibitem{Satterthwaite}
+  Satterthwaite FE. 
+  An Approximate Distribution of Estimates of Variance Components., 
+  \emph{Biometrics Bulletin}. 1946 \textbf{2}: 110-114
+
+
+\end{thebibliography}
+\end{document}

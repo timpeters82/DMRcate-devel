@@ -50,8 +50,9 @@ assays(tcell)[["M"]] <- tcellms.noSNPs
 assays(tcell)[["Beta"]] <- minfi::ilogit2(tcellms.noSNPs)
 type <- factor(tcell$CellType)
 design <- model.matrix(~type) 
-myannotation <- cpg.annotate("array", tcell, arraytype = "EPIC",
-                             analysis.type="differential", design=design, coef=2)
+myannotation <- cpg.annotate("array", tcell, arraytype = "EPICv1",
+                             analysis.type="differential",
+                             design=design, coef=2)
 dmrcoutput <- dmrcate(myannotation, lambda=1000, C=2)
 results.ranges <- extractRanges(dmrcoutput, genome = "hg19")
 }

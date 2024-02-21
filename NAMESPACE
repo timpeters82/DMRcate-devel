@@ -8,23 +8,17 @@ import(bsseq)
 import(IRanges)
 import(SummarizedExperiment)
 import(ExperimentHub)
+import(AnnotationHub)
 importFrom("plyr", rbind.fill)
 importFrom("graphics", plot)
-importFrom("S4Vectors", subjectHits)
+importFrom("S4Vectors", subjectHits, queryHits)
 importFrom("stats", approx, p.adjust, pchisq, pnorm, qnorm)
 importFrom("edgeR", modelMatrixMeth)
 importFrom("utils", data)
-importFrom("minfi", detectionP, preprocessFunnorm, getM, makeGenomicRatioSetFromMatrix, getBeta, getAnnotation, ilogit2)
+importFrom("minfi", detectionP, preprocessFunnorm, getM, makeGenomicRatioSetFromMatrix, getBeta, getAnnotation, ilogit2, logit2)
 importFrom("missMethyl", goregion, varFit, contrasts.varFit, topVar)
 importFrom("biomaRt", useEnsembl, useMart)
 importFrom("Gviz", BiomartGeneRegionTrack)
 importFrom("grDevices", colorRampPalette)
-export(dmrcate)
-exportMethods(
-	cpg.annotate, 
-	sequencing.annotate,
-	rmSNPandCH, 
-	DMR.plot,
-	extractRanges,
-	changeFDR
-	)
+export(dmrcate, rmPosReps)
+exportMethods(cpg.annotate, sequencing.annotate, rmSNPandCH, DMR.plot, extractRanges, changeFDR)

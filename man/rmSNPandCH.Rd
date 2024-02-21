@@ -4,10 +4,10 @@
   Filter probes
 }
 \description{
-  Filters a matrix of M-values (or beta values) by distance to SNP/variant. Also (optionally) removes cross-hybridising probes and sex-chromosome probes.
+  Filters a matrix of M-values (or beta values) by distance to SNP/variant. Also (optionally) removes cross-hybridising probes and sex-chromosome probes. Also removes ``rs'' and ``nv'' probes from the matrix.
 }
 \usage{
-rmSNPandCH(object, dist = 2, mafcut = 0.05, and = TRUE, rmcrosshyb = TRUE, rmXY=FALSE)
+rmSNPandCH(object, dist = 2, mafcut = 0.05, and = TRUE, rmcrosshyb = TRUE, rmXY = FALSE) 
 }
 \arguments{
   \item{object}{
@@ -30,12 +30,10 @@ rmSNPandCH(object, dist = 2, mafcut = 0.05, and = TRUE, rmcrosshyb = TRUE, rmXY=
     \code{TRUE}.
   }
   \item{rmcrosshyb}{
-    If \code{TRUE}, filters out probes found by Pidsley and Zotenko et al. (2016)
-    for EPIC or Chen et al. (2013) for 450K to be cross-reactive with areas of the genome not
-    at the site of interest. Many of these sites are on the X-chromosome, leading to
-    potential confounding if the sample group is a mix of males and
-    females. There are 63,707 probes in total in this list. Default is
-    \code{TRUE}.
+    If \code{TRUE}, filters out probes found by Peters et al. (2024) (EPICv2),
+    Pidsley and Zotenko et al. (2016) (EPICv1) or Chen et al. (2013) (450K) 
+    to be cross-reactive with areas of the genome not at the site of interest. 
+    Default is \code{TRUE}.
   }
   \item{rmXY}{
     If \code{TRUE}, filters out probe hybridising to sex chromosomes. Or-operator applies when combined with other 2 filters. 
@@ -44,8 +42,8 @@ rmSNPandCH(object, dist = 2, mafcut = 0.05, and = TRUE, rmcrosshyb = TRUE, rmXY=
 \details{
   Probes in \code{-1:dist} will be filtered out for any integer
   specification of \code{dist}. When a probe is listed as being ``-1''
-  nucleotides from a SNP (7 in total of the 153,113), that SNP is
-  immediately adjacent to the end of the probe, and is likely to
+  nucleotides from a SNP, that SNP is immediately adjacent to the end of 
+  the probe, and is likely to
   confound the measurement, in addition to those listed as 0, 1 or 2
   nucleotides away. See vignette for further details.
 }
@@ -67,7 +65,7 @@ rmSNPandCH(object, dist = 2, mafcut = 0.05, and = TRUE, rmcrosshyb = TRUE, rmXY=
 
 }
 \author{
-  Tim J. Peters <t.peters@garvan.org.au>
+  Tim Peters <t.peters@garvan.org.au>
 }
 \examples{
 library(ExperimentHub)

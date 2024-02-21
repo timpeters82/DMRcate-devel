@@ -4,16 +4,17 @@
   Annotate Illumina CpGs with their chromosome position and test statistic
 }
 \description{
-Annotate a matrix/GenomicRatioSet representing 450K or EPIC data with probe weights and chromosomal position.
+Annotate a matrix/GenomicRatioSet representing EPICv2, EPICv1 or 450K data with probe weights and chromosomal position. Provides replicate filtering and remapping functions for EPICv2 probes.
 
 }
 \usage{
 
-cpg.annotate(datatype = c("array", "sequencing"), object, what=c("Beta", "M"), 
-             arraytype=c("EPIC", "450K"), analysis.type = c("differential", 
+cpg.annotate(datatype = c("array", "sequencing"), object,  
+             what = c("Beta", "M"), arraytype = c("EPICv2", "EPICv1", "EPIC", 
+             "450K"), epicv2Remap = TRUE, analysis.type = c("differential", 
              "variability", "ANOVA", "diffVar"), design, contrasts = FALSE, 
-             cont.matrix = NULL, fdr = 0.05, coef, varFitcoef=NULL, 
-             topVarcoef=NULL, ...) 
+             cont.matrix = NULL, fdr = 0.05, coef, varFitcoef = NULL, 
+             topVarcoef = NULL, ...) 
 }
 \arguments{
   \item{datatype}{
@@ -35,6 +36,11 @@ cpg.annotate(datatype = c("array", "sequencing"), object, what=c("Beta", "M"),
     Is the data matrix sourced from EPIC or 450K data? Not needed
     if object is a GenomicRatioSet.
   }
+  \item{epicv2Remap}{
+    Logical indicating whether to remap 11,878 cross-hybridising EPICv2 probes 
+    to their more likely CpG target (see Peters \emph{et al.} 2024).
+  }
+  
   \item{analysis.type}{
     \code{"differential"} for \code{dmrcate()} to return DMRs;
     \code{"variability"} to return VMRs;
@@ -96,8 +102,6 @@ cpg.annotate(datatype = c("array", "sequencing"), object, what=c("Beta", "M"),
 \references{
 Ritchie, M. E., Phipson, B., Wu, D., Hu, Y., Law, C. W., Shi, W., & Smyth, G. K. (2015). limma powers differential expression analyses for RNA-sequencing and microarray studies. \emph{Nucleic Acids Research}, \bold{43}(7), e47. 
 
-Feng, H., Conneely, K. N., & Wu, H. (2014). A Bayesian hierarchical model to detect differentially methylated loci from single nucleotide resolution sequencing data. \emph{Nucleic Acids Research}, \bold{42}(8), e69. 
-
 Phipson, B., & Oshlack, A. (2014). DiffVar: a new method for detecting differential variability with application to methylation in cancer and aging. \emph{Genome Biol}, \emph{15}(9), 465. 
 
 Peters T.J., Buckley M.J., Statham, A., Pidsley R., Samaras K., Lord R.V., Clark S.J. and  Molloy P.L. \emph{De novo} identification of differentially methylated regions in the human genome. \emph{Epigenetics & Chromatin} 2015, \bold{8}:6,  doi:10.1186/1756-8935-8-6.
@@ -130,7 +134,7 @@ assays(tcell)[["M"]] <- tcellms.noSNPs
 assays(tcell)[["Beta"]] <- minfi::ilogit2(tcellms.noSNPs)
 type <- factor(tcell$CellType)
 design <- model.matrix(~type) 
-myannotation <- cpg.annotate("array", tcell, arraytype = "EPIC",
+myannotation <- cpg.annotate("array", tcell, arraytype = "EPICv1",
                              analysis.type="differential", design=design, coef=2)
 }
 

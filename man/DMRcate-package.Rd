@@ -7,7 +7,7 @@ DMR calling from bisulfite sequencing and Illumina array data
 }
 \description{
   \emph{De novo} identification and extraction of differentially
-  methylated regions (DMRs) in the human genome using Illumin array and bisulfite sequencing
+  methylated regions (DMRs) in the human genome using Illumina array and bisulfite sequencing
   data. \code{DMRcate} extracts and annotates differentially methylated regions
   (DMRs) using a kernel-smoothed estimate. Functions are
   provided for filtering probes possibly confounded by SNPs and
@@ -17,7 +17,10 @@ DMR calling from bisulfite sequencing and Illumina array data
 Tim J. Peters <t.peters@garvan.org.au>
 }
 \references{
-Peters T.J., Buckley M.J., Statham, A., Pidsley R., Samaras K., Lord R.V., Clark S.J. and  Molloy P.L. \emph{De novo} identification of differentially methylated regions in the human genome. \emph{Epigenetics & Chromatin} 2015, \bold{8}:6,  doi:10.1186/1756-8935-8-6
+Peters TJ, Buckley MJ, Statham A, Pidsley R, Samaras K, Lord RV, Clark SJ and  Molloy PL. \emph{De novo} identification of differentially methylated regions in the human genome. \emph{Epigenetics & Chromatin} 2015, \bold{8}:6,  doi:10.1186/1756-8935-8-6
+
+Peters TJ, Buckley MJ, Chen Y, Smyth GK, Goodnow CC and Clark SJ. Calling differentially methylated regions from whole genome bisulphite sequencing with DMRcate. \emph{Nucleic Acids Research} 2021, \bold{49}(19):e109. doi:10.1093/nar/gkab637.
+
 }
 
 \examples{
@@ -44,12 +47,14 @@ assays(tcell)[["M"]] <- tcellms.noSNPs
 assays(tcell)[["Beta"]] <- minfi::ilogit2(tcellms.noSNPs)
 type <- factor(tcell$CellType)
 design <- model.matrix(~type) 
-myannotation <- cpg.annotate("array", tcell, arraytype = "EPIC",
-                             analysis.type="differential", design=design, coef=2)
+myannotation <- cpg.annotate("array", tcell, 
+                             arraytype = "EPICv1", analysis.type="differential",
+                             design=design, coef=2)
 dmrcoutput <- dmrcate(myannotation, lambda=1000, C=2)
 results.ranges <- extractRanges(dmrcoutput, genome = "hg19")
 groups <- c(CD8T="magenta", CD4T="forestgreen")
 cols <- groups[as.character(type)]
-DMR.plot(ranges=results.ranges, dmr=1, CpGs=minfi::getBeta(tcell), what="Beta", 
-         arraytype = "EPIC", phen.col=cols, genome="hg19")
+DMR.plot(ranges=results.ranges, dmr=1, 
+         CpGs=minfi::getBeta(tcell), what="Beta", 
+         arraytype = "EPICv1", phen.col=cols, genome="hg19")
 }
