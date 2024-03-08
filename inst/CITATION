@@ -41,4 +41,31 @@ citEntry(entry="article",
 )
 )
 
+citEntry(entry="article",
+	author = c(person(c("Timothy","J"),"Peters"),
+	           person("Braydon","Meyer"),
+	           person("Lauren","Ryan"),
+	           person("Joanna","Achinger-Kawecka"),
+	           person("Jenny","Song"),
+	           person(c("Elyssa","M"),"Campbell"),
+	           person("Wenjia","Qu"),
+		   person("Shalima","Nair"),
+		   person("Phuc", "Loi-Luu"),
+                   person("Phillip", "Stricker"),
+		   person("Elgene", "Lim"),
+	           person("Clare", "Stirzaker"),
+	           person(c("Susan", "J"), "Clark"),
+	           person("Ruth", "Pidsley")),
+	title = "Characterisation and reproducibility of the HumanMethylationEPIC v2.0 BeadChip for DNA methylation profiling",
+	journal = "BMC Genomics",
+	year = 2024,
+	volume = 25,
+	issue = 251,
+	url = "https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-024-10027-5",
+	 textVersion = paste(sep="",
+    "Timothy J. Peters, Braydon Meyer, Lauren Ryan, Joanna Achinger-Kawecka, Jenny Song, Elyssa M. Campbell, Wenjia Qu, Shalima Nair, Phuc Loi-Luu, Phillip Stricker, Elgene Lim, Clare Stirzaker, Susan J. Clark and Ruth Pidsley. ",
+    "Characterisation and reproducibility of the HumanMethylationEPIC v2.0 BeadChip for DNA methylation profiling, ",
+    "BMC Genomics, ", "2024, ", "25, 251, ", "https://doi.org/10.1186/s12864-024-10027-5."
+)
+)
 

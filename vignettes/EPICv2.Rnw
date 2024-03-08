@@ -36,7 +36,7 @@ will show how to pare down an EPICv2 dataset to a suitable format for DMR callin
 library(DMRcate)
 @
 
-We use a subset of samples kindly taken from Noguera-Castells \emph{et al.} (2023), for finding DMRs between T cell acute lymphoblastic leukaemia (TALL) and B cell acute lymphoblastic leukaemia (BALL). We load the beta 
+We use a subset of samples kindly taken from Noguera-Castells \emph{et al.} (2023)\cite{Noguera}, for finding DMRs between T cell acute lymphoblastic leukaemia (TALL) and B cell acute lymphoblastic leukaemia (BALL). We load the beta 
 matrix from ExperimentHub:
 
 <<libreh, message=FALSE, warning=FALSE>>=
@@ -65,7 +65,7 @@ ALLMs <- minfi::logit2(ALLbetas)
 @
 
 
-Just like with the previous EPIC array, there are subsets of probes whose target is near a SNP, and also subsets for which there is evidence of cross-reactivity with other parts of the genome (Peters \textit{et al.} 2024), both which can be filtered out with with \texttt{rmSNPandCH}. We will filter out the SNP-proximal probes, but for this vignette, we will retain the EPICv2 probes for which there is evidence for preferential binding to off-targets, using \texttt{rmcrosshyb=FALSE}, since these off-targets have also been mapped (Peters \textit{et al.} 2024).
+Just like with the previous EPIC array, there are subsets of probes whose target is near a SNP, and also subsets for which there is evidence of cross-reactivity with other parts of the genome\cite{Peters2024}, both which can be filtered out with with \texttt{rmSNPandCH}. We will filter out the SNP-proximal probes, but for this vignette, we will retain the EPICv2 probes for which there is evidence for preferential binding to off-targets, using \texttt{rmcrosshyb=FALSE}, since these off-targets have also been mapped\cite{Peters2024}.
 
 
 <<rmSNPandCH>>=
@@ -99,11 +99,11 @@ EPICv2 data contains groups of probes we call ``replicates'' that map to the sam
 ALLMs.noSNPs.repmean <- rmPosReps(ALLMs.noSNPs, filter.strategy="mean")
 @
 
-However, we can also select one probe from each replicate group based on its performance from cross-platform comparisons with EPICv1 and WGBS data (see Peters \textit{et al.} 2024). Probe robustness is measured in terms of either: 
+However, we can also select one probe from each replicate group based on its performance from cross-platform comparisons with EPICv1 and WGBS data (see Peters \textit{et al.} 2024)\cite{Peters2024}. Probe robustness is measured in terms of either: 
 
 \begin{itemize}
 
-\item its sensitivity to methylation change and measurement precision, relative to a platform consensus obtained from matched EPICv1 and whole genome bisulphite sequencing (WGBS) values (Peters \textit{et al.} 2019)
+\item its sensitivity to methylation change and measurement precision, relative to a platform consensus obtained from matched EPICv1 and whole genome bisulphite sequencing (WGBS) values\cite{Peters2019}.
 
 \item minimum root mean squared error (RMSE) with WGBS (mainly for probes that don't appear on EPICv1)
 
@@ -163,18 +163,20 @@ sessionInfo()
 
 \begin{thebibliography}{99}
 
+\bibitem{Peters2024}
+  Peters, T.J., Meyer, B., Ryan, L., Achinger-Kawecka, J., Song, J., 
+  Campbell, E.M., Qu, W., Nair, S., Loi-Luu, P., Stricker, P., Lim, E., 
+  Stirzaker, C., Clark, S.J. and Pidsley, (2024). Characterisation and 
+  reproducibility of the HumanMethylationEPIC v2.0 BeadChip for DNA methylation 
+  profiling. \emph{BMC Genomics} \bold{25}, 251. 
+  doi:10.1186/s12864-024-10027-5.
+
 
 \bibitem{Noguera}
   Noguera-Castells A, Garcia-Prieto CA, Alvarez-Errico D, Esteller, M. 
   (2023). Validation of the new EPIC DNA methylation microarray (900K EPIC v2) 
   for high-throughput profiling of the human DNA methylome. \emph{Epigenetics}
   18(1), 2185742.
-
-\bibitem{Peters2024}
-  Pidsley R, Zotenko E, Peters TJ, Lawrence MG, Risbridger GP, Molloy P, 
-  Van Dijk S, Muhlhausler B, Stirzaker C, Clark SJ. Critical evaluation of 
-  the Illumina MethylationEPIC BeadChip microarray for whole-genome DNA 
-  methylation profiling. \emph{Genome Biology}. 2016 17(1), 208.
 
 \bibitem{Peters2019}
   Peters TJ, French HJ, Bradford ST, Pidsley R, Stirzaker C, Varinli H, 
