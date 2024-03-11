@@ -13,7 +13,8 @@
 DMR.plot(ranges, dmr, CpGs, what = c("Beta", "M"), 
          arraytype = c("EPICv2", "EPICv1", "450K"), phen.col, 
          genome = c("hg19", "hg38", "mm10"), labels = names(ranges), 
-         group.means = FALSE, extra.ranges = NULL, extra.title = names(extra.ranges))
+         group.means = FALSE, extra.ranges = NULL, 
+         extra.title = names(extra.ranges))
 }
 \arguments{
   \item{ranges}{

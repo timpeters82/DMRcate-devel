@@ -1,9 +1,8 @@
 Package: DMRcate
 Title: Methylation array and sequencing spatial analysis methods
-Version: 2.99.1
-Date: 2024-08-03
+Version: 2.99.2
+Date: 2024-11-03
 Author: Tim Peters
-Maintainer: Tim Peters <t.peters@garvan.org.au>
 Authors@R: c(person("Tim", "Peters", role = c("cre", "aut"),
                     email = "t.peters@garvan.org.au"),
 	     person("Mike", "Buckley", role = "aut"),
@@ -13,7 +12,7 @@ Description: De novo identification and extraction of differentially methylated 
 Depends: R (>= 4.3.0)
 Imports: AnnotationHub, ExperimentHub, bsseq, GenomeInfoDb, limma, edgeR, minfi,
         missMethyl, GenomicRanges, plyr, Gviz, IRanges, stats, utils,
-        S4Vectors, methods, graphics, SummarizedExperiment, biomaRt
+        S4Vectors, methods, graphics, SummarizedExperiment, biomaRt, grDevices
 biocViews: DifferentialMethylation, GeneExpression, Microarray,
         MethylationArray, Genetics, DifferentialExpression,
         GenomeAnnotation, DNAMethylation, OneChannel, TwoChannel,

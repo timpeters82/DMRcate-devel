@@ -15,11 +15,15 @@ sequencing.annotate(obj, methdesign, all.cov=FALSE, contrasts = FALSE,
 }
 \arguments{
   \item{obj}{
-    A BSseq object or data.frame output from \code{DSS::DMLtest()} or \code{DSS::DMLtest.multiFactor()}.
+    A BSseq object or data.frame output from \code{DSS::DMLtest()} or 
+    \code{DSS::DMLtest.multiFactor()}.
   }
   \item{methdesign}{
-    Methylation study design matrix describing samples and groups. \strong{Use of edgeR::modelMatrixMeth() to make this matrix is highly recommended}, since it transforms a regular model.matrix (as one would construct for a microarray or RNA-Seq experiment) into a ``two-channel'' matrix representing methylated and unmethylated reads for each sample.
-    Only applicable when \code{obj} is a BSseq object.
+    Methylation study design matrix describing samples and groups. \strong{Use of 
+    edgeR::modelMatrixMeth() to make this matrix is highly recommended}, since it 
+    transforms a regular model.matrix (as one would construct for a microarray or 
+    RNA-Seq experiment) into a ``two-channel'' matrix representing methylated and 
+    unmethylated reads for each sample. Only applicable when \code{obj} is a BSseq object.
   }
   \item{all.cov}{
     If \code{TRUE}, only CpG sites where all samples have > 0 coverage will be retained. If \code{FALSE}, CpG sites for which some (not all) samples have coverage=0 will be retained. 
@@ -74,8 +78,8 @@ library(GenomeInfoDb)
 eh = ExperimentHub()
 bis_1072 <- eh[["EH1072"]]
 pData(bis_1072) <- data.frame(replicate=gsub(".*-", "", colnames(bis_1072)),
-                              tissue=substr(colnames(bis_1072), 1, nchar(colnames(bis_1072))-3), 
-                              row.names=colnames(bis_1072))
+                   tissue=substr(colnames(bis_1072), 1, nchar(colnames(bis_1072))-3), 
+                   row.names=colnames(bis_1072))
 colData(bis_1072)$tissue <- gsub("-", "_", colData(bis_1072)$tissue)
 bis_1072 <- renameSeqlevels(bis_1072, mapSeqlevels(seqlevels(bis_1072), "UCSC"))
 bis_1072 <- bis_1072[seqnames(bis_1072)=="chr19",]

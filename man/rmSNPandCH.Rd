@@ -7,7 +7,8 @@
   Filters a matrix of M-values (or beta values) by distance to SNP/variant. Also (optionally) removes cross-hybridising probes and sex-chromosome probes. Also removes ``rs'' and ``nv'' probes from the matrix.
 }
 \usage{
-rmSNPandCH(object, dist = 2, mafcut = 0.05, and = TRUE, rmcrosshyb = TRUE, rmXY = FALSE) 
+rmSNPandCH(object, dist = 2, mafcut = 0.05, and = TRUE, rmcrosshyb = TRUE, 
+           rmXY = FALSE) 
 }
 \arguments{
   \item{object}{
@@ -83,6 +84,8 @@ detP <- minfi::detectionP(tcell)
 remove <- apply(detP, 1, function (x) any(x > 0.01))
 tcell <- tcell[!remove,]
 tcell <- minfi::preprocessFunnorm(tcell)
+#Subset to chr2 only
+tcell <- tcell[seqnames(tcell) == "chr2",]
 tcellms <- minfi::getM(tcell)
 tcellms.noSNPs <- rmSNPandCH(tcellms, dist=2, mafcut=0.05)
 

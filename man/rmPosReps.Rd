@@ -3,7 +3,8 @@
 \title{Filter out position replicates from an EPICv2 beta- or M-matrix}
 \description{Given a beta-value or M-value matrix with EPICv2 probe IDs as rownames, returns a truncated matrix with a 1-to-1 mapping of probe ID to CpG locus. Values returned depend on the filtering strategy selected. Replicate probes are averaged by default, but the user may optionally select individual probes per replicate group based on maximum sensitivity to methylation change or maximum precision, as per empirical cross-platform consensus testing against EPICv1 and WGBS data (Peters \emph{et al.} 2024).}
 \usage{
-rmPosReps(object, filter.strategy= c("mean", "sensitivity","precision","random"))
+rmPosReps(object, filter.strategy= c("mean", "sensitivity",
+                                     "precision","random"))
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -42,6 +43,7 @@ Tim J. Peters <t.peters@garvan.org.au>
 library(ExperimentHub)
 eh <- ExperimentHub()
 ALLbetas <- eh[["EH9451"]]
+ALLbetas <- ALLbetas[1:1000,]
 ALLMs <- minfi::logit2(ALLbetas)
 ALLMs.noSNPs <- rmSNPandCH(ALLMs, rmcrosshyb = FALSE)
 ALLMs.noSNPs.repmean <- rmPosReps(ALLMs.noSNPs, filter.strategy="mean")
