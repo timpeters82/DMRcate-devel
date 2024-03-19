@@ -75,18 +75,9 @@ rmSNPandCH(object, dist = 2, mafcut = 0.05, and = TRUE, rmcrosshyb = TRUE,
 }
 \examples{
 library(ExperimentHub)
-library(limma)
 eh <- ExperimentHub()
-FlowSorted.Blood.EPIC <- eh[["EH1136"]]
-tcell <- FlowSorted.Blood.EPIC[,colData(FlowSorted.Blood.EPIC)$CD4T==100 |
-                                colData(FlowSorted.Blood.EPIC)$CD8T==100]
-detP <- minfi::detectionP(tcell)
-remove <- apply(detP, 1, function (x) any(x > 0.01))
-tcell <- tcell[!remove,]
-tcell <- minfi::preprocessFunnorm(tcell)
-#Subset to chr2 only
-tcell <- tcell[seqnames(tcell) == "chr2",]
-tcellms <- minfi::getM(tcell)
-tcellms.noSNPs <- rmSNPandCH(tcellms, dist=2, mafcut=0.05)
-
+ALLbetas <- eh[["EH9451"]]
+ALLbetas <- ALLbetas[1:1000,]
+ALLMs <- minfi::logit2(ALLbetas)
+ALLMs.noSNPs <- rmSNPandCH(ALLMs, rmcrosshyb = FALSE)
 }

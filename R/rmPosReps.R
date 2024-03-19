@@ -2,8 +2,8 @@ rmPosReps <- function(object, filter.strategy= c("mean", "sensitivity","precisio
   if(any(nchar(rownames(object)) < 13)){
     stop("Error: rownames do not look like EPICv2 probes. This function will only work for EPICv2 data.")
   }
-  if(any(grepl("^rs|^nv", rownames(object)))){
-    stop("Error: rs and/or nv probes detected. Please run your matrix through rmSNPandCH() first.")
+  if(any(!grepl("^cg|^ch", rownames(object)))){
+    stop("Error: This function will only accept a matrix with rownames beginning with cg or ch. Please run your matrix through rmSNPandCH() first.")
   }
   message("Loading EPICv2 manifest...")
   ah <- AnnotationHub()

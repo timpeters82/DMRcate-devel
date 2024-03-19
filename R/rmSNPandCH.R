@@ -58,9 +58,9 @@ rmSNPandCH <- function (object, dist = 2, mafcut = 0.05, and = TRUE, rmcrosshyb 
       badprobes <- union(badprobes, XY.probes)
     }
   }
-  rsnv <- grepl("^rs|^nv", rownames(object))
-  if(any(rsnv)){
-    object <- object[!rsnv,]
-  }
+  #Only retain cytosines
+  keep <- grep("^cg|^ch", rownames(object))
+  object <- object[keep,]
+  
   object[!(rownames(object) %in% badprobes), ]
 }

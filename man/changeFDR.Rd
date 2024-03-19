@@ -23,35 +23,13 @@ A re-indexed \code{\link{CpGannotated-class}} object.
 Tim Peters <t.peters@garvan.org.au>
 }
 \examples{
-library(ExperimentHub)
-library(SummarizedExperiment)
-library(bsseq)
-library(GenomeInfoDb)
-eh <- ExperimentHub()
-bis_1072 <- eh[["EH1072"]]
-pData(bis_1072) <- data.frame(replicate=gsub(".*-", "", colnames(bis_1072)),
-                              tissue=substr(colnames(bis_1072), 1, 
-                                            nchar(colnames(bis_1072))-3), 
-                              row.names=colnames(bis_1072))
-colData(bis_1072)$tissue <- gsub("-", "_", colData(bis_1072)$tissue)
-bis_1072 <- renameSeqlevels(bis_1072, mapSeqlevels(seqlevels(bis_1072), "UCSC"))
-bis_1072 <- bis_1072[seqnames(bis_1072)=="chr19",]
-bis_1072 <- bis_1072[138151:138250,]
-tissue <- factor(pData(bis_1072)$tissue)
-tissue <- relevel(tissue, "Liver_Treg")
-design <- model.matrix(~tissue)
-colnames(design) <- gsub("tissue", "", colnames(design))
-colnames(design)[1] <- "Intercept"
-rownames(design) <- colnames(bis_1072)
-methdesign <- edgeR::modelMatrixMeth(design)
-cont.mat <- limma::makeContrasts(treg_vs_tcon=Lymph_N_Treg-Lymph_N_Tcon,
-                          fat_vs_ln=Fat_Treg-Lymph_N_Treg,
-                          skin_vs_ln=Skin_Treg-Lymph_N_Treg,
-                          fat_vs_skin=Fat_Treg-Skin_Treg,
-                          levels=methdesign)
-seq_annot <- sequencing.annotate(bis_1072, methdesign, all.cov = TRUE, 
-                                   contrasts = TRUE, cont.matrix = cont.mat, 
-                                   coef = "fat_vs_skin", fdr=0.05)
-seq_annot <- changeFDR(seq_annot, 0.25)
+library(GenomicRanges)
+stats <- rt(1000, 2)
+fdrs <- p.adjust(2*pt(-abs(stats), 100), "BH")
+annotated <- GRanges(rep("chr1", 1000), IRanges(1:1000, 1:1000), stat = stats,
+                     diff = 0, ind.fdr = fdrs, is.sig = fdrs < 0.05)
+names(annotated) <- paste0("CpG_", 1:1000)
+myannotation <- new("CpGannotated", ranges=annotated)
+changeFDR(myannotation, 0.1)
 }
 

@@ -1,6 +1,9 @@
-CHANGES IN DMRcate VERSION 2.16.2
+CHANGES IN DMRcate VERSION 3.0.0
 
-- EPICv2 functionality added.
+- Full utility for EPICv2 implemented. DMRs can now be called from the new Illumina Infinium MethylationEPIC v2.0 BeadChip same as the usual pipeline, save for replicate probe filtering (mandatory) and remapping of cross-hybridising probes (optional).
+- Annotation package EPICv2manifest is used as a backend for cpg.annotate().
+- A new function, rmPosReps(), gives multiple user options for filtering replicate probes mapping to the same CpG site. The mean can be taken, or, based on Peters et al. (2024) (see documentation), the probe that is most precise or sensitive to methylation change may be selected.
+- Many thanks to Braydon Meyer and Ruth Pidsley for constructive input and beta testing.
 
 CHANGES IN DMRcate VERSION 2.16.1
 

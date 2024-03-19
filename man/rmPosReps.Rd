@@ -45,7 +45,6 @@ eh <- ExperimentHub()
 ALLbetas <- eh[["EH9451"]]
 ALLbetas <- ALLbetas[1:1000,]
 ALLMs <- minfi::logit2(ALLbetas)
-ALLMs.noSNPs <- rmSNPandCH(ALLMs, rmcrosshyb = FALSE)
-ALLMs.noSNPs.repmean <- rmPosReps(ALLMs.noSNPs, filter.strategy="mean")
+ALLMs.repmean <- rmPosReps(ALLMs, filter.strategy="mean")
 }
 

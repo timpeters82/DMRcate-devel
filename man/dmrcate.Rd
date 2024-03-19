@@ -78,32 +78,18 @@ two-sample tests. \emph{ Journal of Nonparametric Statistics}. 2013
 Tim J. Peters <t.peters@garvan.org.au>, Mike J. Buckley <Mike.Buckley@csiro.au>, Tim Triche Jr. <tim.triche@usc.edu>
 }
 \examples{
-library(ExperimentHub)
-library(limma)
-eh <- ExperimentHub()
-FlowSorted.Blood.EPIC <- eh[["EH1136"]]
-tcell <- FlowSorted.Blood.EPIC[,colData(FlowSorted.Blood.EPIC)$CD4T==100 |
-                                colData(FlowSorted.Blood.EPIC)$CD8T==100]
-detP <- minfi::detectionP(tcell)
-remove <- apply(detP, 1, function (x) any(x > 0.01))
-tcell <- tcell[!remove,]
-tcell <- minfi::preprocessFunnorm(tcell)
-#Subset to chr2 only
-tcell <- tcell[seqnames(tcell) == "chr2",]
-tcellms <- minfi::getM(tcell)
-tcellms.noSNPs <- rmSNPandCH(tcellms, dist=2, mafcut=0.05)
-tcell$Replicate[tcell$Replicate==""] <- tcell$Sample_Name[tcell$Replicate==""]
-tcellms.noSNPs <- avearrays(tcellms.noSNPs, tcell$Replicate)
-tcell <- tcell[,!duplicated(tcell$Replicate)]
-tcell <- tcell[rownames(tcellms.noSNPs),]
-colnames(tcellms.noSNPs) <- colnames(tcell)
-assays(tcell)[["M"]] <- tcellms.noSNPs
-assays(tcell)[["Beta"]] <- minfi::ilogit2(tcellms.noSNPs)
-type <- factor(tcell$CellType)
-design <- model.matrix(~type) 
-myannotation <- cpg.annotate("array", tcell, arraytype = "EPICv1",
-                             analysis.type="differential", 
-                             design=design, coef=2)
+library(AnnotationHub)
+library(GenomicRanges)
+ah <- AnnotationHub()
+EPICv2manifest <- ah[["AH116484"]]
+chr21probes <- rownames(EPICv2manifest)[EPICv2manifest$CHR=="chr21"]
+coords <- EPICv2manifest[chr21probes, "MAPINFO"]
+stats <- rt(length(chr21probes), 2)
+fdrs <- p.adjust(2*pt(-abs(stats), 100), "BH")
+annotated <- GRanges(rep("chr21", length(stats)), IRanges(coords, coords), stat = stats,
+                     diff = 0, ind.fdr = fdrs, is.sig = fdrs < 0.05)
+names(annotated) <- chr21probes
+myannotation <- new("CpGannotated", ranges=annotated)
 dmrcoutput <- dmrcate(myannotation, lambda=1000, C=2)
 }
 

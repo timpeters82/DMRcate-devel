@@ -13,6 +13,9 @@ cpg.annotate <- function (datatype = c("array", "sequencing"), object, what = c(
   if (datatype == "array") {
     stopifnot(class(object)[1] %in% c("matrix", "GenomicRatioSet"))
     if (is(object, "matrix")) {
+      #Only retain cytosines
+      keep <- grep("^cg|^ch", rownames(object))
+      object <- object[keep,]
         if (arraytype == "450K") {
         grset <- makeGenomicRatioSetFromMatrix(mat = object, 
                                                array = "IlluminaHumanMethylation450k", annotation = "ilmn12.hg19", 
