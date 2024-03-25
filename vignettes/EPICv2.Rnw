@@ -74,24 +74,6 @@ ALLMs.noSNPs <- rmSNPandCH(ALLMs, rmcrosshyb = FALSE)
 nrow(ALLMs.noSNPs)
 @
 
-Plotting the first two principal components reveals group differences between TALL and BALL:
-
-
-<<PCA>>==
-typecol <- ifelse(grepl("TALL", colnames(ALLMs.noSNPs)), "orange", "forestgreen")
-pca <- prcomp(t(ALLMs.noSNPs))
-plot(pca$x[,1:2], xlab="", ylab="", col=typecol, cex=2, pch=16)
-  lam <- pca$sdev
-  v <- lam^2
-  v <- v/sum(v)
-  k1 <- round(100*v[1], 2)
-  k2 <- round(100*v[2], 2)
-  title(main=paste0("Noguera-Castells et al. 2023 lung samples PCA,\n", k1+k2, 
-                    "% of variance explained"), xlab=paste0(k1, "% of variance explained"), 
-        ylab=paste0(k2, "% of variance explained"))
-  legend("topright", c("T cell ALL", "B cell ALL"), text.col=c("orange", "forestgreen"))
-@
-
 
 EPICv2 data contains groups of probes we call ``replicates'' that map to the same CpG site. Since DMRcate requires a 1-to-1 relationship between rows of methylation measurements and CpG loci, lest the kernel become biased towards sites with multiple mappings, we need to attenuate our \textit{M}-value matrix to maintain this relationship. The function \texttt{rmPosReps()} does this, with user options specified by the argument \texttt{filter.strategy}. The default is to take the \texttt{mean} of each replicate group (with row name represented by the first probe in each group that appears in the manifest):
 
@@ -110,7 +92,6 @@ However, we can also select one probe from each replicate group based on its per
 \end{itemize}
 
 In some cases, a replicated probe will prove superior in both sensitivity and precision, however in many cases superior sensitivity and precision is split between two probes in a replicate group. Furthermore, an individual probe may have superior sensitivity in a group, but superior precision is incurred by the group mean. Hence we give the user the option of choosing \texttt{sensitivity} or \texttt{precision}, based on their appetite for potential Type I error. In cases where there is insufficient evidence for superiority, a replicate probe is taken at random from the group. This strategy is generalised to all replicate groups for the \texttt{random} option. Figure 1 shows the differences in probe selection based on the \texttt{filter.strategy} argument. In practice, the number of differentially methylated CpGs (and hence DMRs) is unlikely to vary greatly depending on the \texttt{filter.strategy} argument, but we provide this optionality to make use of all available probes on the array, and to potentially update the manifest with more rigorous probe benchmarking as usage proliferates.
-
 
 
 \begin{figure}[htbp!]

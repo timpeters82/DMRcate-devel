@@ -158,7 +158,7 @@ cols
 DMR.plot(fat_vs_skin.ranges, dmr = 1, CpGs=bis_1072, phen.col = cols, genome="mm10")
 @
 
-Here we can see the methylation of skin cells over this region near the \textit{Gcnt1} transcription start site is hypomethylated not only relative to fat, but to the other tissues as well.
+Here we can see the methylation of skin cells over this region near the \textit{Gcnt1} promoter is hypomethylated not only relative to fat, but to the other tissues as well.
 
 <<sessionInfo>>=
 sessionInfo()
