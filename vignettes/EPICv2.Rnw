@@ -65,7 +65,7 @@ ALLMs <- minfi::logit2(ALLbetas)
 @
 
 
-Just like with the previous EPIC array, there are subsets of probes whose target is near a SNP, and also subsets for which there is evidence of cross-reactivity with other parts of the genome\cite{Peters2024}, both which can be filtered out with with \texttt{rmSNPandCH}. We will filter out the SNP-proximal probes, but for this vignette, we will retain the EPICv2 probes for which there is evidence for preferential binding to off-targets, using \texttt{rmcrosshyb=FALSE}, since these off-targets have also been mapped\cite{Peters2024}.
+Just like with the previous EPIC array, there are subsets of probes whose target is near a SNP, and also subsets for which there is evidence of cross-reactivity with other parts of the genome\cite{Peters2024}, both which can be filtered out with with \texttt{rmSNPandCH()}. We will filter out the SNP-proximal probes, but for this vignette, we will retain the EPICv2 probes for which there is evidence for preferential binding to off-targets, using \texttt{rmcrosshyb=FALSE}, since these off-targets have also been mapped\cite{Peters2024}.
 
 
 <<rmSNPandCH>>=
@@ -128,7 +128,7 @@ results.ranges <- extractRanges(dmrcoutput, genome = "hg38")
 results.ranges
 @
 
-And finally, plotting the top DMR. 
+And finally, plotting one of the top DMRs. 
 
 <<plot>>=
 groups <- c(BALL="forestgreen", TALL="orange")

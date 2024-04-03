@@ -93,7 +93,7 @@ DMR.plot <- function (ranges, dmr, CpGs, what = c("Beta", "M"), arraytype = c("E
                                                                                names(phen.col) %in% i], name = i, background.title = phen.col[i], 
                                                                     type = "heatmap", showSampleNames = TRUE, ylim = c(0, 
                                                                                                                        1), genome = genome, gradient = colorRampPalette(c("black", 
-                                                                                                                                                                          "orange"))(20)))
+                                                                                                                                                                          "cyan"))(20)))
   if (!group.means) {
     smoothedmeans <- DataTrack(methRatios, groups = 1:ncol(values(methRatios)), 
                                type = "smooth", col = phen.col, ylim = c(0, 1), 
