@@ -107,7 +107,7 @@ cpg.annotate <- function (datatype = c("array", "sequencing"), object, what = c(
         annotated <- GRanges(as.character(EPICv2manifest$CHR), IRanges(EPICv2manifest$MAPINFO, 
                                                              EPICv2manifest$MAPINFO), stat = stat, diff = tt$diff, ind.fdr = tt$adj.P.Val, 
                              is.sig = tt$adj.P.Val < fdr)
-        annotated <- sort(sortSeqlevels(annotated))
+        
       } else {
       anno <- getAnnotation(grset)
       annotated <- GRanges(as.character(anno$chr), IRanges(anno$pos, 
@@ -115,6 +115,8 @@ cpg.annotate <- function (datatype = c("array", "sequencing"), object, what = c(
                            is.sig = tt$adj.P.Val < fdr)
       }
       names(annotated) <- rownames(tt)
+      annotated <- sort(sortSeqlevels(annotated))
+      
     }, variability = {
       RSanno <- getAnnotation(grset)
       wholevar <- var(object)
