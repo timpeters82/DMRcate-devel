@@ -10,10 +10,18 @@
   (with an option for smoothed group means) and chromosome ideogram.
 }
 \usage{
-DMR.plot(ranges, dmr, CpGs, what = c("Beta", "M"), 
-         arraytype = c("EPICv2", "EPICv1", "450K"), phen.col, 
-         genome = c("hg19", "hg38", "mm10"), labels = names(ranges), 
-         group.means = FALSE, extra.ranges = NULL, 
+DMR.plot(ranges, 
+         dmr, 
+         CpGs, 
+         what = c("Beta", "M"), 
+         arraytype = c("EPICv2", "EPICv1", "450K"),
+         phen.col,
+         genome = c("hg19", "hg38", "mm10"),
+         labels = names(ranges),
+         flank = 5000,
+         heatmap = TRUE,
+         group.means = FALSE, 
+         extra.ranges = NULL, 
          extra.title = names(extra.ranges))
 }
 \arguments{
@@ -54,6 +62,12 @@ DMR.plot(ranges, dmr, CpGs, what = c("Beta", "M"),
   }
   \item{labels}{
     Vector of DMR names to be displayed. Defaults to \code{names(ranges)}.
+  }
+  \item{flank}{
+    Size, in base pairs, of the plotted region either side of the DMR. Cannot be less than 10bp or greater than 10kb.
+  }
+  \item{heatmap}{
+    Should the heatmap be plotted? Default is \code{TRUE}, but \code{FALSE} is useful when plotting large numbers of samples.
   }
   \item{group.means}{
     Whether to plot smoothed methylation by individual sample (\code{FALSE}) or by groups defined in \code{phen.col} (\code{TRUE}).

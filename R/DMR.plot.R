@@ -1,6 +1,16 @@
-DMR.plot <- function (ranges, dmr, CpGs, what = c("Beta", "M"), arraytype = c("EPICv2", "EPICv1", 
-                                                                  "450K"), phen.col, genome = c("hg19", "hg38", "mm10"), labels = names(ranges), 
-          group.means = FALSE, extra.ranges = NULL, extra.title = names(extra.ranges)) 
+DMR.plot <- function(ranges, 
+                     dmr, 
+                     CpGs, 
+                     what = c("Beta", "M"), 
+                     arraytype = c("EPICv2", "EPICv1", "450K"),
+                     phen.col,
+                     genome = c("hg19", "hg38", "mm10"),
+                     labels = names(ranges),
+                     flank = 5000,
+                     heatmap = TRUE,
+                     group.means = FALSE, 
+                     extra.ranges = NULL, 
+                     extra.title = names(extra.ranges)) 
 {
   what <- match.arg(what)
   arraytype <- match.arg(arraytype)
@@ -8,6 +18,9 @@ DMR.plot <- function (ranges, dmr, CpGs, what = c("Beta", "M"), arraytype = c("E
   stopifnot(class(CpGs)[1] %in% c("matrix", "BSseq", "GenomicRatioSet"))
   if(arraytype=="EPICv2" & genome=="hg19"){
     stop("Error: genome must be hg38 for EPICv2 data.")
+  }
+  if(flank < 10 | flank > 10000){
+    stop("Error: DMR flanking region needs to be between 10bp and 10000bp")
   }
   stopifnot(dmr %in% 1:length(ranges))
   IDs <- unique(names(phen.col))
@@ -68,7 +81,7 @@ DMR.plot <- function (ranges, dmr, CpGs, what = c("Beta", "M"), arraytype = c("E
     isbsseq <- TRUE
   }
   ranges$ID <- rep("", length(ranges))
-  ranges.reduce <- reduce(ranges + 5000)
+  ranges.reduce <- reduce(ranges + flank)
   dmrs.inplot <- ranges[queryHits(findOverlaps(ranges, ranges.reduce[subjectHits(findOverlaps(ranges[dmr], 
                                                                              ranges.reduce))]))]
   ranges.inplot <- ranges.reduce[queryHits(findOverlaps(ranges.reduce, dmrs.inplot))]
@@ -89,18 +102,18 @@ DMR.plot <- function (ranges, dmr, CpGs, what = c("Beta", "M"), arraytype = c("E
   }
   values(methRatios) <- as.matrix(values(methRatios))
   colnames(values(methRatios)) <- gsub("mcols.", "", colnames(values(methRatios)))
-  dt.group <- lapply(unique(names(phen.col)), function(i) DataTrack(methRatios[, 
+  if(heatmap){dt.group <- lapply(unique(names(phen.col)), function(i) DataTrack(methRatios[, 
                                                                                names(phen.col) %in% i], name = i, background.title = phen.col[i], 
                                                                     type = "heatmap", showSampleNames = TRUE, ylim = c(0, 
                                                                                                                        1), genome = genome, gradient = colorRampPalette(c("black", 
-                                                                                                                                                                          "cyan"))(20)))
+                                                                                                                                                                          "cyan"))(20)))}
   if (!group.means) {
     smoothedmeans <- DataTrack(methRatios, groups = 1:ncol(values(methRatios)), 
                                type = "smooth", col = phen.col, ylim = c(0, 1), 
                                name = "Smoothed methylation", na.rm = TRUE, legend = FALSE)
     suppressMessages(setPar(smoothedmeans, "groupAnnotation", 
                             "feature"))
-    dt.group <- c(dt.group, list(smoothedmeans))
+    
   }
   else {
     smoothedmeans <- DataTrack(methRatios, groups = names(phen.col), 
@@ -108,8 +121,9 @@ DMR.plot <- function (ranges, dmr, CpGs, what = c("Beta", "M"), arraytype = c("E
                                                                                                        na.rm = TRUE), col = phen.col[sort(unique(names(phen.col)))], 
                                ylim = c(0, 1), name = "Smoothed\n group means", 
                                na.rm = TRUE)
-    dt.group <- c(dt.group, list(smoothedmeans))
+    
   }
+  if(heatmap){dt.group <- c(dt.group, list(smoothedmeans))}
   suppressWarnings(switch(genome, hg19 = {
     ensembl <- useEnsembl(host = "https://grch37.ensembl.org", 
                           biomart = "ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl")
@@ -158,7 +172,12 @@ DMR.plot <- function (ranges, dmr, CpGs, what = c("Beta", "M"), arraytype = c("E
     basetracks <- list(IdeogramTrack(genome = genome, chromosome = as.character(seqnames(ranges.inplot))), 
                        GenomeAxisTrack(), grt, cpgs.track, dmrs.track)
   }
-  trackstoplot <- c(basetracks, dt.group)
+  if(heatmap){
+    trackstoplot <- c(basetracks, dt.group)
+  } else {
+    trackstoplot <- c(basetracks, smoothedmeans)  
+  }
+  
   suppressWarnings(plotTracks(trackstoplot, from = min(start(ranges.inplot)), 
                               to = max(end(ranges.inplot))))
 }

@@ -1,7 +1,7 @@
 Package: DMRcate
 Title: Methylation array and sequencing spatial analysis methods
-Version: 3.0.1
-Date: 2024-27-05
+Version: 3.0.2
+Date: 2024-12-06
 Author: Tim Peters
 Authors@R: c(person("Tim", "Peters", role = c("cre", "aut"),
                     email = "t.peters@garvan.org.au"),
@@ -10,9 +10,10 @@ Authors@R: c(person("Tim", "Peters", role = c("cre", "aut"),
              person("Tim", "Triche, Jr.", role = "ctb"))
 Description: De novo identification and extraction of differentially methylated regions (DMRs) from the human genome using Whole Genome Bisulfite Sequencing (WGBS) and Illumina Infinium Array (450K and EPIC) data. Provides functionality for filtering probes possibly confounded by SNPs and cross-hybridisation. Includes GRanges generation and plotting functions.
 Depends: R (>= 4.3.0)
-Imports: AnnotationHub, ExperimentHub, bsseq, GenomeInfoDb, limma, edgeR, minfi,
-        missMethyl, GenomicRanges, plyr, Gviz, IRanges, stats, utils,
-        S4Vectors, methods, graphics, SummarizedExperiment, biomaRt, grDevices
+Imports: AnnotationHub, ExperimentHub, bsseq, GenomeInfoDb, limma,
+        edgeR, minfi, missMethyl, GenomicRanges, plyr, Gviz, IRanges,
+        stats, utils, S4Vectors, methods, graphics,
+        SummarizedExperiment, biomaRt, grDevices
 biocViews: DifferentialMethylation, GeneExpression, Microarray,
         MethylationArray, Genetics, DifferentialExpression,
         GenomeAnnotation, DNAMethylation, OneChannel, TwoChannel,
@@ -24,3 +25,6 @@ Suggests: knitr, RUnit, BiocGenerics,
         FlowSorted.Blood.EPIC, tissueTreg, DMRcatedata, EPICv2manifest
 License: file LICENSE
 VignetteBuilder: knitr
+NeedsCompilation: no
+Packaged: 2024-06-12 06:15:04 UTC; timpet
+Maintainer: Tim Peters <t.peters@garvan.org.au>
