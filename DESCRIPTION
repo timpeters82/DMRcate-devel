@@ -1,11 +1,12 @@
 Package: DMRcate
 Title: Methylation array and sequencing spatial analysis methods
-Version: 3.0.2
-Date: 2024-12-06
+Version: 3.0.3
+Date: 2024-21-06
 Author: Tim Peters
 Authors@R: c(person("Tim", "Peters", role = c("cre", "aut"),
                     email = "t.peters@garvan.org.au"),
 	     person("Mike", "Buckley", role = "aut"),
+	     person("Braydon", "Meyer", role = "ctb"),
              person("Aaron", "Statham", role = "ctb"),
              person("Tim", "Triche, Jr.", role = "ctb"))
 Description: De novo identification and extraction of differentially methylated regions (DMRs) from the human genome using Whole Genome Bisulfite Sequencing (WGBS) and Illumina Infinium Array (450K and EPIC) data. Provides functionality for filtering probes possibly confounded by SNPs and cross-hybridisation. Includes GRanges generation and plotting functions.

@@ -8,7 +8,6 @@ DMR.plot <- function(ranges,
                      labels = names(ranges),
                      flank = 5000,
                      heatmap = TRUE,
-                     group.means = FALSE, 
                      extra.ranges = NULL, 
                      extra.title = names(extra.ranges)) 
 {
@@ -107,23 +106,16 @@ DMR.plot <- function(ranges,
                                                                     type = "heatmap", showSampleNames = TRUE, ylim = c(0, 
                                                                                                                        1), genome = genome, gradient = colorRampPalette(c("black", 
                                                                                                                                                                           "cyan"))(20)))}
-  if (!group.means) {
-    smoothedmeans <- DataTrack(methRatios, groups = 1:ncol(values(methRatios)), 
-                               type = "smooth", col = phen.col, ylim = c(0, 1), 
-                               name = "Smoothed methylation", na.rm = TRUE, legend = FALSE)
-    suppressMessages(setPar(smoothedmeans, "groupAnnotation", 
+  meanmeth <- DataTrack(methRatios, groups = names(phen.col), 
+                             type = c("a", "confint"), 
+                             col = phen.col[sort(unique(names(phen.col)))], 
+                             ylim = c(0, 1), name = "Group means (with 0.3 CI)", 
+                             na.rm = TRUE)
+  suppressMessages(setPar(meanmeth, "groupAnnotation", 
                             "feature"))
     
-  }
-  else {
-    smoothedmeans <- DataTrack(methRatios, groups = names(phen.col), 
-                               type = "smooth", aggregateGroups = TRUE, aggregation = function(x) mean(x, 
-                                                                                                       na.rm = TRUE), col = phen.col[sort(unique(names(phen.col)))], 
-                               ylim = c(0, 1), name = "Smoothed\n group means", 
-                               na.rm = TRUE)
-    
-  }
-  if(heatmap){dt.group <- c(dt.group, list(smoothedmeans))}
+  
+  if(heatmap){dt.group <- c(dt.group, list(meanmeth))}
   suppressWarnings(switch(genome, hg19 = {
     ensembl <- useEnsembl(host = "https://grch37.ensembl.org", 
                           biomart = "ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl")
@@ -175,7 +167,7 @@ DMR.plot <- function(ranges,
   if(heatmap){
     trackstoplot <- c(basetracks, dt.group)
   } else {
-    trackstoplot <- c(basetracks, smoothedmeans)  
+    trackstoplot <- c(basetracks, meanmeth)  
   }
   
   suppressWarnings(plotTracks(trackstoplot, from = min(start(ranges.inplot)), 

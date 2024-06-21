@@ -19,8 +19,7 @@ DMR.plot(ranges,
          genome = c("hg19", "hg38", "mm10"),
          labels = names(ranges),
          flank = 5000,
-         heatmap = TRUE,
-         group.means = FALSE, 
+         heatmap = TRUE, 
          extra.ranges = NULL, 
          extra.title = names(extra.ranges))
 }
@@ -69,9 +68,6 @@ DMR.plot(ranges,
   \item{heatmap}{
     Should the heatmap be plotted? Default is \code{TRUE}, but \code{FALSE} is useful when plotting large numbers of samples.
   }
-  \item{group.means}{
-    Whether to plot smoothed methylation by individual sample (\code{FALSE}) or by groups defined in \code{phen.col} (\code{TRUE}).
-  }
   \item{extra.ranges}{
     Optional GRanges object. Will plot any range overlapping a DMR..
   }
@@ -83,7 +79,7 @@ DMR.plot(ranges,
   A plot to the current device.
 }
 \author{
-  Tim J. Peters <t.peters@garvan.org.au>, Aaron Statham <a.statham@garvan.org.au>
+  Tim J. Peters <t.peters@garvan.org.au>, Aaron Statham <a.statham@garvan.org.au>, Braydon Meyer <b.meyer@garvan.org.au>
 }
 \examples{
 library(GenomicRanges)
@@ -102,5 +98,5 @@ object[9:35, 6:10] <- minfi::logit2(matrix(rbeta(135, 1, 3), 27, 5))
 cols <- c(rep("forestgreen", 5), rep("magenta", 5))
 names(cols) <- rep(c("Ctrl", "Treat"), each=5)
 DMR.plot(dmrranges, dmr = 1, CpGs=object, what = "M", arraytype="EPICv2", 
-         phen.col=cols, genome="hg38", group.means = TRUE)
+         phen.col=cols, genome="hg38")
 }
