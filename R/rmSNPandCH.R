@@ -50,7 +50,7 @@ rmSNPandCH <- function (object, dist = 2, mafcut = 0.05, and = TRUE, rmcrosshyb 
       badprobes <- union(badprobes, as.character(crosshyb))
     }
     if (rmXY) {
-      if(!exists(EPICv2manifest)){
+      if(!exists("EPICv2manifest")){
         ah <- AnnotationHub()
         EPICv2manifest <- ah[["AH116484"]]
       }
