@@ -30,7 +30,12 @@ dmrcate <-
                  )
     # Order by position
     object <- object[order(object$CHR, object$pos),]
-
+    # Remove any chromosome with exactly 1 probe
+    if (any(table(object$CHR)==1)) {
+      torm <- names(which(table(object$CHR)==1))
+      object <- object[!object$CHR %in% torm,]
+    }
+    
     # Automatic bandwidth specification
     if (is.null(C) & !consec) {
       C = 2

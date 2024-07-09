@@ -47,12 +47,15 @@ cpg.annotate <- function (datatype = c("array", "sequencing"), object, what = c(
         
         if(epicv2Remap){
           if(any(EPICv2manifest$CH_WGBS_evidence=="Y")){
+            #Remap those with offtarget
             torm <- sum(EPICv2manifest$CH_WGBS_evidence=="Y")
             message(paste0("Remapping ", torm, " cross-hybridising probes to their more likely offtarget..."))
             EPICv2manifest$CHR[EPICv2manifest$CH_WGBS_evidence=="Y"] <- gsub(":.*", "", EPICv2manifest$Suggested_offtarget[EPICv2manifest$CH_WGBS_evidence=="Y"])
             EPICv2manifest$MAPINFO[EPICv2manifest$CH_WGBS_evidence=="Y"] <- as.integer(gsub(".*:", "", EPICv2manifest$Suggested_offtarget[EPICv2manifest$CH_WGBS_evidence=="Y"]))
             coords <- paste(EPICv2manifest$CHR, EPICv2manifest$MAPINFO, sep=":")
             EPICv2manifest <- EPICv2manifest[!duplicated(coords),]
+            #Throw away those with CH but no remap
+            EPICv2manifest <- EPICv2manifest[!(EPICv2manifest$CH_BLAT=="Y" & EPICv2manifest$CH_WGBS_evidence==""),]
             object <- object[rownames(EPICv2manifest),]
           }
           
