@@ -223,7 +223,7 @@ cpg.annotate <- function (datatype = c("array", "sequencing"), object, what = c(
                              ind.fdr = tt$adj.P.Val, 
                              is.sig = tt$adj.P.Val < fdr)
         
-      names(annotated) <- paste(annotated)
+      names(annotated) <- rownames(tt)
       annotated <- sort(sortSeqlevels(annotated))
       
     }, variability = {

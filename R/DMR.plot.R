@@ -36,36 +36,22 @@ DMR.plot <- function(ranges,
                                                mergeManifest = TRUE, what = what)
       }
       if (arraytype == "EPICv2") {
-        if (!is(CpGs, "matrix")){
-          stop("Error, CpGs argument must be a matrix for EPICv2")
-        }
-      }
+        grset <- makeGenomicRatioSetFromMatrix(CpGs, 
+                                               array = "IlluminaHumanMethylationEPICv2", annotation = "20a1.hg38", 
+                                               mergeManifest = TRUE, what = what)
+       }
     }
     else {
       grset <- CpGs
     }
     
-    if (arraytype == "EPICv2") {
-      message("Loading EPICv2 manifest...")
-      ah <- AnnotationHub()
-      EPICv2manifest <- ah[["AH116484"]]
-      EPICv2manifest <- EPICv2manifest[EPICv2manifest$CHR!="chr0",]
-      RSanno <- GRanges(EPICv2manifest$CHR, IRanges(EPICv2manifest$MAPINFO, EPICv2manifest$MAPINFO))
-      names(RSanno) <- rownames(EPICv2manifest)
-      RSanno <- sort(sortSeqlevels(RSanno))
-      RSanno <- RSanno[names(RSanno) %in% rownames(CpGs)]
-      CpGs <- CpGs[names(RSanno),]
-      cpgs.ranges <- RSanno
-      
-    } else {
-          CpGs <- getBeta(grset)
-          RSanno <- getAnnotation(grset)
-          RSanno <- RSanno[order(RSanno$chr, RSanno$pos), ]
-          CpGs <- CpGs[rownames(RSanno), ]
-          cpgs.ranges <- GRanges(RSanno$chr, IRanges(RSanno$pos, 
-                                                     RSanno$pos))
-          
-    }
+    
+    CpGs <- getBeta(grset)
+    RSanno <- getAnnotation(grset)
+    RSanno <- RSanno[order(RSanno$chr, RSanno$pos), ]
+    CpGs <- CpGs[rownames(RSanno), ]
+    cpgs.ranges <- GRanges(RSanno$chr, IRanges(RSanno$pos, 
+                                               RSanno$pos))
     values(cpgs.ranges) <- CpGs
     isbsseq <- FALSE
   }
