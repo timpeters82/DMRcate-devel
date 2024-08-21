@@ -1,7 +1,7 @@
 Package: DMRcate
 Title: Methylation array and sequencing spatial analysis methods
 Version: 3.0.6
-Date: 2024-09-07
+Date: 2024-20-08
 Author: Tim Peters
 Authors@R: c(person("Tim", "Peters", role = c("cre", "aut"),
                     email = "t.peters@garvan.org.au"),
@@ -23,6 +23,7 @@ biocViews: DifferentialMethylation, GeneExpression, Microarray,
 Suggests: knitr, RUnit, BiocGenerics,
         IlluminaHumanMethylation450kanno.ilmn12.hg19,
         IlluminaHumanMethylationEPICanno.ilm10b4.hg19,
+        IlluminaHumanMethylationEPICv2anno.20a1.hg38,
         FlowSorted.Blood.EPIC, tissueTreg, DMRcatedata, EPICv2manifest
 License: file LICENSE
 VignetteBuilder: knitr

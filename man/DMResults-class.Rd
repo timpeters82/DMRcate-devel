@@ -11,11 +11,11 @@ This class has eight slots, summarising DMR information to be passed to \code{\l
     \item{\code{coord}:}{ DMR coordinates in UCSC style.}
     \item{\code{no.cpgs}:}{ Number of constituent CpG sites of DMR.}
     \item{\code{min_smoothed_fdr}:}{ Minimum FDR of the \strong{smoothed} estimate.}
-    \item{\code{Stouffer}:}{ Stouffer summary transform of the \strong{individual} CpG FDRs.}
-    \item{\code{HMFDR}:}{ Harmonic mean of the \strong{individual} CpG FDRs.}
-    \item{\code{Fisher}:}{ Fisher combined probability transform of the \strong{individual} CpG FDRs.}
-    \item{\code{maxdiff}:}{ Maximum differential/coefficient within the DMR.}
-    \item{\code{meandiff}:}{ Mean differential/coefficient across the DMR.}
+    \item{\code{Stouffer}:}{ Stouffer summary transform of the \strong{individual} CpG \emph{p}-values (FDR-corrected).}
+    \item{\code{HMFDR}:}{ Harmonic mean of the \strong{individual} CpG \emph{p}-values (FDR-corrected).}
+    \item{\code{Fisher}:}{ Fisher combined probability transform of the \strong{individual} CpG \emph{p}-values (FDR corrected).}
+    \item{\code{maxdiff}:}{ Maximum differential/coefficient within the DMR (logit2-space for sequencing mode).}
+    \item{\code{meandiff}:}{ Mean differential/coefficient across the DMR (logit2-space for sequencing mode).}
     }
 }
 \section{Methods}{

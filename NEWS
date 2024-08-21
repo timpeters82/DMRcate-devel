@@ -1,3 +1,8 @@
+CHANGES IN DMRcate VERSION 3.0.6
+
+- Annotation of EPICv2 now incorporates IlluminaHumanMethylationEPICv2anno.20a1.hg38
+- rmPosReps rolled into cpg.annotate()
+- Fisher, Stouffer, HMFDR fixed, ty Josh Scurll
 
 CHANGES IN DMRcate VERSION 3.0.4
 - Group means prettified by Braydon Meyer

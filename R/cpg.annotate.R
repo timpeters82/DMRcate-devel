@@ -1,5 +1,6 @@
 cpg.annotate <- function (datatype = c("array", "sequencing"), object, what = c("Beta", "M"), 
           arraytype = c("EPICv2", "EPICv1", "EPIC", "450K"), epicv2Remap = TRUE,
+          epicv2Filter = c("mean", "sensitivity", "precision", "random"),
           analysis.type = c("differential", "variability", "ANOVA", "diffVar"), 
           design, contrasts = FALSE, cont.matrix = NULL, fdr = 0.05, coef, 
           varFitcoef = NULL,  topVarcoef = NULL, ...) 
@@ -20,53 +21,163 @@ cpg.annotate <- function (datatype = c("array", "sequencing"), object, what = c(
         grset <- makeGenomicRatioSetFromMatrix(mat = object, 
                                                array = "IlluminaHumanMethylation450k", annotation = "ilmn12.hg19", 
                                                what = what)
+        
       }
       if (arraytype == "EPICv1") {
         grset <- makeGenomicRatioSetFromMatrix(mat = object, 
                                                array = "IlluminaHumanMethylationEPIC", annotation = "ilm10b4.hg19", 
                                                what = what)
+        
       }
       if (arraytype == "EPICv2") {
-        if(what=="Beta"){
-          object <- logit2(object)
-        }
+        grset <- makeGenomicRatioSetFromMatrix(mat = object, 
+                                               array = "IlluminaHumanMethylationEPICv2", annotation = "20a1.hg38", 
+                                               what = what)
+        anno <- getAnnotation(grset)
         message("EPICv2 specified. Loading manifest...")
         ah <- AnnotationHub()
         EPICv2manifest <- ah[["AH116484"]]
-        EPICv2manifest <- EPICv2manifest[rownames(object),]
-        #Remove probes without mappings
-        EPICv2manifest <- EPICv2manifest[!is.na(EPICv2manifest$posrep_IlmnIDs),]
-        EPICv2manifest <- EPICv2manifest[!EPICv2manifest$CHR=="chr0",]
-        object <- object[rownames(EPICv2manifest),]
-        #Check for replicates
-        coords <- paste(EPICv2manifest$CHR, EPICv2manifest$MAPINFO, sep=":")
-        posreps <- table(coords)
-        if (any(posreps > 1)){
-          stop("Found 1 or more probes that map to the same CpG site. Please use rmPosReps() to filter these out, and retry with the resulting matrix.")
-        }
-        
-        if(epicv2Remap){
-          if(any(EPICv2manifest$CH_WGBS_evidence=="Y")){
-            #Remap those with offtarget
-            torm <- sum(EPICv2manifest$CH_WGBS_evidence=="Y")
-            message(paste0("Remapping ", torm, " cross-hybridising probes to their more likely offtarget..."))
-            EPICv2manifest$CHR[EPICv2manifest$CH_WGBS_evidence=="Y"] <- gsub(":.*", "", EPICv2manifest$Suggested_offtarget[EPICv2manifest$CH_WGBS_evidence=="Y"])
-            EPICv2manifest$MAPINFO[EPICv2manifest$CH_WGBS_evidence=="Y"] <- as.integer(gsub(".*:", "", EPICv2manifest$Suggested_offtarget[EPICv2manifest$CH_WGBS_evidence=="Y"]))
-            coords <- paste(EPICv2manifest$CHR, EPICv2manifest$MAPINFO, sep=":")
-            EPICv2manifest <- EPICv2manifest[!duplicated(coords),]
-            #Throw away those with CH but no remap
-            EPICv2manifest <- EPICv2manifest[!(EPICv2manifest$CH_BLAT=="Y" & EPICv2manifest$CH_WGBS_evidence==""),]
-            object <- object[rownames(EPICv2manifest),]
-          }
-          
-        }
-        
-      }
-      } else {
-      grset <- object
-      }
-    if(!arraytype=="EPICv2"){
+        anno <- cbind(anno, EPICv2manifest[rownames(anno), 73:80])
+        object <- getM(grset)
+      } 
+      
+    } else {
+    grset <- object
+    anno <- getAnnotation(grset)
+    }
+    
+    if(arraytype!="EPICv2"){
       object <- getM(grset)
+    } else {
+      #Remapping
+      if(epicv2Remap){
+        if(any(anno$CH_WGBS_evidence=="Y")){
+          #Remap those with offtarget
+          torm <- sum(anno$CH_WGBS_evidence=="Y")
+          message(paste0("Remapping ", torm, " cross-hybridising probes to their more likely offtarget..."))
+          anno$chr[anno$CH_WGBS_evidence=="Y"] <- gsub(":.*", "", anno$Suggested_offtarget[anno$CH_WGBS_evidence=="Y"])
+          anno$pos[anno$CH_WGBS_evidence=="Y"] <- as.integer(gsub(".*:", "", anno$Suggested_offtarget[anno$CH_WGBS_evidence=="Y"]))
+          #Throw away those with CH but no remap
+          anno <- anno[!(anno$CH_BLAT=="Y" & anno$CH_WGBS_evidence==""),]
+          object <- object[rownames(anno),]
+        }
+      }
+      
+      #Check for replicates
+      coords <- paste(anno$chr, anno$pos, sep=":")
+      posreps <- table(coords)
+      if (any(posreps > 1)){
+        message(paste("Replicate probes that map to the same CpG site found. Filtering these using strategy:", epicv2Filter))
+        if(any(nchar(rownames(object)) < 13)){
+          stop("Error: rownames do not look like EPICv2 probes. This function will only work for EPICv2 data.")
+        }
+        if(any(!grepl("^cg|^ch", rownames(object)))){
+          stop("Error: This function will only accept a matrix with rownames beginning with cg or ch. Please run your matrix through rmSNPandCH() first.")
+        }
+        posreps <- names(posreps)[posreps > 1]
+        switch(epicv2Filter, mean={
+          message("Averaging probes that map to the same CpG site...")
+          outs <- lapply(posreps, function (x){
+            ids <- coords==x
+            means <- colMeans(object[ids,])
+            retain <- rownames(anno)[ids][1]
+            dups <- rownames(anno)[ids][-1]
+            list(means, retain, dups)
+          })
+          means <- do.call("rbind", lapply(outs, function (x) x[[1]]))
+          rownames(means) <- unlist(lapply(outs, function (x) x[[2]]))
+          object[rownames(means),] <- means
+          dups <- unlist(lapply(outs, function (x) x[[3]]))
+          anno <- anno[!rownames(anno) %in% dups,]
+          object <- object[!rownames(object) %in% dups,]
+        }, sensitivity={
+          message("Selecting probes that map to the same CpG site by sensitivity to methylation change...")
+          senschoice <- lapply(posreps, function (x) {
+            probes <- rownames(anno)[coords==x]
+            classes <- anno[probes, "Rep_results_by_LOCATION"]
+            if(any(grepl("Superior|sensitivity", classes))){
+              if(length(grep("Superior|sensitivity", classes)) > 1){
+                choice <- sample(probes[grepl("Superior|sensitivity", classes)], 1)
+              } else {
+                choice <- probes[grepl("Superior|sensitivity", classes)]
+              }
+            } 
+            else if (any(grepl("Inferior", classes))){
+              if(all(grepl("Inferior", classes))){
+                choice <- sample(probes, 1)
+              } else {
+                choice <- sample(probes[!grepl("Inferior", classes)], 1)
+              }
+            } else {
+              choice <- sample(probes, 1)
+            }
+            dups <- probes[!probes==choice]
+            list(choice, dups)
+          })
+          remove <- unlist(lapply(senschoice, function (x) x[[2]]))
+          anno <- anno[!rownames(anno) %in% remove,]
+          object <- object[!rownames(object) %in% remove,]
+        }, precision={
+          message("Processing probes that map to the same CpG site for best precision...")
+          precchoice <- lapply(posreps, function (x) {
+            probes <- rownames(anno)[coords==x]
+            classes <- anno[probes, "Rep_results_by_LOCATION"]
+            if(any(grepl("mean", classes))){
+              means <- colMeans(object[probes,])
+              retain <- probes[1]
+              dups <- probes[-1]
+              return(list(means, retain, dups))
+            } 
+            else if (any(classes=="Best precision")){
+              if(sum(classes=="Best precision") > 1){
+                choice <- sample(probes[classes=="Best precision"], 1)
+              } else {
+                choice <- probes[grepl("Best precision", classes)]
+              }
+            } 
+            else if (any(grepl("Superior", classes))){
+              if(length(grep("Superior", classes)) > 1){
+                choice <- sample(probes[grepl("Superior", classes)], 1)
+              } else {
+                choice <- probes[grepl("Superior", classes)]
+              }
+            }
+            else if (any(grepl("Inferior", classes))){
+              if(all(grepl("Inferior", classes))){
+                choice <- sample(probes, 1)
+              } else {
+                choice <- sample(probes[!grepl("Inferior", classes)], 1)
+              }
+            }
+            else {
+              choice <- sample(probes, 1)
+            }
+            means <- object[choice,]
+            retain <- choice
+            dups <- probes[!probes==choice]
+            return(list(means, retain, dups))
+          }
+          )
+          means <- do.call("rbind", lapply(precchoice, function (x) x[[1]]))
+          rownames(means) <- unlist(lapply(precchoice, function (x) x[[2]]))
+          object[rownames(means),] <- means
+          dups <- unlist(lapply(precchoice, function (x) x[[3]]))
+          anno <- anno[!rownames(anno) %in% dups,]
+          object <- object[!rownames(object) %in% dups,]
+        }, random = {
+          message("Selecting replicate probes at random...")
+          randchoice <- lapply(posreps, function (x) {
+            probes <- rownames(anno)[coords==x]
+            choice <- sample(probes, 1)
+            dups <- probes[!probes==choice]
+            list(choice, dups)
+          })
+          remove <- unlist(lapply(randchoice, function (x) x[[2]]))
+          anno <- anno[!rownames(anno) %in% remove,]
+          object <- object[!rownames(object) %in% remove,]
+          
+        })
+      }
     }
     switch(analysis.type, differential = {
       stopifnot(is.matrix(design))
@@ -105,29 +216,23 @@ cpg.annotate <- function (datatype = c("array", "sequencing"), object, what = c(
       m <- match(rownames(object), rownames(tt))
       tt <- tt[m, ]
       stat <- tt$t
+      rawpval <- tt$P.Value
       
-      if (arraytype == "EPICv2"){
-        annotated <- GRanges(as.character(EPICv2manifest$CHR), IRanges(EPICv2manifest$MAPINFO, 
-                                                             EPICv2manifest$MAPINFO), stat = stat, diff = tt$diff, ind.fdr = tt$adj.P.Val, 
+      annotated <- GRanges(paste(anno$chr, anno$pos, sep=":"),
+                             stat = stat, diff = tt$diff, rawpval = rawpval,
+                             ind.fdr = tt$adj.P.Val, 
                              is.sig = tt$adj.P.Val < fdr)
         
-      } else {
-      anno <- getAnnotation(grset)
-      annotated <- GRanges(as.character(anno$chr), IRanges(anno$pos, 
-                                                           anno$pos), stat = stat, diff = tt$diff, ind.fdr = tt$adj.P.Val, 
-                           is.sig = tt$adj.P.Val < fdr)
-      }
-      names(annotated) <- rownames(tt)
+      names(annotated) <- paste(annotated)
       annotated <- sort(sortSeqlevels(annotated))
       
     }, variability = {
-      RSanno <- getAnnotation(grset)
       wholevar <- var(object)
       weights <- apply(object, 1, var)
       weights <- weights/mean(weights)
-      annotated <- GRanges(as.character(RSanno$chr), IRanges(RSanno$pos, 
-                                                             RSanno$pos), stat = weights, diff = rep(0, nrow(object)), 
-                           ind.fdr = rep(0, nrow(object)), is.sig = weights > 
+      annotated <- GRanges(as.character(anno$chr), IRanges(anno$pos, 
+                                                             anno$pos), stat = weights, diff = rep(0, nrow(object)), 
+                           rawpval = rep(0, nrow(object)), ind.fdr = rep(0, nrow(object)), is.sig = weights > 
                              quantile(weights, 0.95))
       names(annotated) <- rownames(object)
     }, ANOVA = {
@@ -137,6 +242,7 @@ cpg.annotate <- function (datatype = c("array", "sequencing"), object, what = c(
       fit <- eBayes(fit)
       sqrtFs <- sqrt(fit$F)
       sqrtfdrs <- p.adjust(fit$F.p.value, method = "BH")
+      rawpval <- fit$F.p.value
       nsig <- sum(sqrtfdrs < fdr)
       if (nsig == 0) {
         message("Your design returned no individually significant probes for ANOVA. Try increasing the fdr. Alternatively, set pcutoff manually in dmrcate() to return DMRs, but be warned there is an increased risk of Type I errors.")
@@ -152,7 +258,7 @@ cpg.annotate <- function (datatype = c("array", "sequencing"), object, what = c(
       anno <- getAnnotation(grset)
       stat <- sqrtFs
       annotated <- GRanges(as.character(anno$chr), IRanges(anno$pos, 
-                                                           anno$pos), stat = stat, diff = 0, ind.fdr = sqrtfdrs, 
+                                                           anno$pos), stat = stat, diff = 0, rawpval = rawpval, ind.fdr = sqrtfdrs, 
                            is.sig = sqrtfdrs < fdr)
       names(annotated) <- rownames(object)
     }, diffVar = {
@@ -183,8 +289,10 @@ cpg.annotate <- function (datatype = c("array", "sequencing"), object, what = c(
       tt <- tt[m, ]
       anno <- getAnnotation(grset)
       stat <- tt$t
+      rawpval <- tt$P.Value
       annotated <- GRanges(as.character(anno$chr), IRanges(anno$pos, 
-                                                           anno$pos), stat = stat, diff = 0, ind.fdr = tt$Adj.P.Value, 
+                                                           anno$pos), stat = stat, diff = 0, 
+                           rawpval=rawpval, ind.fdr = tt$Adj.P.Value, 
                            is.sig = tt$Adj.P.Value < fdr)
       names(annotated) <- rownames(tt)
     })

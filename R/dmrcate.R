@@ -24,6 +24,7 @@ dmrcate <-
                  weights = abs(object@ranges$stat),
                  CHR = seqnames(object@ranges),
                  pos = start(object@ranges),
+                 rawpval = object@ranges$rawpval,
                  diff = object@ranges$diff,
                  indfdr = object@ranges$ind.fdr,
                  is.sig = object@ranges$is.sig
@@ -157,7 +158,7 @@ dmrcate <-
       }
     # results <- region-wise stats
     fn_Stouffer <- function(x) pnorm(sum(qnorm(x))/sqrt(length(x)))
-    fn_HMFDR <- function (x) 1/mean(1/x)
+    fn_HMpval <- function (x) 1/mean(1/x)
     fn_Fisher <- function (x) pchisq((sum(log(x))*-2), df=length(x)*2, lower.tail=FALSE)
     fn_max <- function(x) x[which.max(abs(x))]
     results <-
@@ -165,15 +166,18 @@ dmrcate <-
         coord = coord.A,
         no.cpgs = no_cpg.A,
         min_smoothed_fdr = REGIONSTAT("fdr", min),
-        Stouffer = REGIONSTAT("indfdr", fn_Stouffer),
-        HMFDR = REGIONSTAT("indfdr", fn_HMFDR),
-        Fisher = REGIONSTAT("indfdr", fn_Fisher),
+        Stouffer = REGIONSTAT("rawpval", fn_Stouffer),
+        HMpval = REGIONSTAT("rawpval", fn_HMpval),
+        Fisher = REGIONSTAT("rawpval", fn_Fisher),
         maxdiff = REGIONSTAT("diff", fn_max),
         meandiff = REGIONSTAT("diff", mean),
         row.names = seq(A),
         stringsAsFactors = FALSE
       )
-
+    #Correct DMR-wise "significances"
+    results$Stouffer <- p.adjust(results$Stouffer, method = "fdr")
+    results$Fisher <- p.adjust(results$Fisher, method = "fdr")
+    results$HMFDR <- p.adjust(results$HMpval, method = "fdr")
     # Order and filter DMRs
     
     keep <- (results$no.cpgs >= min.cpgs)
@@ -183,7 +187,7 @@ dmrcate <-
       keep <- (abs(results$meandiff) > betacutoff)
       results <- results[keep, ]
     }
-    o <- order(results$Fisher, -results$no.cpgs)
+    o <- order(results$min_smoothed_fdr, -results$no.cpgs)
     results <- results[o,]
     message("Done!")
     return(new("DMResults", coord=results$coord, no.cpgs=results$no.cpgs, min_smoothed_fdr=results$min_smoothed_fdr,

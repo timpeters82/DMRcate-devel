@@ -11,10 +11,11 @@ Annotate a matrix/GenomicRatioSet representing EPICv2, EPICv1 or 450K data with 
 
 cpg.annotate(datatype = c("array", "sequencing"), object,  
              what = c("Beta", "M"), arraytype = c("EPICv2", "EPICv1", "EPIC", 
-             "450K"), epicv2Remap = TRUE, analysis.type = c("differential", 
-             "variability", "ANOVA", "diffVar"), design, contrasts = FALSE, 
-             cont.matrix = NULL, fdr = 0.05, coef, varFitcoef = NULL, 
-             topVarcoef = NULL, ...) 
+             "450K"), epicv2Remap = TRUE, epicv2Filter = c("mean", 
+             "sensitivity", "precision", "random"), analysis.type = 
+             c("differential", "variability", "ANOVA", "diffVar"), 
+             design, contrasts = FALSE, cont.matrix = NULL, fdr = 0.05, coef, 
+             varFitcoef = NULL, topVarcoef = NULL, ...) 
 }
 \arguments{
   \item{datatype}{
@@ -40,7 +41,16 @@ cpg.annotate(datatype = c("array", "sequencing"), object,
     Logical indicating whether to remap 11,878 cross-hybridising EPICv2 probes 
     to their more likely CpG target (see Peters \emph{et al.} 2024).
   }
-  
+  \item{epicv2Filter}{
+    Strategy for filtering probe replicates that map to the same CpG site.
+    \code{"mean"} takes the mean of the available probes;
+    \code{"sensitivity"} takes the available probe most sensitive to methylation
+    change;
+    \code{"precision"} either selects the available probe with the lowest 
+    variation from the consensus value (most precise), or takes the mean if that
+    confers the lowest variation instead,
+    \code{"random"} takes a single probe at random from each replicate group.
+  }
   \item{analysis.type}{
     \code{"differential"} for \code{dmrcate()} to return DMRs;
     \code{"variability"} to return VMRs;

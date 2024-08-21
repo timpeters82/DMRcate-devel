@@ -12,7 +12,7 @@ sequencing.annotate <- function(obj, methdesign, all.cov=FALSE, contrasts = FALS
     obj$fdr <- p.adjust(obj$pval, method="BH")
     nsig <- sum(obj$fdr < fdr)
     annotated <- GRanges(as.character(obj$chr), IRanges(obj$pos, obj$pos), stat = obj$stat,
-                         diff = obj$diff, ind.fdr = obj$fdr, is.sig = obj$fdr < fdr)
+                         rawpval = obj$pval, diff = obj$diff, ind.fdr = obj$fdr, is.sig = obj$fdr < fdr)
     names(annotated) <- rownames(obj)
     annotated <- sort(annotated)
     
@@ -60,7 +60,7 @@ sequencing.annotate <- function(obj, methdesign, all.cov=FALSE, contrasts = FALS
     tt <- topTable(fit, coef = coef, number = nrow(ym), sort.by = "none")
     nsig <- sum(tt$adj.P.Val < fdr)
     annotated <- GRanges(as.character(seqnames(obj)), IRanges(start(obj), start(obj)), stat = tt$t,
-                         diff = tt$logFC,, ind.fdr = tt$adj.P.Val, is.sig = tt$adj.P.Val < fdr)
+                         rawpval = tt$P.Value, diff = tt$logFC, ind.fdr = tt$adj.P.Val, is.sig = tt$adj.P.Val < fdr)
     names(annotated) <- paste0("cpg", 1:nrow(tt))
     annotated <- sort(annotated)
     

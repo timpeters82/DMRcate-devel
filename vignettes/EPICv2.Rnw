@@ -75,13 +75,7 @@ nrow(ALLMs.noSNPs)
 @
 
 
-EPICv2 data contains groups of probes we call ``replicates'' that map to the same CpG site. Since DMRcate requires a 1-to-1 relationship between rows of methylation measurements and CpG loci, lest the kernel become biased towards sites with multiple mappings, we need to attenuate our \textit{M}-value matrix to maintain this relationship. The function \texttt{rmPosReps()} does this, with user options specified by the argument \texttt{filter.strategy}. The default is to take the \texttt{mean} of each replicate group (with row name represented by the first probe in each group that appears in the manifest):
-
-<<repmean>>==
-ALLMs.noSNPs.repmean <- rmPosReps(ALLMs.noSNPs, filter.strategy="mean")
-@
-
-However, we can also select one probe from each replicate group based on its performance from cross-platform comparisons with EPICv1 and WGBS data (see Peters \textit{et al.} 2024)\cite{Peters2024}. Probe robustness is measured in terms of either: 
+EPICv2 data contains groups of probes we call ``replicates'' that map to the same CpG site. Since DMRcate requires a 1-to-1 relationship between rows of methylation measurements and CpG loci, lest the kernel become biased towards sites with multiple mappings, we need to attenuate our \textit{M}-value matrix to maintain this relationship.  \texttt{cpg.annotate()} now does this when \texttt{arraytype = "EPICv2"}, with user options specified by the argument \texttt{epicv2Filter}. The default is to take the \texttt{mean} of each replicate group (with row name represented by the first probe in each group that appears in the manifest). However, we can also select one probe from each replicate group based on its performance from cross-platform comparisons with EPICv1 and WGBS data (see Peters \textit{et al.} 2024)\cite{Peters2024}. Probe robustness is measured in terms of either: 
 
 \begin{itemize}
 
@@ -91,11 +85,11 @@ However, we can also select one probe from each replicate group based on its per
 
 \end{itemize}
 
-In some cases, a replicated probe will prove superior in both sensitivity and precision, however in many cases superior sensitivity and precision is split between two probes in a replicate group. Furthermore, an individual probe may have superior sensitivity in a group, but superior precision is incurred by the group mean. Hence we give the user the option of choosing \texttt{sensitivity} or \texttt{precision}, based on their appetite for potential Type I error. In cases where there is insufficient evidence for superiority, a replicate probe is taken at random from the group. This strategy is generalised to all replicate groups for the \texttt{random} option. Figure 1 shows the differences in probe selection based on the \texttt{filter.strategy} argument. In practice, the number of differentially methylated CpGs (and hence DMRs) is unlikely to vary greatly depending on the \texttt{filter.strategy} argument, but we provide this optionality to make use of all available probes on the array, and to potentially update the manifest with more rigorous probe benchmarking as usage proliferates.
+In some cases, a replicated probe will prove superior in both sensitivity and precision, however in other cases superior sensitivity and precision is split between two probes in a replicate group. Alternatively, an individual probe may have superior sensitivity in a group, but superior precision is incurred by the group mean. Hence we give the user the option of choosing \texttt{sensitivity} or \texttt{precision}, based on their appetite for potential Type I error. In cases where there is insufficient evidence for superiority, a replicate probe is taken at random from the group. This strategy is generalised to all replicate groups for the \texttt{random} option. Figure 1 shows the differences in probe selection based on the \texttt{filter.strategy} argument. In practice, the number of differentially methylated CpGs (and hence DMRs) is unlikely to vary greatly depending on the \texttt{epicv2Filter} argument, but we provide this optionality to make use of all available probes on the array, and to potentially update the manifest with more rigorous probe benchmarking as usage proliferates.
 
 
 \begin{figure}[htbp!]
-  \caption{Variation in probe selection based on the \texttt{filter.strategy} argument from \texttt{rmPosReps()}. Values in the ``Random'' group may differ when reproduced.
+  \caption{Variation in probe selection based on the \texttt{epicv2Filter} argument from \texttt{cpg.annotate()}. Values in the ``Random'' group may differ when reproduced.
 }
   \centering
     \includegraphics[width=\textwidth]{ProbeVenn.pdf}
@@ -104,18 +98,18 @@ In some cases, a replicated probe will prove superior in both sensitivity and pr
 The main event, however, is calling DMRs. Let's take our replicate-averaged \textit{M}-value matrix and specify our hypothesis to call DMRs between T cell and B cell ALL samples:
 
 <<hypothesis>>=
-type <- gsub("_.*", "", colnames(ALLMs.noSNPs.repmean))
+type <- gsub("_.*", "", colnames(ALLMs.noSNPs))
 type
 design <- model.matrix(~type)
 design
 @
 
 
-Now for \texttt{cpg.annotate()}. In DMRcate 3.0 we have added an extra logical argument \texttt{epicv2Remap} giving the user the option of reassigning probes to an off-target CpG site where there is evidence (based on both \textit{in silico} alignment and concordance with WGBS data) that the probe is preferentially hybridising to that site. As stated previously, this will only apply when you have specified \texttt{rmcrosshyb=FALSE} in \texttt{rmSNPandCH()}. 
+Now for \texttt{cpg.annotate()}. In addition to \texttt{epicv2Filter}, we have also added an extra logical argument \texttt{epicv2Remap} giving the user the option of reassigning probes to an off-target CpG site where there is evidence (based on both \textit{in silico} alignment and concordance with WGBS data) that the probe is preferentially hybridising to that site. As stated previously, this will only apply when you have specified \texttt{rmcrosshyb=FALSE} in \texttt{rmSNPandCH()}. 
 
 <<cpg.annotate>>=
-myannotation <- cpg.annotate("array", object=ALLMs.noSNPs.repmean, what = "M", 
-                             arraytype = "EPICv2", epicv2Remap = TRUE, 
+myannotation <- cpg.annotate("array", object=ALLMs.noSNPs, what = "M", 
+                             arraytype = "EPICv2", epicv2Filter = "mean", epicv2Remap = TRUE, 
                              analysis.type="differential", design=design, coef=2, 
                              fdr=0.001)
 @

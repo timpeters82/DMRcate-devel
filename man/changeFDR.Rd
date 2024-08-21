@@ -25,9 +25,10 @@ Tim Peters <t.peters@garvan.org.au>
 \examples{
 library(GenomicRanges)
 stats <- rt(1000, 2)
-fdrs <- p.adjust(2*pt(-abs(stats), 100), "BH")
+pvals <- pt(-abs(stats), 100)
+fdrs <- p.adjust(2*pvals, "BH")
 annotated <- GRanges(rep("chr1", 1000), IRanges(1:1000, 1:1000), stat = stats,
-                     diff = 0, ind.fdr = fdrs, is.sig = fdrs < 0.05)
+                     rawpval = pvals, diff = 0, ind.fdr = fdrs, is.sig = fdrs < 0.05)
 names(annotated) <- paste0("CpG_", 1:1000)
 myannotation <- new("CpGannotated", ranges=annotated)
 changeFDR(myannotation, 0.1)

@@ -34,9 +34,10 @@ EPICv2manifest <- ah[["AH116484"]]
 chr21probes <- rownames(EPICv2manifest)[EPICv2manifest$CHR=="chr21"]
 coords <- EPICv2manifest[chr21probes, "MAPINFO"]
 stats <- rt(length(chr21probes), 2)
-fdrs <- p.adjust(2*pt(-abs(stats), 100), "BH")
+pvals <- pt(-abs(stats), 100)
+fdrs <- p.adjust(2*pvals, "BH")
 annotated <- GRanges(rep("chr21", length(stats)), IRanges(coords, coords), stat = stats,
-                     diff = 0, ind.fdr = fdrs, is.sig = fdrs < 0.05)
+                     rawpval = pvals, diff = 0, ind.fdr = fdrs, is.sig = fdrs < 0.05)
 names(annotated) <- chr21probes
 myannotation <- new("CpGannotated", ranges=annotated)
 dmrcoutput <- dmrcate(myannotation, lambda=1000, C=2)
