@@ -46,7 +46,7 @@ rmSNPandCH <- function (object, dist = 2, mafcut = 0.05, and = TRUE, rmcrosshyb 
     if (rmcrosshyb) {
       ah <- AnnotationHub()
       EPICv2manifest <- ah[["AH116484"]]
-      crosshyb <- rownames(EPICv2manifest)[EPICv2manifest$CH_WGBS_evidence=="Y"]
+      crosshyb <- rownames(EPICv2manifest)[EPICv2manifest$CH_BLAT=="Y"]
       badprobes <- union(badprobes, as.character(crosshyb))
     }
     if (rmXY) {

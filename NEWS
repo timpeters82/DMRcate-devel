@@ -1,3 +1,7 @@
+CHANGES IN DMRcate VERSION 3.0.7
+
+- rmSNPandCH() for EPICv2 removes all CH probes when rmcrosshyb=T, not just those with WGBS evidence
+
 CHANGES IN DMRcate VERSION 3.0.6
 
 - Annotation of EPICv2 now incorporates IlluminaHumanMethylationEPICv2anno.20a1.hg38
