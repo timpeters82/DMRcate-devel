@@ -17,11 +17,13 @@
     
     - ind.fdr: False discovery rate as calculated on individual CpG sites.
     
-    - is.sig: Logical determining whether a CpG site is individually significant or not. Can be adjusted using \code{\link{changeFDR}}.}}
+    - is.sig: Logical determining whether a CpG site is individually significant or not. Can be adjusted using \code{\link{changeFDR}}.}
+    \item{\code{betas}:}{A matrix of per-CpG beta values matching the annotated loci.}
+    }
     
 }
 \section{Methods}{
-    \code{CpGannotate} objects have a \code{show} method that describes the data therein.
+    \code{CpGannotated} objects have a show method that describes the data therein.
 }
 \author{ 
 Tim Peters <t.peters@garvan.org.au>

@@ -109,9 +109,9 @@ Now for \texttt{cpg.annotate()}. In addition to \texttt{epicv2Filter}, we have a
 
 <<cpg.annotate>>=
 myannotation <- cpg.annotate("array", object=ALLMs.noSNPs, what = "M", 
-                             arraytype = "EPICv2", epicv2Filter = "mean", epicv2Remap = TRUE, 
-                             analysis.type="differential", design=design, coef=2, 
-                             fdr=0.001)
+                             arraytype = "EPICv2", epicv2Filter = "mean", 
+                             epicv2Remap = TRUE,  analysis.type="differential", 
+                             design=design, coef=2, fdr=0.001)
 @
                              
 And then, as usual, call DMRs and annotate them. Unlike previous arrays, the EPICv2 manifest is in hg38:
@@ -127,7 +127,7 @@ And finally, plotting one of the top DMRs.
 <<plot>>=
 groups <- c(BALL="forestgreen", TALL="orange")
 cols <- groups[as.character(type)]
-DMR.plot(ranges=results.ranges, dmr=2, CpGs=ALLbetas, 
+DMR.plot(ranges=results.ranges, dmr=2, CpGs=myannotation, 
          what = "Beta", arraytype = "EPICv2", phen.col=cols, genome = "hg38") 
 @
  

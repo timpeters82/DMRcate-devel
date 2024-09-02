@@ -61,7 +61,7 @@ sequencing.annotate <- function(obj, methdesign, all.cov=FALSE, contrasts = FALS
     nsig <- sum(tt$adj.P.Val < fdr)
     annotated <- GRanges(as.character(seqnames(obj)), IRanges(start(obj), start(obj)), stat = tt$t,
                          rawpval = tt$P.Value, diff = tt$logFC, ind.fdr = tt$adj.P.Val, is.sig = tt$adj.P.Val < fdr)
-    names(annotated) <- paste0("cpg", 1:nrow(tt))
+    names(annotated) <- paste(seqnames(obj), start(obj), sep=":")
     annotated <- sort(annotated)
     
   } else {
@@ -82,5 +82,5 @@ sequencing.annotate <- function(obj, methdesign, all.cov=FALSE, contrasts = FALS
     message(paste("Your contrast returned", nsig, 
                   "individually significant CpGs; this is plenty. Consider decreasing the 'fdr' parameter using changeFDR(), for more precise DMR definition."))
   }
-  return(new("CpGannotated", ranges=annotated))
+  return(new("CpGannotated", ranges=annotated, betas=matrix("Betas can be obtained with bsseq::getMeth(obj).", 1, 1)))
 }

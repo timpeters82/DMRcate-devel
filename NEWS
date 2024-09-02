@@ -1,3 +1,7 @@
+CHANGES IN DMRcate VERSION 3.0.9
+
+- getCollapsedBetas() added to facilitate extraction of beta values post-annotation for EPICv2
+
 CHANGES IN DMRcate VERSION 3.0.7
 
 - rmSNPandCH() for EPICv2 removes all CH probes when rmcrosshyb=T, not just those with WGBS evidence

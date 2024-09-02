@@ -128,7 +128,7 @@ groups <- c(CD8T="magenta", CD4T="forestgreen")
 cols <- groups[as.character(type)]
 cols
 
-DMR.plot(ranges=results.ranges, dmr=1, CpGs=getBeta(tcell), what="Beta", 
+DMR.plot(ranges=results.ranges, dmr=1, CpGs=myannotation, what="Beta", 
          arraytype = "EPICv1", phen.col=cols, genome="hg19")
 @
 

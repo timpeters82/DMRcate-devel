@@ -14,7 +14,7 @@ DMR.plot <- function(ranges,
   what <- match.arg(what)
   arraytype <- match.arg(arraytype)
   genome <- match.arg(genome)
-  stopifnot(class(CpGs)[1] %in% c("matrix", "BSseq", "GenomicRatioSet"))
+  stopifnot(class(CpGs)[1] %in% c("CpGannotated", "matrix", "BSseq", "GenomicRatioSet"))
   if(arraytype=="EPICv2" & genome=="hg19"){
     stop("Error: genome must be hg38 for EPICv2 data.")
   }
@@ -23,7 +23,15 @@ DMR.plot <- function(ranges,
   }
   stopifnot(dmr %in% 1:length(ranges))
   IDs <- unique(names(phen.col))
-  if (is(CpGs, "matrix") | is(CpGs, "GenomicRatioSet")) {
+  if(is(CpGs, "CpGannotated")){
+    CpGs <- getCollapsedBetas(CpGs)
+    RSanno <- data.frame(chr=gsub(":.*", "", rownames(CpGs)), pos=as.numeric(gsub(".*:", "", rownames(CpGs))))
+    RSanno <- RSanno[order(RSanno$chr, RSanno$pos), ]
+    cpgs.ranges <- GRanges(RSanno$chr, IRanges(RSanno$pos, 
+                                               RSanno$pos))
+    values(cpgs.ranges) <- CpGs
+    isbsseq <- FALSE
+  } else if (is(CpGs, "matrix") | is(CpGs, "GenomicRatioSet")) {
     if (is(CpGs, "matrix")) {
       if (arraytype == "450K") {
         grset <- makeGenomicRatioSetFromMatrix(CpGs, 
@@ -54,8 +62,7 @@ DMR.plot <- function(ranges,
                                                RSanno$pos))
     values(cpgs.ranges) <- CpGs
     isbsseq <- FALSE
-  }
-  else {
+  }  else {
     if (any(width(CpGs) > 1)) {
       stop("Error: all ranges in the BSseq object must be single nucleotides with width 1.")
     }

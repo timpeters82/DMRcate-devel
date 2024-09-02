@@ -35,3 +35,7 @@ setGeneric("sequencing.annotate", valueClass = "CpGannotated", function(obj, met
                                            cont.matrix = NULL, fdr = 0.05, coef, ...) {
   standardGeneric("sequencing.annotate")
 })
+
+setGeneric("getCollapsedBetas", function(CpGanno, ranges=NULL) {
+  standardGeneric("getCollapsedBetas")
+})

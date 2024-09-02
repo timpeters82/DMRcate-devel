@@ -11,45 +11,46 @@ cpg.annotate <- function (datatype = c("array", "sequencing"), object, what = c(
   if (arraytype == "EPIC") {
     stop("Please specify either 'EPICv2' or 'EPICv1' for arraytype. EPICv2 probe IDs have 15 characters, e.g. cg00000029_TC21. EPICv1 probe IDs have 10 characters, e.g. cg00000029.")
   }
-  if (datatype == "array") {
+  if (datatype == "sequencing") {
+    stop("Sequencing mode is deprecated for cpg.annotate(). Please use sequencing.annotate().")
+  }
+    
     stopifnot(class(object)[1] %in% c("matrix", "GenomicRatioSet"))
     if (is(object, "matrix")) {
       #Only retain cytosines
       keep <- grep("^cg|^ch", rownames(object))
       object <- object[keep,]
-        if (arraytype == "450K") {
+      if (arraytype == "450K") {
         grset <- makeGenomicRatioSetFromMatrix(mat = object, 
                                                array = "IlluminaHumanMethylation450k", annotation = "ilmn12.hg19", 
                                                what = what)
-        
-      }
+                                 }
       if (arraytype == "EPICv1") {
         grset <- makeGenomicRatioSetFromMatrix(mat = object, 
                                                array = "IlluminaHumanMethylationEPIC", annotation = "ilm10b4.hg19", 
                                                what = what)
         
-      }
+                                 }
       if (arraytype == "EPICv2") {
         grset <- makeGenomicRatioSetFromMatrix(mat = object, 
                                                array = "IlluminaHumanMethylationEPICv2", annotation = "20a1.hg38", 
                                                what = what)
-        anno <- getAnnotation(grset)
-        message("EPICv2 specified. Loading manifest...")
-        ah <- AnnotationHub()
-        EPICv2manifest <- ah[["AH116484"]]
-        anno <- cbind(anno, EPICv2manifest[rownames(anno), 73:80])
-        object <- getM(grset)
-      } 
+                                 } 
       
-    } else {
-    grset <- object
-    anno <- getAnnotation(grset)
+                              
+                           }  else {
+                                    grset <- object
     }
     
-    if(arraytype!="EPICv2"){
-      object <- getM(grset)
-    } else {
-      #Remapping
+    anno <- getAnnotation(grset)
+    object <- getM(grset)
+    
+    if(arraytype=="EPICv2"){
+      
+      message("EPICv2 specified. Loading manifest...")
+      ah <- AnnotationHub()
+      EPICv2manifest <- ah[["AH116484"]]
+      anno <- cbind(anno, EPICv2manifest[rownames(anno), 73:80])
       if(epicv2Remap){
         if(any(anno$CH_WGBS_evidence=="Y")){
           #Remap those with offtarget
@@ -62,123 +63,118 @@ cpg.annotate <- function (datatype = c("array", "sequencing"), object, what = c(
           object <- object[rownames(anno),]
         }
       }
-      
-      #Check for replicates
       coords <- paste(anno$chr, anno$pos, sep=":")
       posreps <- table(coords)
-      if (any(posreps > 1)){
-        message(paste("Replicate probes that map to the same CpG site found. Filtering these using strategy:", epicv2Filter))
-        if(any(nchar(rownames(object)) < 13)){
-          stop("Error: rownames do not look like EPICv2 probes. This function will only work for EPICv2 data.")
-        }
-        if(any(!grepl("^cg|^ch", rownames(object)))){
-          stop("Error: This function will only accept a matrix with rownames beginning with cg or ch. Please run your matrix through rmSNPandCH() first.")
-        }
-        posreps <- names(posreps)[posreps > 1]
-        switch(epicv2Filter, mean={
-          message("Averaging probes that map to the same CpG site...")
-          outs <- lapply(posreps, function (x){
-            ids <- coords==x
-            means <- colMeans(object[ids,])
-            retain <- rownames(anno)[ids][1]
-            dups <- rownames(anno)[ids][-1]
-            list(means, retain, dups)
-          })
-          means <- do.call("rbind", lapply(outs, function (x) x[[1]]))
-          rownames(means) <- unlist(lapply(outs, function (x) x[[2]]))
-          object[rownames(means),] <- means
-          dups <- unlist(lapply(outs, function (x) x[[3]]))
-          anno <- anno[!rownames(anno) %in% dups,]
-          object <- object[!rownames(object) %in% dups,]
-        }, sensitivity={
-          message("Selecting probes that map to the same CpG site by sensitivity to methylation change...")
-          senschoice <- lapply(posreps, function (x) {
-            probes <- rownames(anno)[coords==x]
-            classes <- anno[probes, "Rep_results_by_LOCATION"]
-            if(any(grepl("Superior|sensitivity", classes))){
-              if(length(grep("Superior|sensitivity", classes)) > 1){
-                choice <- sample(probes[grepl("Superior|sensitivity", classes)], 1)
+        if (any(posreps > 1)){
+          message(paste("Replicate probes that map to the same CpG site found. Filtering these using strategy:", epicv2Filter))
+          posreps <- names(posreps)[posreps > 1]
+          switch(epicv2Filter, mean={
+            message("Averaging probes that map to the same CpG site...")
+            outs <- lapply(posreps, function (x){
+              ids <- coords==x
+              means <- colMeans(object[ids,])
+              retain <- rownames(anno)[ids][1]
+              dups <- rownames(anno)[ids][-1]
+              list(means, retain, dups)
+            })
+            means <- do.call("rbind", lapply(outs, function (x) x[[1]]))
+            rownames(means) <- unlist(lapply(outs, function (x) x[[2]]))
+            object[rownames(means),] <- means
+            dups <- unlist(lapply(outs, function (x) x[[3]]))
+            anno <- anno[!rownames(anno) %in% dups,]
+            object <- object[!rownames(object) %in% dups,]
+          }, sensitivity={
+            message("Selecting probes that map to the same CpG site by sensitivity to methylation change...")
+            senschoice <- lapply(posreps, function (x) {
+              probes <- rownames(anno)[coords==x]
+              classes <- anno[probes, "Rep_results_by_LOCATION"]
+              if(any(grepl("Superior|sensitivity", classes))){
+                if(length(grep("Superior|sensitivity", classes)) > 1){
+                  choice <- sample(probes[grepl("Superior|sensitivity", classes)], 1)
+                } else {
+                  choice <- probes[grepl("Superior|sensitivity", classes)]
+                }
+              } 
+              else if (any(grepl("Inferior", classes))){
+                if(all(grepl("Inferior", classes))){
+                  choice <- sample(probes, 1)
+                } else {
+                  choice <- sample(probes[!grepl("Inferior", classes)], 1)
+                }
               } else {
-                choice <- probes[grepl("Superior|sensitivity", classes)]
-              }
-            } 
-            else if (any(grepl("Inferior", classes))){
-              if(all(grepl("Inferior", classes))){
                 choice <- sample(probes, 1)
-              } else {
-                choice <- sample(probes[!grepl("Inferior", classes)], 1)
               }
-            } else {
-              choice <- sample(probes, 1)
-            }
-            dups <- probes[!probes==choice]
-            list(choice, dups)
-          })
-          remove <- unlist(lapply(senschoice, function (x) x[[2]]))
-          anno <- anno[!rownames(anno) %in% remove,]
-          object <- object[!rownames(object) %in% remove,]
-        }, precision={
-          message("Processing probes that map to the same CpG site for best precision...")
-          precchoice <- lapply(posreps, function (x) {
-            probes <- rownames(anno)[coords==x]
-            classes <- anno[probes, "Rep_results_by_LOCATION"]
-            if(any(grepl("mean", classes))){
-              means <- colMeans(object[probes,])
-              retain <- probes[1]
-              dups <- probes[-1]
+              dups <- probes[!probes==choice]
+              list(choice, dups)
+            })
+            remove <- unlist(lapply(senschoice, function (x) x[[2]]))
+            anno <- anno[!rownames(anno) %in% remove,]
+            object <- object[!rownames(object) %in% remove,]
+          }, precision={
+            message("Processing probes that map to the same CpG site for best precision...")
+            precchoice <- lapply(posreps, function (x) {
+              probes <- rownames(anno)[coords==x]
+              classes <- anno[probes, "Rep_results_by_LOCATION"]
+              if(any(grepl("mean", classes))){
+                means <- colMeans(object[probes,])
+                retain <- probes[1]
+                dups <- probes[-1]
+                return(list(means, retain, dups))
+              } 
+              else if (any(classes=="Best precision")){
+                if(sum(classes=="Best precision") > 1){
+                  choice <- sample(probes[classes=="Best precision"], 1)
+                } else {
+                  choice <- probes[grepl("Best precision", classes)]
+                }
+              } 
+              else if (any(grepl("Superior", classes))){
+                if(length(grep("Superior", classes)) > 1){
+                  choice <- sample(probes[grepl("Superior", classes)], 1)
+                } else {
+                  choice <- probes[grepl("Superior", classes)]
+                }
+              }
+              else if (any(grepl("Inferior", classes))){
+                if(all(grepl("Inferior", classes))){
+                  choice <- sample(probes, 1)
+                } else {
+                  choice <- sample(probes[!grepl("Inferior", classes)], 1)
+                }
+              }
+              else {
+                choice <- sample(probes, 1)
+              }
+              means <- object[choice,]
+              retain <- choice
+              dups <- probes[!probes==choice]
               return(list(means, retain, dups))
-            } 
-            else if (any(classes=="Best precision")){
-              if(sum(classes=="Best precision") > 1){
-                choice <- sample(probes[classes=="Best precision"], 1)
-              } else {
-                choice <- probes[grepl("Best precision", classes)]
-              }
-            } 
-            else if (any(grepl("Superior", classes))){
-              if(length(grep("Superior", classes)) > 1){
-                choice <- sample(probes[grepl("Superior", classes)], 1)
-              } else {
-                choice <- probes[grepl("Superior", classes)]
-              }
             }
-            else if (any(grepl("Inferior", classes))){
-              if(all(grepl("Inferior", classes))){
-                choice <- sample(probes, 1)
-              } else {
-                choice <- sample(probes[!grepl("Inferior", classes)], 1)
-              }
-            }
-            else {
+            )
+            means <- do.call("rbind", lapply(precchoice, function (x) x[[1]]))
+            rownames(means) <- unlist(lapply(precchoice, function (x) x[[2]]))
+            object[rownames(means),] <- means
+            dups <- unlist(lapply(precchoice, function (x) x[[3]]))
+            anno <- anno[!rownames(anno) %in% dups,]
+            object <- object[!rownames(object) %in% dups,]
+          }, random = {
+            message("Selecting replicate probes at random...")
+            randchoice <- lapply(posreps, function (x) {
+              probes <- rownames(anno)[coords==x]
               choice <- sample(probes, 1)
-            }
-            means <- object[choice,]
-            retain <- choice
-            dups <- probes[!probes==choice]
-            return(list(means, retain, dups))
-          }
-          )
-          means <- do.call("rbind", lapply(precchoice, function (x) x[[1]]))
-          rownames(means) <- unlist(lapply(precchoice, function (x) x[[2]]))
-          object[rownames(means),] <- means
-          dups <- unlist(lapply(precchoice, function (x) x[[3]]))
-          anno <- anno[!rownames(anno) %in% dups,]
-          object <- object[!rownames(object) %in% dups,]
-        }, random = {
-          message("Selecting replicate probes at random...")
-          randchoice <- lapply(posreps, function (x) {
-            probes <- rownames(anno)[coords==x]
-            choice <- sample(probes, 1)
-            dups <- probes[!probes==choice]
-            list(choice, dups)
+              dups <- probes[!probes==choice]
+              list(choice, dups)
+            })
+            remove <- unlist(lapply(randchoice, function (x) x[[2]]))
+            anno <- anno[!rownames(anno) %in% remove,]
+            object <- object[!rownames(object) %in% remove,]
+            
           })
-          remove <- unlist(lapply(randchoice, function (x) x[[2]]))
-          anno <- anno[!rownames(anno) %in% remove,]
-          object <- object[!rownames(object) %in% remove,]
-          
-        })
+        }  
       }
-    }
+    
+    rownames(object) <- rownames(anno) <- paste(anno$chr, anno$pos, sep=":")
+    
     switch(analysis.type, differential = {
       stopifnot(is.matrix(design))
       if (!contrasts) {
@@ -297,12 +293,7 @@ cpg.annotate <- function (datatype = c("array", "sequencing"), object, what = c(
       names(annotated) <- rownames(tt)
     })
     annotated <- sort(annotated)
-    return(new("CpGannotated", ranges = annotated))
+    object <- object[names(annotated),]
+    return(new("CpGannotated", ranges = annotated, betas=ilogit2(object)))
   }
-  if (datatype == "sequencing") {
-    stop("Sequencing mode is deprecated for cpg.annotate(). Please use sequencing.annotate().")
-  }
-  else {
-    message("Error: datatype must be one of 'array' or 'sequencing'")
-  }
-}
+

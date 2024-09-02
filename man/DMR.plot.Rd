@@ -35,10 +35,12 @@ DMR.plot(ranges,
   \item{CpGs}{
     Either:
     
-    - A matrix of beta values for plotting, with unique Illumina probe IDs
-    as rownames.
+    - A CpGannotated object (preferred),
     
-    - A GenomicRatioSet, annotated with the appropriate array and data types
+    - A matrix of beta values for plotting, with unique Illumina probe IDs
+    as rownames,
+    
+    - A GenomicRatioSet, annotated with the appropriate array and data types, or
     
     - A BSseq object containing per-CpG methylation and coverage counts for
     the samples to be plotted
