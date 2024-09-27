@@ -127,7 +127,7 @@ And finally, plotting one of the top DMRs.
 <<plot>>=
 groups <- c(BALL="forestgreen", TALL="orange")
 cols <- groups[as.character(type)]
-DMR.plot(ranges=results.ranges, dmr=2, CpGs=myannotation, 
+DMR.plot(ranges=results.ranges, dmr=3, CpGs=myannotation, 
          what = "Beta", arraytype = "EPICv2", phen.col=cols, genome = "hg38") 
 @
  

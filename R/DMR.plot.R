@@ -24,7 +24,7 @@ DMR.plot <- function(ranges,
   stopifnot(dmr %in% 1:length(ranges))
   IDs <- unique(names(phen.col))
   if(is(CpGs, "CpGannotated")){
-    CpGs <- getCollapsedBetas(CpGs)
+    CpGs <- getCollapsedBetas(CpGs, ranges = ranges[dmr] + flank)
     RSanno <- data.frame(chr=gsub(":.*", "", rownames(CpGs)), pos=as.numeric(gsub(".*:", "", rownames(CpGs))))
     RSanno <- RSanno[order(RSanno$chr, RSanno$pos), ]
     cpgs.ranges <- GRanges(RSanno$chr, IRanges(RSanno$pos, 
