@@ -41,7 +41,6 @@ tcell <- FlowSorted.Blood.EPIC[,colData(FlowSorted.Blood.EPIC)$CD4T==100 |
 @
 
 
-<<chr2, 
 Firstly we filter out any probes where any sample has a failed position. Then we normalise using \texttt{minfi::preprocessFunnorm}. For this vignette, we will restrict the analysis to chromosome 2. After this, we extract the \emph{M}-values from the GenomicRatioSet.
 
 <<detpnorm>>==

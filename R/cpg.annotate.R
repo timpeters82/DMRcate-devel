@@ -8,6 +8,7 @@ cpg.annotate <- function (datatype = c("array", "sequencing"), object, what = c(
   analysis.type <- match.arg(analysis.type)
   what <- match.arg(what)
   arraytype <- match.arg(arraytype)
+  epicv2Filter <- match.arg(epicv2Filter)
   if (arraytype == "EPIC") {
     stop("Please specify either 'EPICv2' or 'EPICv1' for arraytype. EPICv2 probe IDs have 15 characters, e.g. cg00000029_TC21. EPICv1 probe IDs have 10 characters, e.g. cg00000029.")
   }

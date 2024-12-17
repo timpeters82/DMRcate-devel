@@ -68,6 +68,7 @@ dmrcate <-
                C = C
     )
     object <- rbind.fill(fitted)
+    object <- object[!is.na(object$is.sig),]
 
     ## FDR stuff
     object$fdr <- p.adjust(object$raw, method = "BH")
